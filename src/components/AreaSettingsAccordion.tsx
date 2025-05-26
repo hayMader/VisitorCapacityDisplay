@@ -11,105 +11,235 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Settings, SlidersHorizontal, Move, Save } from 'lucide-react';
-import ThresholdItem from '@/components/ui/ThresholdItem';
+import ThresholdItemActions from '@/components/ui/ThresholdItemActions';   // ↓ new helper component
 import NewThresholdForm from '@/components/ui/NewThresholdForm';
 import AreaGeneralSettings from '@/components/ui/AreaGeneralSettings';
 import AreaPositionSettings from '@/components/ui/AreaPositionSettings';
 import { isEqual } from 'lodash';
+   export const MAX_LEVELS = 4;   // <— NEU: jetzt vier Stufen erlaubt
 
 interface AreaSettingsAccordionProps {
   area: AreaStatus;
   onUpdate: (updatedArea: AreaStatus) => void;
 }
 
-const AreaSettingsAccordion: React.FC<AreaSettingsAccordionProps> = ({ area, onUpdate }) => {
-  // Original data to compare against for change detection
+const AreaSettingsAccordion: React.FC<AreaSettingsAccordionProps> = ({
+  area,
+  onUpdate,
+}) => {
+  /* --------------------------------------------------------------------- */
+  /*  state                                                                */
+  /* --------------------------------------------------------------------- */
   const [originalData, setOriginalData] = useState<AreaStatus>(area);
-  
-  // Current form data
   const [formData, setFormData] = useState<AreaStatus>(area);
-  
-  // UI states
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [hasChanges, setHasChanges] = useState(false);
-  const [newThreshold, setNewThreshold] = useState({ upper_threshold: 0, color: '#cccccc' });
-  const [editingThreshold, setEditingThreshold] = useState<number | null>(null);
-  const [editedThreshold, setEditedThreshold] = useState<{ upper_threshold: number, color: string }>({ 
-    upper_threshold: 0, 
-    color: '#cccccc' 
+
+  const [newThreshold, setNewThreshold] = useState({
+    upper_threshold: 0,
+    color: '#cccccc',
   });
 
+  /* threshold row currently in inline-edit mode (null = none) */
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [edited, setEdited] = useState<{ upper_threshold: number; color: string }>(
+    { upper_threshold: 0, color: '#cccccc' }
+  );
+
+  /* --------------------------------------------------------------------- */
+  /*  sync when area prop changes                                          */
+  /* --------------------------------------------------------------------- */
   useEffect(() => {
-    // Set the original data when the area prop changes
     setOriginalData(area);
     setFormData(area);
   }, [area]);
 
-  // Check for changes
+  /* detect unsaved edits */
   useEffect(() => {
-    // When original data is null or undefined, show loading state
     setIsLoading(!originalData);
-
-    // When formdata is null or undefined, set it to the original data
-    if (!formData) {
-      setFormData(originalData);
-    }
-
-    const formHasChanges = !isEqual(formData, originalData);
-    
-    setHasChanges(formHasChanges);
-
-
+    if (!formData) setFormData(originalData);
+    setHasChanges(!isEqual(formData, originalData));
   }, [formData, originalData]);
 
-  // Handle form field changes (except for thresholds)
+  /* --------------------------------------------------------------------- */
+  /*  generic field change (name, capacity, coords …)                      */
+  /* --------------------------------------------------------------------- */
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>, // Event from submitted form
-    field: keyof AreaStatus // Field name from the changed field in form
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: keyof AreaStatus
   ) => {
-    const value = e.target.value; // Get the value from the event
+    const v = e.target.value;
+    const parsed =
+      typeof area[field] === 'number' ? (parseInt(v, 10) || 0) : (v as any);
 
-    // Check if the field is a number by checking the type of the field
-    if ( typeof area[field] === 'number') {
-      setFormData(prev => ({
-        ...prev,
-        [field]: parseInt(value) || 0,
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [field]: value,
-      }));
-    }
+    setFormData((prev) => ({
+      ...prev,
+      [field]: parsed,
+    }));
   };
 
-  // Submit form - only now we send data to the backend
+  /* --------------------------------------------------------------------- */
+  /*  add new threshold (client-side only until Save)                      */
+  /* --------------------------------------------------------------------- */
+  const handleAddThreshold = () => {
+    if (newThreshold.upper_threshold <= 0) {
+      toast({
+        title: 'Ungültiger Grenzwert',
+        description: 'Der Grenzwert muss größer als 0 sein.',
+        variant: 'destructive',
+      });
+      return;
+    }
+     if (formData.thresholds.length >= MAX_LEVELS) {
+      toast({
+        title: 'Limit erreicht',
+        description: `Maximal ${MAX_LEVELS} Grenzwerte sind erlaubt.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // contiguous validation
+    const maxSoFar = Math.max(
+      0,
+      ...formData.thresholds.map((t) => t.upper_threshold)
+    );
+    if (newThreshold.upper_threshold <= maxSoFar) {
+      toast({
+        title: 'Grenzwert zu niedrig',
+        description: `Er muss größer sein als ${maxSoFar}.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const tempId = -Date.now();
+    const threshold: Threshold = {
+      id: tempId,
+      setting_id: area.id,
+      upper_threshold: newThreshold.upper_threshold,
+      color: newThreshold.color,
+      alert: false,
+      alert_message: '',
+    };
+
+    setFormData((prev) => ({
+      ...prev,
+      thresholds: [...prev.thresholds, threshold],
+    }));
+    setNewThreshold({ upper_threshold: 0, color: '#cccccc' });
+
+    toast({
+      title: 'Grenzwert hinzugefügt',
+      description: `Neuer Grenzwert bei ${threshold.upper_threshold} wurde hinzugefügt.`,
+    });
+  };
+
+  /* --------------------------------------------------------------------- */
+  /*  inline edit helpers                                                  */
+  /* --------------------------------------------------------------------- */
+  const beginEdit = (t: Threshold) => {
+    setEditingId(t.id);
+    setEdited({ upper_threshold: t.upper_threshold, color: t.color });
+  };
+
+  const cancelEdit = () => setEditingId(null);
+
+  const saveEdit = (id: number) => {
+    const idx = formData.thresholds.findIndex((t) => t.id === id);
+    if (idx === -1) return;
+
+    const prevUpper = idx === 0 ? 0 : formData.thresholds[idx - 1].upper_threshold;
+    const nextUpper =
+      idx === formData.thresholds.length - 1
+        ? Infinity
+        : formData.thresholds[idx + 1].upper_threshold;
+
+    /* validation */
+    if (
+      edited.upper_threshold <= prevUpper ||
+      edited.upper_threshold >= nextUpper
+    ) {
+      toast({
+        title: 'Ungültiger Grenzwert',
+        description: `Er muss zwischen ${prevUpper + 1} und ${
+          nextUpper === Infinity ? '∞' : nextUpper - 1
+        } liegen.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      thresholds: prev.thresholds.map((t) =>
+        t.id === id
+          ? { ...t, upper_threshold: edited.upper_threshold, color: edited.color }
+          : t
+      ),
+    }));
+    setEditingId(null);
+    toast({
+      title: 'Grenzwert aktualisiert',
+      description: 'Speichern Sie, um Änderungen zu übernehmen.',
+    });
+  };
+
+  const deleteThreshold = (id: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      thresholds: prev.thresholds.filter((t) => t.id !== id),
+    }));
+    toast({
+      title: 'Grenzwert gelöscht',
+      description: 'Speichern Sie, um Änderungen zu übernehmen.',
+    });
+  };
+
+  /* --------------------------------------------------------------------- */
+  /*  submit to backend                                                    */
+  /* --------------------------------------------------------------------- */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
-      let updatedArea = null;
-      if (!isEqual(formData, originalData)) {    
-        updatedArea = await updateAreaSettings(area.id, formData);
-      }
-      
-      
-      // If any changes were made, refetch the latest data
-      if (hasChanges) {        
-        setOriginalData(formData);
-        
-        // Notify parent
-        onUpdate(formData);
-        
-        toast({
-          title: 'Einstellungen aktualisiert',
-          description: `Die Einstellungen für ${area.area_name} wurden erfolgreich aktualisiert.`,
+      /* palette = three hex codes sorted by upper_threshold */
+      const palette = formData.thresholds
+        .sort((a, b) => a.upper_threshold - b.upper_threshold)
+        .slice(0, MAX_LEVELS)
+        .map((t) => t.color);
+
+      let updated: AreaStatus | null = null;
+      if (!isEqual(formData, originalData)) {
+        updated = await updateAreaSettings(area.id, {
+          ...formData,
+          palette,
         });
       }
-    } catch (error) {
-      console.error('Error updating settings:', error);
+
+      /* refresh CSS custom properties so public map re-colours instantly */
+      palette.forEach((hex, i) => {
+        document.documentElement.style.setProperty(`--heat-${i + 1}`, hex);
+      });
+
+      /* reflect new state locally & in parent */
+      if (updated) {
+        setOriginalData(updated);
+        onUpdate(updated);
+      } else {
+        setOriginalData(formData);
+        onUpdate(formData);
+      }
+
+      toast({
+        title: 'Einstellungen aktualisiert',
+        description: `Die Einstellungen für ${area.area_name} wurden erfolgreich aktualisiert.`,
+      });
+    } catch (err) {
+      console.error(err);
       toast({
         title: 'Fehler',
         description: 'Die Einstellungen konnten nicht aktualisiert werden.',
@@ -120,117 +250,13 @@ const AreaSettingsAccordion: React.FC<AreaSettingsAccordionProps> = ({ area, onU
     }
   };
 
-  // Handle adding a threshold - only in client state until form submission
-  const handleAddThreshold = () => {
-    if (newThreshold.upper_threshold <= 0) {
-      toast({
-        title: 'Ungültiger Grenzwert',
-        description: 'Der Grenzwert muss größer als 0 sein.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    // Create a temporary ID for client-side rendering
-    const tempId = -Date.now(); // Negative to avoid collisions with real IDs
-    
-    // Create the new threshold object
-    const thresholdData: Threshold = {
-      id: tempId,
-      setting_id: area.id,
-      upper_threshold: newThreshold.upper_threshold,
-      color: newThreshold.color,
-      alert: false,
-      alert_message: ''
-    };
-    
-    // Add to local form state
-    setFormData(prev => ({
-      ...prev,
-      thresholds: [...prev.thresholds, thresholdData]
-    }));
-    
-    
-    toast({
-      title: 'Grenzwert hinzugefügt',
-      description: `Neuer Grenzwert bei ${thresholdData.upper_threshold} wurde hinzugefügt.`,
-    });
-  };
-
-  // Handle editing a threshold
-  const handleEditThreshold = (threshold: Threshold) => {
-    setEditingThreshold(threshold.id);
-  };
-
-  // Handle threshold edit changes
-  const handleEditChange = (changes: Partial<{ upper_threshold: number; color: string }>) => {
-    setEditedThreshold(prev => ({
-      ...prev,
-      ...changes
-    }));
-  };
-
-  // Handle saving a threshold edit - only in client state until form submission
-  const handleSaveEdit = (thresholdId: number) => {
-    if (editedThreshold.upper_threshold <= 0) {
-      toast({
-        title: 'Ungültiger Grenzwert',
-        description: 'Der Grenzwert muss größer als 0 sein.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    // Update the threshold in UI
-    setFormData(prev => ({
-      ...prev,
-      thresholds: prev.thresholds.map(t => t.id === thresholdId ? {
-        ...t, 
-        upper_threshold: editedThreshold.upper_threshold,
-        color: editedThreshold.color
-      } : t)
-    }));
-    
-    // Exit edit mode
-    setEditingThreshold(null);
-    
-    toast({
-      title: 'Grenzwert aktualisiert',
-      description: `Grenzwert wurde aktualisiert. Speichern Sie, um die Änderungen zu übernehmen.`,
-    });
-  };
-
-  // Handle deleting a threshold - only in client state until form submission
-  const handleDeleteThreshold = (thresholdId: number) => {
-    // Update areastatus object
-    setFormData(prev => ({
-      ...prev,
-      thresholds: prev.thresholds.filter(t => t.id !== thresholdId)
-    }));
-    
-    toast({
-      title: 'Grenzwert gelöscht',
-      description: 'Der Grenzwert wurde entfernt. Speichern Sie, um die Änderungen zu übernehmen.',
-    });
-  };
-
-  // Handle cancelling an edit
-  const cancelEdit = () => {
-    setEditingThreshold(null);
-  };
-
-  // Handle changes to new threshold form
-  const handleNewThresholdChange = (changes: Partial<{ upper_threshold: number; color: string }>) => {
-    setNewThreshold(prev => ({
-      ...prev,
-      ...changes
-    }));
-  };
-
+  /* --------------------------------------------------------------------- */
+  /*  UI                                                                    */
+  /* --------------------------------------------------------------------- */
   if (isLoading) {
     return (
       <div className="p-4 text-center">
-        <p>Einstellungen werden geladen...</p>
+        <p>Einstellungen werden geladen …</p>
       </div>
     );
   }
@@ -238,94 +264,136 @@ const AreaSettingsAccordion: React.FC<AreaSettingsAccordionProps> = ({ area, onU
   return (
     <form onSubmit={handleSubmit}>
       <Accordion type="single" collapsible defaultValue="general" className="w-full">
-        {/* General Settings */}
+        {/* ---------------------------------------------------------- */}
+        {/* Allgemeine Einstellungen                                   */}
+        {/* ---------------------------------------------------------- */}
         <AccordionItem value="general">
           <AccordionTrigger className="py-4">
-            <div className="flex items-center">
-              <Settings className="mr-2 h-5 w-5" />
-              <span>Allgemeine Einstellungen</span>
-            </div>
+            <Settings className="mr-2 h-5 w-5" />
+            Allgemeine Einstellungen
           </AccordionTrigger>
           <AccordionContent>
-            <AreaGeneralSettings
-              formData={formData}
-              onChange={handleChange}
-            />
+            <AreaGeneralSettings formData={formData} onChange={handleChange} />
           </AccordionContent>
         </AccordionItem>
 
-        {/* Threshold Settings */}
+        {/* ---------------------------------------------------------- */}
+        {/* Grenzwerte                                                 */}
+        {/* ---------------------------------------------------------- */}
         <AccordionItem value="thresholds">
           <AccordionTrigger className="py-4">
-            <div className="flex items-center">
-              <SlidersHorizontal className="mr-2 h-5 w-5" />
-              <span>Grenzwerte Besucherzahl</span>
-            </div>
+            <SlidersHorizontal className="mr-2 h-5 w-5" />
+            Grenzwerte Besucherzahl
           </AccordionTrigger>
           <AccordionContent>
             <div className="space-y-4 py-2">
-              {formData.thresholds.length > 0 ? (
+              {formData.thresholds.length ? (
                 <div className="space-y-2">
                   <Label>Aktuelle Grenzwerte</Label>
                   <div className="border rounded-md">
                     {formData.thresholds
                       .sort((a, b) => a.upper_threshold - b.upper_threshold)
-                      .map((threshold) => (
-                        <div 
-                          key={threshold.id}
-                          className="flex items-center justify-between p-2 border-b last:border-0"
-                        >
-                          <ThresholdItem
-                            threshold={threshold}
-                            isEditing={editingThreshold === threshold.id}
-                            editedThreshold={editedThreshold}
-                            onEdit={handleEditThreshold}
-                            onSave={handleSaveEdit}
-                            onCancel={cancelEdit}
-                            onDelete={handleDeleteThreshold}
-                            onEditChange={handleEditChange}
-                          />
-                        </div>
-                      ))}
+                      .map((t, idx, arr) => {
+                        const lower = idx === 0 ? 0 : arr[idx - 1].upper_threshold + 1;
+                        const isEditing = editingId === t.id;
+
+                        return (
+                          <div
+                            key={t.id}
+                            className="grid grid-cols-[auto_auto_auto_1fr_auto] items-center gap-2 p-2 border-b last:border-0"
+                          >
+                            {/* colour dot / picker (simple <input type="color">) */}
+                            {isEditing ? (
+                              <input
+                                type="color"
+                                value={edited.color}
+                                onChange={(e) =>
+                                  setEdited((p) => ({ ...p, color: e.target.value }))
+                                }
+                                className="h-4 w-4"
+                              />
+                            ) : (
+                              <div
+                                className="h-4 w-4 rounded-full border"
+                                style={{ background: t.color }}
+                              />
+                            )}
+
+                            {/* lower bound (readonly) */}
+                            <span className="text-xs text-muted-foreground w-10 text-right">
+                              {lower}
+                            </span>
+
+                            {/* “bis” label */}
+                            <span className="text-xs text-muted-foreground">bis</span>
+
+                            {/* upper bound */}
+                            {isEditing ? (
+                              <input
+                                type="number"
+                                className="input w-20"
+                                value={edited.upper_threshold}
+                                onChange={(e) =>
+                                  setEdited((p) => ({
+                                    ...p,
+                                    upper_threshold: parseInt(e.target.value, 10) || 0,
+                                  }))
+                                }
+                              />
+                            ) : (
+                              <span className="w-20 text-right">{t.upper_threshold}</span>
+                            )}
+
+                            {/* action buttons */}
+                            <ThresholdItemActions
+                              isEditing={isEditing}
+                              onEdit={() => beginEdit(t)}
+                              onSave={() => saveEdit(t.id)}
+                              onCancel={cancelEdit}
+                              onDelete={() => deleteThreshold(t.id)}
+                            />
+                          </div>
+                        );
+                      })}
                   </div>
                 </div>
               ) : (
                 <p className="text-muted-foreground">Keine Grenzwerte definiert.</p>
               )}
 
+              {/* -------------------------------------------------- */}
+              {/* Neues Level hinzufügen                            */}
+              {/* -------------------------------------------------- */}
               <NewThresholdForm
                 newThreshold={newThreshold}
-                onChange={handleNewThresholdChange}
+                onChange={(chg) =>
+                  setNewThreshold((p) => ({ ...p, ...chg }))
+                }
                 onAdd={handleAddThreshold}
+                disabled={formData.thresholds.length >= MAX_LEVELS}
               />
             </div>
           </AccordionContent>
         </AccordionItem>
 
-        {/* Area Position Settings */}
+        {/* ---------------------------------------------------------- */}
+        {/* Position                                                  */}
+        {/* ---------------------------------------------------------- */}
         <AccordionItem value="position">
           <AccordionTrigger className="py-4">
-            <div className="flex items-center">
-              <Move className="mr-2 h-5 w-5" />
-              <span>Anpassung Areal</span>
-            </div>
+            <Move className="mr-2 h-5 w-5" />
+            Anpassung Areal
           </AccordionTrigger>
           <AccordionContent>
-            <AreaPositionSettings
-              formData={formData}
-              onChange={handleChange}
-            />
+            <AreaPositionSettings formData={formData} onChange={handleChange} />
           </AccordionContent>
         </AccordionItem>
       </Accordion>
 
       <div className="mt-6 flex justify-end">
-        <Button 
-          type="submit" 
-          disabled={isSubmitting || !hasChanges}
-        >
+        <Button type="submit" disabled={isSubmitting || !hasChanges}>
           <Save className="mr-2 h-4 w-4" />
-          {isSubmitting ? 'Speichern...' : 'Speichern'}
+          {isSubmitting ? 'Speichern …' : 'Speichern'}
         </Button>
       </div>
     </form>
