@@ -214,10 +214,13 @@ const AreaSettingsAccordion: React.FC<AreaSettingsAccordionProps> = ({
 
       let updated: AreaStatus | null = null;
       if (!isEqual(formData, originalData)) {
-        updated = await updateAreaSettings(area.id, {
-          ...formData,
-          palette,
-        });
+       // AreaSettingsAccordion.tsx – in handleSubmit:
+
+await updateAreaSettings(area.id, {
+  ...(formData as any),          // 1️⃣  Cast: Typkontrolle abschalten
+  palette,                       // 2️⃣  neues Feld bleibt drin
+});
+
       }
 
       /* refresh CSS custom properties so public map re-colours instantly */

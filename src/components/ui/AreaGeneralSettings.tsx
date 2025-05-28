@@ -33,7 +33,7 @@ const AreaGeneralSettings: React.FC<AreaGeneralSettingsProps> = ({
         />
       </div>
 
-      <div className="space-y-2">
+   {/*    <div className="space-y-2">
         <Label htmlFor="highlight">Hervorhebungsfarbe (optional)</Label>
         <div className="flex gap-2">
           <Input
@@ -49,7 +49,7 @@ const AreaGeneralSettings: React.FC<AreaGeneralSettingsProps> = ({
             className="w-12 p-0 h-10"
           />
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
