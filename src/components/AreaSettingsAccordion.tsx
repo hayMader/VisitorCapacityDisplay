@@ -307,7 +307,7 @@ const AreaSettingsAccordion: React.FC<AreaSettingsAccordionProps> = ({ area, onU
           <AccordionTrigger className="py-4">
             <div className="flex items-center">
               <Move className="mr-2 h-5 w-5" />
-              <span>Anpassung Areal</span>
+              <span className='text'>Anpassung Areal</span>
             </div>
           </AccordionTrigger>
           <AccordionContent>

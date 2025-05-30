@@ -89,7 +89,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
     return (
       <div className="flex flex-col items-center justify-center h-full">
         <RefreshCw className="h-10 w-10 text-primary animate-spin" />
-        <p className="mt-4 text-lg text-muted-foreground">Daten werden geladen...</p>
+        <p className="mt-4 text-muted-foreground">Daten werden geladen...</p>
       </div>
     );
   }
