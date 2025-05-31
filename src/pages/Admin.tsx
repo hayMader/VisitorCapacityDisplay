@@ -102,7 +102,7 @@ const Admin = () => {
             <div className="bg-white p-4 rounded-lg shadow-sm">
               <div className="flex justify-between items-center mb-4">
                 <h3>Aktueller Besucherfüllstand</h3>
-                <div className="text-gray-500">
+                <div className="text-muted-foreground">
                   {new Date().toLocaleDateString('de-DE', {
                     day: '2-digit', 
                     month: '2-digit', 
@@ -144,7 +144,6 @@ const Admin = () => {
                     key={area.id}
                     variant={selectedArea === area ? "default" : "outline"}
                     size="sm"
-                    className="text-[#757575]"      
                     onClick={() => setSelectedArea(area)}
                   >
                     {area.area_name}
@@ -158,7 +157,6 @@ const Admin = () => {
                     key={area.id}
                     variant={selectedArea === area ? "default" : "outline"}
                     size="sm"
-                    className="text-[#757575]"
                     onClick={() => setSelectedArea(area)}
                   >
                     {area.area_name}
@@ -173,7 +171,6 @@ const Admin = () => {
                       key={area.id}
                       variant={selectedArea === area ? "default" : "outline"}
                       size="sm"
-                      className="text-[#757575]"
                       onClick={() => setSelectedArea(area)}
                     >
                       {area.area_name}

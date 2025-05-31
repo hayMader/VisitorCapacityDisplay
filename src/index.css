@@ -30,42 +30,42 @@
   }
 
   :root {
-    --background: 0 0% 96%; /* Light gray *
+    --background: 0 0% 96%; /* Light grey *
     --foreground: 0 0% 0%; /* Black */
 
     --card: 0 0% 100%; /* White */
     --card-foreground: 0 0% 0%; /* Black */
 
     --popover: 0 0% 100%; /* White */
-    --popover-foreground: 0 0% 46%; /* Dark gray */
+    --popover-foreground: 0 0% 46%; /* Dark grey */
 
     --primary: 212 78% 71%; /* Highlight light blue */
-    --primary-foreground: 0 0% 96%; /* Light gray */
+    --primary-foreground: 0 0% 96%; /* Light grey */
 
     --secondary: 212 78% 71%; /* Highlight light blue */
-    --secondary-foreground: 0 0% 96%; /* Light gray */
+    --secondary-foreground: 0 0% 96%; /* Light grey */
 
     --muted: 210 40% 96.1%; /* Light grey accent */
-    --muted-foreground: 0 0% 46%; /* Dark gray */
+    --muted-foreground: 0 0% 46%; /* Dark grey */
 
     --accent: 210 40% 96.1%; /* Light grey accent */
-    --accent-foreground: 0 0% 46%; /* Dark gray */
+    --accent-foreground: 0 0% 46%; /* Dark grey */
 
     --destructive: 0 77% 53%; /* Dark red */
-    --destructive-foreground: 0 0% 96%; /* Light gray */
+    --destructive-foreground: 0 0% 96%; /* Light grey */
 
-    --border: 0 0% 96%; /* Light gray */
-    --input: 0 0% 95%; /* Light gray */
-    --ring: 0 0% 46%; /* Dark gray */
+    --border: 0 0% 96%; /* Light grey */
+    --input: 0 0% 95%; /* Light grey */
+    --ring: 0 0% 46%; /* Dark grey */
 
     --radius: 0.5rem;
 
     /* Pop Up Sidebar */
-    --sidebar-background: 0 0% 96%; /* Light gray */
-    --sidebar-foreground: 0 0% 46%; /* Dark gray */
+    --sidebar-background: 0 0% 96%; /* Light grey */
+    --sidebar-foreground: 0 0% 46%; /* Dark grey */
     --sidebar-primary: 0 0% 0%; /* Black */
     --sidebar-primary-foreground: 0 0% 100%; /* White */
-    --sidebar-accent: 0 0% 46%; /* Dark gray */
+    --sidebar-accent: 0 0% 46%; /* Dark grey */
     --sidebar-accent-foreground: 0 0% 0%; /* Black */
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 212 78% 71%; /* Highlight light blue */
