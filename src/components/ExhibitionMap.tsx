@@ -153,7 +153,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                     dominantBaseline="middle"
                     fill="#1e293b"
                     fontWeight="bold"
-                    fontSize="14"
+                    fontSize="26"
                   >
                     {area.area_name}
                   </text>
@@ -163,7 +163,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                     textAnchor="middle"
                     dominantBaseline="middle"
                     fill="#1e293b"
-                    fontSize="12"
+                    fontSize="24"
                   >
                     {visitorCount}
                   </text>
