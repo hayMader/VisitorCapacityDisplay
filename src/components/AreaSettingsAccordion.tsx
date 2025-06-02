@@ -180,46 +180,32 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-
+    
     try {
-      const palette = formData.thresholds
-        .sort((a, b) => a.upper_threshold - b.upper_threshold)
-        .slice(0, MAX_LEVELS)
-        .map((t) => t.color);
-
-      let updated: AreaStatus | null = null;
-
-      if (!isEqual(formData, originalData)) {
-        /*  👉 Typ-Hack: palette existiert noch nicht im AreaStatus-Interface   */
-     await updateAreaSettings(area.id, {
-  ...(formData as any),   // Später entfernen
-  palette,                // Array mit bis zu 4 Hex Strings
-});
-
+      let updatedArea = null;
+      if (!isEqual(formData, originalData)) {    
+        updatedArea = await updateAreaSettings(area.id, formData);
       }
-
-      palette.forEach((hex, i) =>
-        document.documentElement.style.setProperty(`--heat-${i + 1}`, hex)
-      );
-
-      if (updated) {
-        setOriginalData(updated);
-        onUpdate(updated);
-      } else {
+      
+      
+      // If any changes were made, refetch the latest data
+      if (hasChanges) {        
         setOriginalData(formData);
+        
+        // Notify parent
         onUpdate(formData);
+        
+        toast({
+          title: 'Einstellungen aktualisiert',
+          description: `Die Einstellungen für ${area.area_name} wurden erfolgreich aktualisiert.`,
+        });
       }
-
+    } catch (error) {
+      console.error('Error updating settings:', error);
       toast({
-        title: "Einstellungen aktualisiert",
-        description: `Die Einstellungen für ${area.area_name} wurden gespeichert.`,
-      });
-    } catch (err) {
-      console.error(err);
-      toast({
-        title: "Fehler",
-        description: "Die Einstellungen konnten nicht gespeichert werden.",
-        variant: "destructive",
+        title: 'Fehler',
+        description: 'Die Einstellungen konnten nicht aktualisiert werden.',
+        variant: 'destructive',
       });
     } finally {
       setIsSubmitting(false);
