@@ -229,8 +229,10 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate }) => {
         {/* ---------------- allgemeine Einstellungen ---------------- */}
         <AccordionItem value="general">
           <AccordionTrigger className="py-4">
-            <Settings className="mr-2 h-5 w-5" />
-            Allgemeine Einstellungen
+            <div className="flex items-center">
+              <Settings className="mr-2 h-5 w-5" />
+              <span className='text'>Allgemeine Einstellungen</span>
+            </div>            
           </AccordionTrigger>
           <AccordionContent>
             <AreaGeneralSettings formData={formData} onChange={handleChange} />
@@ -240,8 +242,10 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate }) => {
         {/* ---------------- Grenzwerte ---------------- */}
         <AccordionItem value="thresholds">
           <AccordionTrigger className="py-4">
-            <SlidersHorizontal className="mr-2 h-5 w-5" />
-            Grenzwerte Besucherzahl
+            <div className="flex items-center">
+              <SlidersHorizontal className="mr-2 h-5 w-5" />
+              <span className='text'>Grenzwerte Besucherzahl</span>
+            </div>     
           </AccordionTrigger>
 
           <AccordionContent>
