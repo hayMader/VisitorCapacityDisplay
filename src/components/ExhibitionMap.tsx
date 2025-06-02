@@ -159,7 +159,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                   </text>
                   <text
                     x={area.x + area.width / 2}
-                    y={area.y + area.height / 2 + 20}
+                    y={area.y + area.height / 2 + 28}
                     textAnchor="middle"
                     dominantBaseline="middle"
                     fill="#1e293b"
