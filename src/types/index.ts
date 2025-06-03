@@ -13,6 +13,7 @@ export interface AreaSettings {
   capacity_usage: number;
   coordinates: { x: number; y: number }[];
   highlight: string | null;
+  hidden_name: boolean;
 }
 
 export interface Threshold {
@@ -31,7 +32,8 @@ export interface AreaStatus {
   coordinates: { x: number; y: number }[];
   amount_visitors: number;
   highlight: string | null;
-  thresholds: Threshold[]
+  thresholds: Threshold[];
+  hidden_name: boolean;
 }
 
 export type OccupancyLevel = 'low' | 'medium' | 'high';

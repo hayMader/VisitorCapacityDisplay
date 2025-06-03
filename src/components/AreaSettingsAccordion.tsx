@@ -66,6 +66,8 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas }) =>
   /* ---------------------------------------------------------------- */
   useEffect(() => {
     setOriginalData(area);
+    console.log(area);
+    console.log(formData);
     setFormData(area);
   }, [area]);
 

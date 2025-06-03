@@ -156,27 +156,29 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                   cy /= n;
                   return (
                     <>
-                    <text
-                      x={cx}
-                      y={cy}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fill="#1e293b"
-                      fontWeight="bold"
-                      fontSize="26"
-                    >
-                      {area.area_name}
-                    </text>
-                    <text
-                      x={cx}
-                      y={cy + 20}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fill="#1e293b"
-                      fontSize="24"
-                    >
-                      {visitorCount}
-                    </text>
+                      {!area.hidden_name && (
+                        <text
+                          x={cx}
+                          y={cy}
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                          fill="#1e293b"
+                          fontWeight="bold"
+                          fontSize="26"
+                        >
+                          {area.area_name}
+                        </text>
+                      )}
+                      <text
+                        x={cx}
+                        y={cy + (area.hidden_name ? 0 : 20)}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fill="#1e293b"
+                        fontSize="24"
+                      >
+                        {visitorCount}
+                      </text>
                     </>
                   );
                   })()}

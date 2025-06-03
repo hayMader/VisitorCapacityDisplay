@@ -1,5 +1,6 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { AreaStatus } from '@/types';
 
@@ -21,6 +22,22 @@ const AreaGeneralSettings: React.FC<AreaGeneralSettingsProps> = ({
           value={formData.area_name}
           onChange={(e) => onChange(e, 'area_name')}
         />
+        <div className="flex items-center space-x-2 mt-2">
+          <Checkbox
+            id="hide-name"
+            checked={formData.hidden_name}
+            onCheckedChange={(checked: boolean) =>
+              onChange(
+                // Create a synthetic event to match the expected signature
+                {
+                  target: { value: checked, name: 'hidden_name' }
+                } as unknown as React.ChangeEvent<HTMLInputElement>,
+                'hidden_name'
+              )
+            }
+          />
+          <Label htmlFor="hide-name">Bereichsname ausblenden</Label>
+        </div>
       </div>
 
       <div className="space-y-2">

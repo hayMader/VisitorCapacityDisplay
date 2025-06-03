@@ -17,6 +17,7 @@ export type Database = {
           highlight: string | null
           id: number
           last_updated: string
+          hidden_name: boolean
         }
         Insert: {
           area_name: string
@@ -25,6 +26,7 @@ export type Database = {
           highlight?: string | null
           id?: number
           last_updated?: string
+          hidden_name?: boolean
         }
         Update: {
           area_name?: string
@@ -33,6 +35,7 @@ export type Database = {
           highlight?: string | null
           id?: number
           last_updated?: string
+          hidden_name?: boolean
         }
         Relationships: []
       }
@@ -125,6 +128,7 @@ export type Database = {
           coordinates: { x: number; y: number }[];
           highlight: string | null
           thresholds: Json | null
+          hidden_name: boolean
         }
         Insert: {
           amount_visitors?: never
@@ -134,6 +138,7 @@ export type Database = {
           coordinates: { x: number; y: number }[];
           highlight?: string | null
           thresholds?: never
+          hidden_name?: boolean
         }
         Update: {
           amount_visitors?: never
@@ -143,6 +148,7 @@ export type Database = {
           coordinates: { x: number; y: number }[];
           highlight?: string | null
           thresholds?: never
+          hidden_name?: boolean
         }
         Relationships: []
       }
