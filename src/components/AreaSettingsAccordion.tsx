@@ -20,8 +20,9 @@ import ThresholdItemActions from "@/components/ui/ThresholdItemActions";
 import NewThresholdForm from "@/components/ui/NewThresholdForm";
 import AreaGeneralSettings from "@/components/ui/AreaGeneralSettings";
 import AreaPositionSettings from "@/components/ui/AreaPositionSettings";
+import CopyThresholdsModal from "@/components/ui/CopyThresholdsModal";
 import { AreaStatus, Threshold } from "@/types";
-import { updateAreaSettings } from "@/utils/api";
+import { updateAreaSettings, copyThresholdsToAreas } from "@/utils/api";
 
 import { isEqual } from "lodash";
 
@@ -33,9 +34,10 @@ export const MAX_LEVELS = 4; // ab jetzt 4 Stufen möglich
 interface Props {
   area: AreaStatus;
   onUpdate: (a: AreaStatus) => void;
+  allAreas: AreaStatus[]; // List of all areas for copying thresholds
 }
 
-const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate }) => {
+const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas }) => {
   /* ---------------------------------------------------------------- */
   /*  State                                                           */
   /* ---------------------------------------------------------------- */
@@ -56,6 +58,8 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate }) => {
     upper_threshold: 0,
     color: "#cccccc",
   });
+
+  const [isCopyModalOpen, setIsCopyModalOpen] = useState(false); // Modal for copying thresholds
 
   /* ---------------------------------------------------------------- */
   /*  Sync incoming area → local state                                 */
@@ -213,6 +217,27 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate }) => {
   };
 
   /* ---------------------------------------------------------------- */
+  /*  Copy Thresholds                                                 */
+  /* ---------------------------------------------------------------- */
+
+  const handleCopyThresholds = async (targetAreaIds: number[]) => {
+    try {
+      await copyThresholdsToAreas(area.id, targetAreaIds);
+      toast({
+        title: "Erfolgreich kopiert",
+        description: "Die Schwellenwerte wurden erfolgreich auf die ausgewählten Areale übertragen.",
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Fehler",
+        description: "Kopieren der Schwellenwerte fehlgeschlagen.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  /* ---------------------------------------------------------------- */
   /*  Render                                                          */
   /* ---------------------------------------------------------------- */
   if (isLoading) {
@@ -224,6 +249,7 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate }) => {
   }
 
   return (
+    <div>
     <form onSubmit={handleSubmit}>
       <Accordion type="single" collapsible defaultValue="general" className="w-full">
         {/* ---------------- allgemeine Einstellungen ---------------- */}
@@ -343,6 +369,16 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate }) => {
                 onAdd={handleAddThreshold}
                 disabled={formData.thresholds.length >= MAX_LEVELS}
               />
+
+              {/* Copy Thresholds Button */}
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setIsCopyModalOpen(true)}
+              >
+                Einstellungen kopieren
+              </Button>
+
             </div>
           </AccordionContent>
         </AccordionItem>
@@ -369,6 +405,16 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate }) => {
         </Button>
       </div>
     </form>
+
+    {/*Model for copying thresholds*/}
+    <CopyThresholdsModal
+      open={isCopyModalOpen}
+      onClose={() => setIsCopyModalOpen(false)}
+      sourceArea={formData}
+      allAreas={allAreas}
+      onApply={handleCopyThresholds}
+    />
+  </div>
   );
 };
 

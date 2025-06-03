@@ -177,6 +177,7 @@ const Admin = () => {
                 <AreaSettingsAccordion
                   area={selectedArea}
                   onUpdate={handleAreaUpdate}
+                  allAreas={areas}
                 />
               ) : (
                 <p className="text-muted-foreground text-center py-8">
