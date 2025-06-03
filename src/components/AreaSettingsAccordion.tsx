@@ -347,8 +347,8 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate }) => {
           </AccordionContent>
         </AccordionItem>
 
-        {/* ---------------- Position / Koordinaten ---------------- */}
-        <AccordionItem value="position">
+        {/* Area Position Settings */}
+        {/* <AccordionItem value="position">
           <AccordionTrigger className="py-4">
             <div className="flex items-center">
               <Move className="mr-2 h-5 w-5" />
@@ -358,7 +358,7 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate }) => {
           <AccordionContent>
             <AreaPositionSettings formData={formData} onChange={handleChange} />
           </AccordionContent>
-        </AccordionItem>
+        </AccordionItem> */}
       </Accordion>
 
       {/* ---------- Footer (Speichern) ---------- */}

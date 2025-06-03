@@ -134,11 +134,8 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
               
               return (
                 <g key={area.id}>
-                  <rect
-                    x={area.x}
-                    y={area.y}
-                    width={area.width}
-                    height={area.height}
+                  <polygon
+                    points={area.coordinates.map((point: { x: number; y: number }) => `${point.x},${point.y}`).join(' ')}
                     fill={area.highlight || activeTreshold?.color || 'lightgray'}
                     fillOpacity={0.7}
                     stroke={isSelected ? "#000" : "#667080"}
@@ -146,27 +143,43 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                     className="exhibition-hall cursor-pointer"
                     onClick={() => handleAreaClick(area)}
                   />
-                  <text
-                    x={area.x + area.width / 2}
-                    y={area.y + area.height / 2}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    fill="#1e293b"
-                    fontWeight="bold"
-                    fontSize="14"
-                  >
-                    {area.area_name}
-                  </text>
-                  <text
-                    x={area.x + area.width / 2}
-                    y={area.y + area.height / 2 + 20}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    fill="#1e293b"
-                    fontSize="12"
-                  >
-                    {visitorCount}
-                  </text>
+                  {/* Calculate centroid for label placement */}
+                  {(() => {
+                  const pts = area.coordinates;
+                  const n = pts.length;
+                  let cx = 0, cy = 0;
+                  for (let i = 0; i < n; i++) {
+                    cx += pts[i].x;
+                    cy += pts[i].y;
+                  }
+                  cx /= n;
+                  cy /= n;
+                  return (
+                    <>
+                    <text
+                      x={cx}
+                      y={cy}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill="#1e293b"
+                      fontWeight="bold"
+                      fontSize="26"
+                    >
+                      {area.area_name}
+                    </text>
+                    <text
+                      x={cx}
+                      y={cy + 20}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill="#1e293b"
+                      fontSize="24"
+                    >
+                      {visitorCount}
+                    </text>
+                    </>
+                  );
+                  })()}
                 </g>
               );
             })}

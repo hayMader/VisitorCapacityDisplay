@@ -1,22 +1,45 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 import ExhibitionMap from '@/components/ExhibitionMap';
 import { formatDateTime } from '@/utils/formatDatetime';
 import { AreaStatus } from '@/types';
 
+const getLocalizedTimeSuffix = (isUSFormat: boolean): string => {
+  return isUSFormat ? '' : 'Uhr';
+};
+
 const Index = () => {
   const [latestTimestamp, setLatestTimestamp] = useState<string>('');
+  const [latestTimestampISO, setLatestTimestampISO] = useState<string>('');
+  const [showGermanTitle, setShowGermanTitle] = useState<boolean>(false);
+  const isUSFormat = !showGermanTitle;
+ 
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+    setShowGermanTitle((prev) => !prev);
+  }, 3000);
   
-  const handleDataUpdate = (areaStatus: AreaStatus[]) => {
-    const timestamp = new Date().toISOString();
-    setLatestTimestamp(formatDateTime(timestamp));
-  };
+  return () => clearInterval (intervalId);
+}, []);
+
+useEffect(() => {
+  if (!latestTimestampISO) return;
+  setLatestTimestamp(formatDateTime(latestTimestampISO, isUSFormat));
+}, [isUSFormat, latestTimestampISO]);
+
+const handleDataUpdate = () => {
+  const iso = new Date().toISOString();
+  setLatestTimestampISO(iso);
+  setLatestTimestamp(formatDateTime(iso, isUSFormat));
+};
   
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header 
-        title="Besucherfüllstand" 
-        subtitle={latestTimestamp ? `${latestTimestamp} Uhr` : undefined}
+        title={showGermanTitle ? "Aktueller Besucherfüllstand" : "Visitor count"} 
+        subtitle={latestTimestamp
+          ? `${latestTimestamp} ${getLocalizedTimeSuffix(isUSFormat)}`
+          : undefined}
       />
       
       <main className="flex-1 overflow-hidden flex items-center justify-center" style={{ maxHeight: '85vh' }}>
