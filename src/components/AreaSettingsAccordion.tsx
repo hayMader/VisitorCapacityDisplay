@@ -12,7 +12,7 @@ import {
 import {
   Settings,
   SlidersHorizontal,
-  Move,
+  Copy,
   Save,
 } from "lucide-react";
 
@@ -353,10 +353,22 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas }) =>
                               onCancel={cancelEdit}
                               onDelete={() => deleteThreshold(t.id)}
                             />
+                            
                           </div>
                         );
                       })}
+                      {/* Copy Thresholds Button */}
+                
                   </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setIsCopyModalOpen(true)}
+                    className="flex items-center"
+                    >
+                    <Copy className="h-4 w-4" />
+                    Schwellenwerte kopieren
+                  </Button>
                 </div>
               ) : (
                 <p className="text-muted-foreground">Keine Grenzwerte definiert.</p>
@@ -370,14 +382,7 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas }) =>
                 disabled={formData.thresholds.length >= MAX_LEVELS}
               />
 
-              {/* Copy Thresholds Button */}
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => setIsCopyModalOpen(true)}
-              >
-                Einstellungen kopieren
-              </Button>
+              
 
             </div>
           </AccordionContent>
