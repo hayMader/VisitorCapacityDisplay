@@ -303,7 +303,7 @@ const AreaSettingsAccordion: React.FC<AreaSettingsAccordionProps> = ({ area, onU
         </AccordionItem>
 
         {/* Area Position Settings */}
-        <AccordionItem value="position">
+        {/* <AccordionItem value="position">
           <AccordionTrigger className="py-4">
             <div className="flex items-center">
               <Move className="mr-2 h-5 w-5" />
@@ -316,7 +316,7 @@ const AreaSettingsAccordion: React.FC<AreaSettingsAccordionProps> = ({ area, onU
               onChange={handleChange}
             />
           </AccordionContent>
-        </AccordionItem>
+        </AccordionItem> */}
       </Accordion>
 
       <div className="mt-6 flex justify-end">
