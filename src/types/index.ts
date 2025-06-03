@@ -21,7 +21,7 @@ export interface Threshold {
   upper_threshold: number;
   color?: string;
   alert: boolean;
-  alert_message: string;
+  alert_message?: string;
 }
 
 export interface AreaStatus {
