@@ -11,10 +11,7 @@ export interface AreaSettings {
   area_name: string;
   last_updated: string;
   capacity_usage: number;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
+  coordinates: { x: number; y: number }[];
   highlight: string | null;
 }
 
@@ -31,10 +28,7 @@ export interface AreaStatus {
   id: number;
   area_name: string;
   capacity_usage: number;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
+  coordinates: { x: number; y: number }[];
   amount_visitors: number;
   highlight: string | null;
   thresholds: Threshold[]
