@@ -137,9 +137,9 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                   <polygon
                     points={area.coordinates.map((point: { x: number; y: number }) => `${point.x},${point.y}`).join(' ')}
                     fill={area.highlight || activeTreshold?.color || 'lightgray'}
-                    fillOpacity={0.7}
+                    fillOpacity={0.4}
                     stroke={isSelected ? "#000" : "#667080"}
-                    strokeWidth={isSelected ? 2 : 1}
+                    strokeWidth={isSelected ? 2 : 0}
                     className="exhibition-hall cursor-pointer"
                     onClick={() => handleAreaClick(area)}
                   />
@@ -167,7 +167,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                     >
                       {area.area_name}
                     </text>
-                    <text
+                    {/* <text
                       x={cx}
                       y={cy + 20}
                       textAnchor="middle"
@@ -176,7 +176,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                       fontSize="24"
                     >
                       {visitorCount}
-                    </text>
+                    </text> */}
                     </>
                   );
                   })()}
