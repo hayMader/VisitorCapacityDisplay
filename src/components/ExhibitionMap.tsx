@@ -89,7 +89,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
     return (
       <div className="flex flex-col items-center justify-center h-full">
         <RefreshCw className="h-10 w-10 text-primary animate-spin" />
-        <p className="mt-4 text-muted-foreground">Daten werden geladen...</p>
+        <p className="mt-4 text-lg text-muted-foreground">Daten werden geladen...</p>
       </div>
     );
   }
@@ -156,7 +156,6 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                   cy /= n;
                   return (
                     <>
-<<<<<<< HEAD
                     <text
                       x={cx}
                       y={cy}
@@ -178,31 +177,6 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                     >
                       {visitorCount}
                     </text> */}
-=======
-                      {!area.hidden_name && (
-                        <text
-                          x={cx}
-                          y={cy}
-                          textAnchor="middle"
-                          dominantBaseline="middle"
-                          fill="#1e293b"
-                          fontWeight="bold"
-                          fontSize="26"
-                        >
-                          {area.area_name}
-                        </text>
-                      )}
-                      <text
-                        x={cx}
-                        y={cy + (area.hidden_name ? 0 : 20)}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        fill="#1e293b"
-                        fontSize="24"
-                      >
-                        {visitorCount}
-                      </text>
->>>>>>> parent of 85f4ce1 (Revert "Merge branch 'dev' into saad-branch")
                     </>
                   );
                   })()}
