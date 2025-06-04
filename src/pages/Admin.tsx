@@ -8,6 +8,8 @@ import { toast } from '@/components/ui/use-toast';
 import { getAreaSettings } from '@/utils/api';
 import { AreaStatus } from '@/types';
 import AreaSettingsAccordion from '@/components/AreaSettingsAccordion';
+import { Input } from '@/components/ui/input';
+import { Search, Filter } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -80,6 +82,11 @@ const Admin = () => {
     !area.area_name.toLowerCase().includes('eingang')
   );
 
+  // Filter areas based on search text
+  const filteredAreas = areas.filter(area => 
+    filterText === '' || area.area_name.toLowerCase().includes(filterText.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header 
@@ -94,8 +101,8 @@ const Admin = () => {
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white p-4 rounded-lg shadow-sm">
               <div className="flex justify-between items-center mb-4">
-                <h3>Aktueller Besucherfüllstand</h3>
-                <div className="text-muted-foreground">
+                <h2 className="text-xl font-medium">Aktueller Besucherfüllstand</h2>
+                <div className="text-gray-500">
                   {new Date().toLocaleDateString('de-DE', {
                     day: '2-digit', 
                     month: '2-digit', 
@@ -118,7 +125,16 @@ const Admin = () => {
             
             <div className="bg-white p-4 rounded-lg shadow-sm">
               <div className="flex items-center justify-between mb-4">
-                <span>Hallen und Gelände</span>
+                <h3 className="font-medium text-lg">Hallen und Gelände</h3>
+                <div className="relative w-64">
+                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+                  <Input
+                    placeholder="Suchen..."
+                    className="pl-9 h-10"
+                    value={filterText}
+                    onChange={(e) => setFilterText(e.target.value)}
+                  />
+                </div>
               </div>
               <Separator className="mb-4" />
               
@@ -169,7 +185,11 @@ const Admin = () => {
           <div className="lg:col-span-1">
             <div className="bg-white p-4 rounded-lg shadow-sm">
               <div className="flex justify-between items-center mb-4">
-                <span>Bereichseinstellungen</span>
+                <h3 className="font-medium text-lg">Bereichseinstellungen</h3>
+                <Button variant="outline" size="sm">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filter
+                </Button>
               </div>
               <Separator className="mb-4" />
               
@@ -177,7 +197,6 @@ const Admin = () => {
                 <AreaSettingsAccordion
                   area={selectedArea}
                   onUpdate={handleAreaUpdate}
-                  allAreas={areas}
                 />
               ) : (
                 <p className="text-muted-foreground text-center py-8">

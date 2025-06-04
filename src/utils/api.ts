@@ -121,46 +121,6 @@ export const deleteThreshold = async (thresholdId: number): Promise<boolean> => 
   }
 };
 
-//Function to copy thresholds from one area to multiple target areas
-export const copyThresholdsToAreas = async (sourceAreaId: number, targetAreaIds: number[]) => {
-  try {
-    // Fetch thresholds from the source area
-    const { data: sourceThresholds, error: fetchError } = await supabase
-      .from('thresholds')
-      .select('*')
-      .eq('setting_id', sourceAreaId);
-
-    if (fetchError) throw fetchError;
-
-    // Create new thresholds for each target area
-    const newThresholds = targetAreaIds.flatMap((targetId) =>
-      (sourceThresholds || []).map((t) => {
-        const { id, ...rest } = t;
-        return { ...rest, setting_id: targetId };
-      })
-    );
-
-    // Delete existing thresholds for target areas
-    const { error: deleteError } = await supabase
-      .from('thresholds')
-      .delete()
-      .in('setting_id', targetAreaIds);
-
-    if (deleteError) throw deleteError;
-
-    // Insert new thresholds for target areas
-    const { error: insertError } = await supabase
-      .from('thresholds')
-      .insert(newThresholds);
-
-    if (insertError) throw insertError;
-
-  } catch (error) {
-    console.error('Error copying thresholds:', error);
-    throw error;
-  }
-};
-
 // Function to add visitor data
 export const addVisitorData = async (visitorData: Omit<VisitorData, 'id' | 'timestamp'>): Promise<VisitorData | null> => {
   try {

@@ -89,7 +89,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
     return (
       <div className="flex flex-col items-center justify-center h-full">
         <RefreshCw className="h-10 w-10 text-primary animate-spin" />
-        <p className="mt-4 text-muted-foreground">Daten werden geladen...</p>
+        <p className="mt-4 text-lg text-muted-foreground">Daten werden geladen...</p>
       </div>
     );
   }
@@ -156,29 +156,27 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                   cy /= n;
                   return (
                     <>
-                      {!area.hidden_name && (
-                        <text
-                          x={cx}
-                          y={cy}
-                          textAnchor="middle"
-                          dominantBaseline="middle"
-                          fill="#1e293b"
-                          fontWeight="bold"
-                          fontSize="26"
-                        >
-                          {area.area_name}
-                        </text>
-                      )}
-                      <text
-                        x={cx}
-                        y={cy + (area.hidden_name ? 0 : 20)}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        fill="#1e293b"
-                        fontSize="24"
-                      >
-                        {visitorCount}
-                      </text>
+                    <text
+                      x={cx}
+                      y={cy}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill="#1e293b"
+                      fontWeight="bold"
+                      fontSize="26"
+                    >
+                      {area.area_name}
+                    </text>
+                    <text
+                      x={cx}
+                      y={cy + 20}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill="#1e293b"
+                      fontSize="24"
+                    >
+                      {visitorCount}
+                    </text>
                     </>
                   );
                   })()}

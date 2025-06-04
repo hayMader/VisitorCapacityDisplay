@@ -20,29 +20,29 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle, isAdmin = false }) => 
   };
 
   return (
-    <header className="bg-white shadow-sm border-b px-4 py-3" style={{ maxHeight: '190px' }}>
+    <header className="bg-white shadow-sm border-b px-4 py-3" style={{ maxHeight: '10vh' }}>
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center gap-5">
           <Link to="/" className="flex-shrink-0">
             <img 
               src="/messe-muenchen-logo.png" 
               alt="Messe München Logo" 
-              className="h-20 w-auto"
+              className="h-12"
             />
           </Link>
           
           <div className="border-l h-12 border-gray-300 mx-2"></div>
           
           <div>
-            <h2>{title}</h2>
+            <h1 className="text-xl font-medium">{title}</h1>
             {subtitle && (
-              <div className="flex items-center">
-                <h3 className="inline-flex items-center font-light">
-                  <svg className="w-7 h-7 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <div className="flex items-center text-gray-600">
+                <span className="inline-flex items-center">
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                   {subtitle}
-                </h3>
+                </span>
               </div>
             )}
           </div>
@@ -56,13 +56,13 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle, isAdmin = false }) => 
               </Link>
             ) : (
               <Button variant="outline" size="sm" onClick={handleLogout}>
-                <LogOut className="h-5 w-5 mr-2" />
+                <LogOut className="h-4 w-4 mr-2" />
                 Abmelden
               </Button>
             )
           ) : (
             <Link to="/login">
-                <LogIn className="h-5 w-5 mr-2" />
+                <LogIn className="h-4 w-4 mr-2" />
             </Link>
           )}
         </div>

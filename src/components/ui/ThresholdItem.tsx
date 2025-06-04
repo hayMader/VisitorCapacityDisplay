@@ -69,7 +69,7 @@ const ThresholdItem: React.FC<ThresholdItemProps> = ({
           className="w-4 h-4 rounded-full mr-3" 
           style={{ backgroundColor: threshold.color }}
         ></div>
-        <p>{threshold.upper_threshold}</p>
+        <span className="font-medium">{threshold.upper_threshold}</span>
       </div>
       <div className="flex gap-1">
         <Button 
@@ -78,7 +78,7 @@ const ThresholdItem: React.FC<ThresholdItemProps> = ({
           type="button"
           onClick={() => onEdit(threshold)}
         >
-          <Edit className="h-5 w-5" />
+          <Edit className="h-4 w-4" />
         </Button>
         <Button 
           size="icon" 
@@ -87,7 +87,7 @@ const ThresholdItem: React.FC<ThresholdItemProps> = ({
           type="button"
           onClick={() => onDelete(threshold.id)}
         >
-          <Trash className="h-5 w-5" />
+          <Trash className="h-4 w-4" />
         </Button>
       </div>
     </>
