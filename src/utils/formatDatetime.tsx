@@ -8,7 +8,6 @@ export const formatDateTime = (dateString: string, useUSFormat = false): string 
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-      second: '2-digit',
     };
     return new Intl.DateTimeFormat(locale, options).format(date);
   };
