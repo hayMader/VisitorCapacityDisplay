@@ -27,6 +27,15 @@ useEffect(() => {
   setLatestTimestamp(formatDateTime(latestTimestampISO, isUSFormat));
 }, [isUSFormat, latestTimestampISO]);
 
+useEffect(() => {
+  const tick = setInterval(() => {
+    const now = new Date().toISOString();
+    setLatestTimestampISO(now);
+  }, 1000);
+
+  return () => clearInterval(tick);
+}, []);
+
 const handleDataUpdate = () => {
   const iso = new Date().toISOString();
   setLatestTimestampISO(iso);
@@ -36,7 +45,7 @@ const handleDataUpdate = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header 
-        title={showGermanTitle ? "Aktueller Besucherfüllstand" : "Visitor count"} 
+        title={showGermanTitle ? "Besucherfüllstand" : "Visitor count"} 
         subtitle={latestTimestamp
           ? `${latestTimestamp} ${getLocalizedTimeSuffix(isUSFormat)}`
           : undefined}
