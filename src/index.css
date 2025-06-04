@@ -4,45 +4,71 @@
 @tailwind utilities;
 
 @layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+    font-style: light;
+  }
+  
+  h1 {
+    @apply text-[70px] font-light;
+  }
+
+  h2 {
+    @apply text-[40px] font-light;
+  }
+
+  h3 {
+    @apply text-[25px] font-medium;
+  }
+
+  span {
+    @apply text-[16px] font-medium;
+  }
+
+  p {
+    @apply text-[15px] font-light;
+  }
+
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 0 0% 96%; /* Light grey *
+    --foreground: 0 0% 0%; /* Black */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%; /* White */
+    --card-foreground: 0 0% 0%; /* Black */
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%; /* White */
+    --popover-foreground: 0 0% 46%; /* Dark grey */
 
-    --primary: 210 79% 46%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 212 78% 71%; /* Highlight light blue */
+    --primary-foreground: 0 0% 96%; /* Light grey */
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 212 78% 71%; /* Highlight light blue */
+    --secondary-foreground: 0 0% 96%; /* Light grey */
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 210 40% 96.1%; /* Light grey accent */
+    --muted-foreground: 0 0% 46%; /* Dark grey */
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 210 40% 96.1%; /* Light grey accent */
+    --accent-foreground: 0 0% 46%; /* Dark grey */
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 77% 53%; /* Dark red */
+    --destructive-foreground: 0 0% 96%; /* Light grey */
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 0 0% 96%; /* Light grey */
+    --input: 0 0% 95%; /* Light grey */
+    --ring: 0 0% 46%; /* Dark grey */
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
+    /* Pop Up Sidebar */
+    --sidebar-background: 0 0% 96%; /* Light grey */
+    --sidebar-foreground: 0 0% 46%; /* Dark grey */
+    --sidebar-primary: 0 0% 0%; /* Black */
+    --sidebar-primary-foreground: 0 0% 100%; /* White */
+    --sidebar-accent: 0 0% 46%; /* Dark grey */
+    --sidebar-accent-foreground: 0 0% 0%; /* Black */
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 212 78% 71%; /* Highlight light blue */
   }
 
   .dark {

@@ -13,35 +13,29 @@ export type Database = {
         Row: {
           area_name: string
           capacity_usage: number
-          height: number
+          coordinates: { x: number; y: number }[];
           highlight: string | null
           id: number
           last_updated: string
-          width: number
-          x: number
-          y: number
+          hidden_name: boolean
         }
         Insert: {
           area_name: string
           capacity_usage?: number
-          height?: number
+          coordinates?: { x: number; y: number }[];
           highlight?: string | null
           id?: number
           last_updated?: string
-          width?: number
-          x?: number
-          y?: number
+          hidden_name?: boolean
         }
         Update: {
           area_name?: string
           capacity_usage?: number
-          height?: number
+          coordinates?: { x: number; y: number }[];
           highlight?: string | null
           id?: number
           last_updated?: string
-          width?: number
-          x?: number
-          y?: number
+          hidden_name?: boolean
         }
         Relationships: []
       }
@@ -51,18 +45,24 @@ export type Database = {
           id: number
           setting_id: number
           upper_threshold: number
+          alert: boolean
+          alert_message?: string | null
         }
         Insert: {
           color: string
           id?: number
           setting_id: number
           upper_threshold: number
+          alert: boolean
+          alert_message?: string | null
         }
         Update: {
           color?: string
           id?: number
           setting_id?: number
           upper_threshold?: number
+          alert?: boolean
+          alert_message?: string | null
         }
         Relationships: [
           {
@@ -125,36 +125,30 @@ export type Database = {
           area_name: string | null
           area_number: number | null
           capacity_usage: number | null
-          height: number | null
+          coordinates: { x: number; y: number }[];
           highlight: string | null
           thresholds: Json | null
-          width: number | null
-          x: number | null
-          y: number | null
+          hidden_name: boolean
         }
         Insert: {
           amount_visitors?: never
           area_name?: string | null
           area_number?: number | null
           capacity_usage?: number | null
-          height?: number | null
+          coordinates: { x: number; y: number }[];
           highlight?: string | null
           thresholds?: never
-          width?: number | null
-          x?: number | null
-          y?: number | null
+          hidden_name?: boolean
         }
         Update: {
           amount_visitors?: never
           area_name?: string | null
           area_number?: number | null
           capacity_usage?: number | null
-          height?: number | null
+          coordinates: { x: number; y: number }[];
           highlight?: string | null
           thresholds?: never
-          width?: number | null
-          x?: number | null
-          y?: number | null
+          hidden_name?: boolean
         }
         Relationships: []
       }
