@@ -12,6 +12,7 @@ interface ExhibitionMapProps {
   onAreaSelect?: (areaNumber: AreaStatus) => void;
   selectedArea?: AreaStatus | null;
 }
+type AreaWithLabel = AreaStatus & { displayName: string };
 
 const ExhibitionMap: React.FC<ExhibitionMapProps> = ({ 
   autoRefresh = true, 
@@ -20,18 +21,32 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
   onAreaSelect,
   selectedArea = null
 }) => {
-  const [areaStatus, setAreaStatus] = useState<AreaStatus[]>([]);
+const [areaStatus, setAreaStatus] = useState<AreaWithLabel[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
+
+  const AREA_SHORT_LABELS: Record<string, string> = {
+  'Haupteingang West': 'HEW',
+  'Haupteingang Ost' : 'HEO',
+  'Haupteingang Nord': 'HEN',
+  'Eingang Nordwest' : 'ENW',
+  'Eingang Nordost'  : 'ENO',
+};
+
 
   // Function to fetch the latest data
   const fetchData = async () => {
     try {
       setIsRefreshing(true);
-      const newAreaStatus = await getAreaSettings();
-      
-      setAreaStatus(newAreaStatus);
+const rawAreaStatus = await getAreaSettings();
+
+const newAreaStatus: AreaWithLabel[] = rawAreaStatus.map(area => ({
+  ...area,
+  displayName: AREA_SHORT_LABELS[area.area_name] ?? area.area_name,
+}));
+
+setAreaStatus(newAreaStatus);
       setLastRefreshed(new Date());
       
       if (onDataUpdate) {
@@ -165,7 +180,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                       fontWeight="bold"
                       fontSize="26"
                     >
-                      {area.area_name}
+{area.displayName}
                     </text>
                     {/* <text
                       x={cx}
