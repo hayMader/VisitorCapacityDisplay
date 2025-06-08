@@ -131,7 +131,15 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
               const thresholds = area.thresholds;
               const activeTreshold = getOccupancyLevel(visitorCount, thresholds);
               const isSelected = selectedArea === area;
-              
+              // ----------------------------------------------------
+// NEU: Flags auswerten und %-Wert berechnen
+const showAbs = !area.hidden_absolute;
+const showPct = !area.hidden_percentage;
+const pct = area.capacity_usage
+  ? Math.round((area.amount_visitors / area.capacity_usage) * 100)
+  : 0;
+// ----------------------------------------------------
+
               return (
                 <g key={area.id}>
                   <polygon
@@ -167,16 +175,49 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                     >
                       {area.area_name}
                     </text>
-                    {/* <text
-                      x={cx}
-                      y={cy + 20}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fill="#1e293b"
-                      fontSize="24"
-                    >
-                      {visitorCount}
-                    </text> */}
+                    <>
+  {/* Bereichsname */}
+  <text
+    x={cx}
+    y={cy}
+    textAnchor="middle"
+    dominantBaseline="middle"
+    fill="#1e293b"
+    fontWeight="bold"
+    fontSize="26"
+  >
+    {area.area_name}
+  </text>
+
+  {/* Besucherzahl */}
+  {showAbs && (
+    <text
+      x={cx}
+      y={cy + 22}
+      textAnchor="middle"
+      dominantBaseline="middle"
+      fill="#1e293b"
+      fontSize="24"
+    >
+      {area.amount_visitors}
+    </text>
+  )}
+
+  {/* %-Auslastung */}
+  {showPct && (
+    <text
+      x={cx}
+      y={cy + (showAbs ? 44 : 22)}
+      textAnchor="middle"
+      dominantBaseline="middle"
+      fill="#1e293b"
+      fontSize="22"
+    >
+      {pct} %
+    </text>
+  )}
+</>
+
                     </>
                   );
                   })()}

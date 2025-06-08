@@ -14,6 +14,8 @@ export interface AreaSettings {
   coordinates: { x: number; y: number }[];
   highlight: string | null;
   hidden_name: boolean;
+  hidden_absolute?: boolean;    // Controls display of absolute visitor count
+  hidden_percentage?: boolean; 
 }
 
 export interface Threshold {
@@ -34,6 +36,8 @@ export interface AreaStatus {
   highlight: string | null;
   thresholds: Threshold[];
   hidden_name: boolean;
+  hidden_absolute?: boolean;    // Controls display of absolute visitor count
+  hidden_percentage?: boolean; 
 }
 
 export type OccupancyLevel = 'low' | 'medium' | 'high';

@@ -13,25 +13,26 @@ const AreaGeneralSettings: React.FC<AreaGeneralSettingsProps> = ({
   formData,
   onChange,
 }) => {
+  const createSyntheticEvent = (checked: boolean, fieldName: string) => ({
+    target: { value: checked, name: fieldName }
+  } as unknown as React.ChangeEvent<HTMLInputElement>);
+
   return (
     <div className="space-y-4 py-2">
       <div className="space-y-2">
         <Label htmlFor="area-name">Bereichsname</Label>
         <Input
           id="area-name"
-          value={formData.area_name}
+          value={formData.area_name || ''}
           onChange={(e) => onChange(e, 'area_name')}
         />
         <div className="flex items-center space-x-2 mt-2">
           <Checkbox
             id="hide-name"
-            checked={formData.hidden_name}
+            checked={formData.hidden_name || false}
             onCheckedChange={(checked: boolean) =>
               onChange(
-                // Create a synthetic event to match the expected signature
-                {
-                  target: { value: checked, name: 'hidden_name' }
-                } as unknown as React.ChangeEvent<HTMLInputElement>,
+                createSyntheticEvent(checked, 'hidden_name'),
                 'hidden_name'
               )
             }
@@ -45,12 +46,46 @@ const AreaGeneralSettings: React.FC<AreaGeneralSettingsProps> = ({
         <Input
           id="capacity"
           type="number"
-          value={formData.capacity_usage}
+          value={formData.capacity_usage || 0}
           onChange={(e) => onChange(e, 'capacity_usage')}
         />
       </div>
 
-   {/*    <div className="space-y-2">
+      <div className="space-y-2">
+        <Label>Anzeige-Optionen</Label>
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="show-absolute"
+              checked={!formData.hidden_absolute}
+              onCheckedChange={(checked: boolean) =>
+                onChange(
+                  createSyntheticEvent(!checked, 'hidden_absolute'),
+                  'hidden_absolute'
+                )
+              }
+            />
+            <Label htmlFor="show-absolute">Absolute Besucherzahl anzeigen</Label>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="show-percentage"
+              checked={!formData.hidden_percentage}
+              onCheckedChange={(checked: boolean) =>
+                onChange(
+                  createSyntheticEvent(!checked, 'hidden_percentage'),
+                  'hidden_percentage'
+                )
+              }
+            />
+            <Label htmlFor="show-percentage">Prozentuale Auslastung anzeigen</Label>
+          </div>
+        </div>
+      </div>
+
+      {/* Optional: Highlight color section (currently commented out) */}
+      {/* <div className="space-y-2">
         <Label htmlFor="highlight">Hervorhebungsfarbe (optional)</Label>
         <div className="flex gap-2">
           <Input
