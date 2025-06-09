@@ -11,14 +11,23 @@ interface ExhibitionMapProps {
   onDataUpdate?: (areaStatus: AreaStatus[]) => void;
   onAreaSelect?: (areaNumber: AreaStatus) => void;
   selectedArea?: AreaStatus | null;
+  showGermanLabels?: boolean; //
 }
 
+const LABEL_TRANSLATIONS: Record<string, { en: string; de: string }> = {
+  'Haupteingang Ost': { en: 'Main Entrance East', de: 'Haupteingang Ost' },
+  'Lingang Nord': { en: 'North Entrance', de: 'Lingang Nord' },
+  'Haupteingang West': { en: 'Main Entrance West', de: 'Haupteingang West' },
+  'Freigelände Mitte': { en: 'Open-air area Central', de: 'Freigelände Mitte' },
+  'Eingang Nord': { en: 'North Entrance', de: 'Eingang Nord' }
+}
 const ExhibitionMap: React.FC<ExhibitionMapProps> = ({ 
   autoRefresh = true, 
   refreshInterval = 60000, // 1 minute by default
   onDataUpdate,
   onAreaSelect,
-  selectedArea = null
+  selectedArea = null,
+  showGermanLabels = false
 }) => {
   const [areaStatus, setAreaStatus] = useState<AreaStatus[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -165,7 +174,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                       fontWeight="bold"
                       fontSize="26"
                     >
-                      {area.area_name}
+                      {LABEL_TRANSLATIONS[area.area_name]?.[showGermanLabels? 'de' : 'en'] || area.area_name}
                     </text>
                     <text
                       x={cx}
