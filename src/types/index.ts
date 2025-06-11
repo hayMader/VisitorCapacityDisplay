@@ -9,6 +9,7 @@ export interface VisitorData {
 export interface AreaSettings {
   id: number;
   area_name: string;
+  area_name_en?: string;
   last_updated: string;
   capacity_usage: number;
   coordinates: { x: number; y: number }[];
@@ -30,6 +31,7 @@ export interface Threshold {
 export interface AreaStatus {
   id: number;
   area_name: string;
+  area_name_en?: string;
   capacity_usage: number;
   coordinates: { x: number; y: number }[];
   amount_visitors: number;

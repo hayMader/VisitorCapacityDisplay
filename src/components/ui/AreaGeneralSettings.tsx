@@ -16,13 +16,23 @@ const AreaGeneralSettings: React.FC<AreaGeneralSettingsProps> = ({
   return (
     <div className="space-y-4 py-2">
       <div className="space-y-2">
-        <Label htmlFor="area-name">Bereichsname</Label>
+        <div className="space-y-1">
+        <Label htmlFor="area-name">Bereichsname (Deutsch)</Label>
         <Input
           id="area-name"
           value={formData.area_name}
           onChange={(e) => onChange(e, 'area_name')}
         />
-        <div className="flex items-center space-x-2 mt-2">
+        </div>
+        <div className="space-y-1">
+        <Label htmlFor="area-name-en">Bereichsname (Englisch)</Label>
+        <Input
+          id="area-name-en"
+          value={formData.area_name_en || ''}
+          onChange={(e) => onChange(e, 'area_name_en')}
+        />
+        </div>
+        <div className="flex items-center space-x-2 pt-1">
           <Checkbox
             id="hide-name"
             checked={formData.hidden_name}
