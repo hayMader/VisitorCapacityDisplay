@@ -156,6 +156,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                   cy /= n;
                   return (
                     <>
+                    {!area.hidden_name && (
                     <text
                       x={cx}
                       y={cy}
@@ -167,7 +168,8 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                     >
                       {area.area_name}
                     </text>
-                    {/* <text
+                  )}
+                    <text
                       x={cx}
                       y={cy + 20}
                       textAnchor="middle"
@@ -176,7 +178,17 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                       fontSize="24"
                     >
                       {visitorCount}
-                    </text> */}
+                    </text>
+                    <text
+                      x={cx}
+                      y={cy + 20}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill="#1e293b"
+                      fontSize="24"
+                    >
+                      {visitorCount/area.capacity_usage * 100}%
+                    </text>
                     </>
                   );
                   })()}
