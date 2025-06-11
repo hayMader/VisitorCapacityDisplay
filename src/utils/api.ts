@@ -1,5 +1,6 @@
-import { VisitorData, AreaSettings, OccupancyLevel, AreaStatus, Threshold } from "@/types";
+import { VisitorData, AreaSettings, OccupancyLevel, AreaStatus, Threshold, LegendRow } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
+import { Legend } from "recharts";
 
 // Function to get the latest visitor data
 export const getVisitorData = async (): Promise<VisitorData[]> => {
@@ -192,3 +193,15 @@ export const getOccupancyColor = (threshold?: Threshold): string => {
   if (!threshold) return '#cccccc'; // Default gray color if no threshold applies
   return threshold.color;
 };
+
+
+export const refreshLegend = async (LegendRows: Partial<LegendRow>[]) => {
+  try {
+    const { data, error } = await supabase.rpc('refresh_legend', { legend_rows: LegendRows });
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error refreshing legend:', error);
+    return null;
+  }
+}

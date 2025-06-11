@@ -1,3 +1,5 @@
+import type { LegendRow } from "@/types/index"
+
 export type Json =
   | string
   | number
@@ -160,6 +162,10 @@ export type Database = {
       },
       update_area_settings: {
         Args: {area_id: number, setting_json: Json}
+        Returns: null
+      }
+      refresh_legend: {
+        Args: { legend_rows: Partial<LegendRow>[] }
         Returns: null
       }
     }
