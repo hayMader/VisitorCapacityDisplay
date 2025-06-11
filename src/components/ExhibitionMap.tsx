@@ -30,6 +30,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
     try {
       setIsRefreshing(true);
       const newAreaStatus = await getAreaSettings();
+      console.log(newAreaStatus)
       
       setAreaStatus(newAreaStatus);
       setLastRefreshed(new Date());
@@ -131,7 +132,13 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
               const thresholds = area.thresholds;
               const activeTreshold = getOccupancyLevel(visitorCount, thresholds);
               const isSelected = selectedArea === area;
-              
+              // ----------------------------------------------------
+// NEU: Flags auswerten und %-Wert berechnen
+const pct = area.capacity_usage
+  ? Math.round((area.amount_visitors / area.capacity_usage) * 100)
+  : 0;
+// ----------------------------------------------------
+
               return (
                 <g key={area.id}>
                   <polygon
@@ -145,52 +152,62 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                   />
                   {/* Calculate centroid for label placement */}
                   {(() => {
-                  const pts = area.coordinates;
-                  const n = pts.length;
-                  let cx = 0, cy = 0;
-                  for (let i = 0; i < n; i++) {
-                    cx += pts[i].x;
-                    cy += pts[i].y;
-                  }
-                  cx /= n;
-                  cy /= n;
-                  return (
-                    <>
-                    {!area.hidden_name && (
-                    <text
-                      x={cx}
-                      y={cy}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fill="#1e293b"
-                      fontWeight="bold"
-                      fontSize="26"
-                    >
-                      {area.area_name}
-                    </text>
-                  )}
-                    <text
-                      x={cx}
-                      y={cy + 20}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fill="#1e293b"
-                      fontSize="24"
-                    >
-                      {visitorCount}
-                    </text>
-                    <text
-                      x={cx}
-                      y={cy + 20}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fill="#1e293b"
-                      fontSize="24"
-                    >
-                      {visitorCount/area.capacity_usage * 100}%
-                    </text>
-                    </>
-                  );
+                    const pts = area.coordinates;
+                    const n = pts.length;
+                    let cx = 0, cy = 0;
+                    for (let i = 0; i < n; i++) {
+                      cx += pts[i].x;
+                      cy += pts[i].y;
+                    }
+                    cx /= n;
+                    cy /= n;
+
+                    return (
+                      <>
+                        {/* Bereichsname */}
+                        {!area.hidden_name && (
+                            <text
+                            x={cx}
+                            y={cy - (!area.hidden_absolute && !area.hidden_percentage ? 22 : 0)}
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            fill="#1e293b"
+                            fontWeight="bold"
+                            fontSize="26"
+                            >
+                            {area.area_name}
+                            </text>
+                        )}
+
+                        {/* Besucherzahl */}
+                        {!area.hidden_absolute && (
+                            <text
+                            x={cx}
+                            y={cy + (!area.hidden_percentage ? 11 : 22)}
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            fill="#1e293b"
+                            fontSize="24"
+                            >
+                            {area.amount_visitors}
+                            </text>
+                        )}
+
+                        {/* %-Auslastung */}
+                        {!area.hidden_percentage && (
+                          <text
+                            x={cx}
+                            y={cy + (!area.hidden_absolute ? 44 : 22)}
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            fill="#1e293b"
+                            fontSize="22"
+                          >
+                            {pct} %
+                          </text>
+                        )}
+                      </>
+                    );
                   })()}
                 </g>
               );

@@ -78,15 +78,26 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas }) =>
   }, [formData, originalData]);
 
   /* ---------------------------------------------------------------- */
-  /*  Field-Change Handler (Name, Capacity, … )                        */
+  /*  Field-Change Handler (Name, Capacity, Display Options)           */
   /* ---------------------------------------------------------------- */
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     field: keyof AreaStatus
   ) => {
     const value = e.target.value;
-    const parsed =
-      typeof area[field] === "number" ? parseInt(value, 10) || 0 : (value as any);
+    
+    // Handle different field types
+    let parsed: any;
+    if (field === 'hidden_name' || field === 'hidden_absolute' || field === 'hidden_percentage') {
+      // Boolean fields
+      parsed = Boolean(value);
+    } else if (typeof area[field] === "number") {
+      // Numeric fields
+      parsed = parseInt(value, 10) || 0;
+    } else {
+      // String fields
+      parsed = value;
+    }
 
     setFormData((p) => ({ ...p, [field]: parsed }));
   };
