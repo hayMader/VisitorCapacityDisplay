@@ -57,29 +57,29 @@ const AreaGeneralSettings: React.FC<AreaGeneralSettingsProps> = ({
           <div className="flex items-center space-x-2">
             <Checkbox
               id="show-absolute"
-              checked={!formData.hidden_absolute}
+              checked={formData.hidden_absolute}
               onCheckedChange={(checked: boolean) =>
                 onChange(
-                  createSyntheticEvent(!checked, 'hidden_absolute'),
+                  createSyntheticEvent(checked, 'hidden_absolute'),
                   'hidden_absolute'
                 )
               }
             />
-            <Label htmlFor="show-absolute">Absolute Besucherzahl anzeigen</Label>
+            <Label htmlFor="show-absolute">Absolute Besucherzahl ausblenden</Label>
           </div>
           
           <div className="flex items-center space-x-2">
             <Checkbox
               id="show-percentage"
-              checked={!formData.hidden_percentage}
+              checked={formData.hidden_percentage}
               onCheckedChange={(checked: boolean) =>
                 onChange(
-                  createSyntheticEvent(!checked, 'hidden_percentage'),
+                  createSyntheticEvent(checked, 'hidden_percentage'),
                   'hidden_percentage'
                 )
               }
             />
-            <Label htmlFor="show-percentage">Prozentuale Auslastung anzeigen</Label>
+            <Label htmlFor="show-percentage">Prozentuale Auslastung ausblenden</Label>
           </div>
         </div>
       </div>

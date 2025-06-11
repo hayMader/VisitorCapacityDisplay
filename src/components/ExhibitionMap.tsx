@@ -30,6 +30,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
     try {
       setIsRefreshing(true);
       const newAreaStatus = await getAreaSettings();
+      console.log(newAreaStatus)
       
       setAreaStatus(newAreaStatus);
       setLastRefreshed(new Date());
@@ -133,8 +134,6 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
               const isSelected = selectedArea === area;
               // ----------------------------------------------------
 // NEU: Flags auswerten und %-Wert berechnen
-const showAbs = !area.hidden_absolute;
-const showPct = !area.hidden_percentage;
 const pct = area.capacity_usage
   ? Math.round((area.amount_visitors / area.capacity_usage) * 100)
   : 0;
@@ -163,62 +162,49 @@ const pct = area.capacity_usage
                   cx /= n;
                   cy /= n;
                   return (
-                    <>
-                    <text
-                      x={cx}
-                      y={cy}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fill="#1e293b"
-                      fontWeight="bold"
-                      fontSize="26"
-                    >
-                      {area.area_name}
-                    </text>
-                    <>
-  {/* Bereichsname */}
-  <text
-    x={cx}
-    y={cy}
-    textAnchor="middle"
-    dominantBaseline="middle"
-    fill="#1e293b"
-    fontWeight="bold"
-    fontSize="26"
-  >
-    {area.area_name}
-  </text>
+                    {/* Bereichsname */}
+                    {!area.hidden_name && (
+                      <text
+                        x={cx}
+                        y={cy}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fill="#1e293b"
+                        fontWeight="bold"
+                        fontSize="26"
+                      >
+                        {area.hidden_name}
+                      </text>
+                    )}
+  
 
-  {/* Besucherzahl */}
-  {showAbs && (
-    <text
-      x={cx}
-      y={cy + 22}
-      textAnchor="middle"
-      dominantBaseline="middle"
-      fill="#1e293b"
-      fontSize="24"
-    >
-      {area.amount_visitors}
-    </text>
-  )}
+                      {/* Besucherzahl */}
+                      {!area.hidden_absolute && (
+                        <text
+                          x={cx}
+                          y={cy + 22}
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                          fill="#1e293b"
+                          fontSize="24"
+                        >
+                          {area.amount_visitors}
+                        </text>
+                      )}
 
-  {/* %-Auslastung */}
-  {showPct && (
-    <text
-      x={cx}
-      y={cy + (showAbs ? 44 : 22)}
-      textAnchor="middle"
-      dominantBaseline="middle"
-      fill="#1e293b"
-      fontSize="22"
-    >
-      {pct} %
-    </text>
-  )}
-</>
-
-                    </>
+                      {/* %-Auslastung */}
+                      {!area.hidden_percentage && (
+                        <text
+                          x={cx}
+                          y={cy + (!area.hidden_absolute ? 44 : 22)}
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                          fill="#1e293b"
+                          fontSize="22"
+                        >
+                          {pct} %
+                        </text>
+                      )}
                   );
                   })()}
                 </g>
