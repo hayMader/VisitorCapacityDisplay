@@ -1,3 +1,5 @@
+import { AreaStatus } from "@/types"
+
 export type Json =
   | string
   | number
@@ -161,6 +163,10 @@ export type Database = {
       update_area_settings: {
         Args: {area_id: number, setting_json: Json}
         Returns: null
+      },
+      get_area_status_filtered: {
+        Args: {filter_minutes: Json}
+        Returns: AreaStatus[]
       }
     }
     Enums: {

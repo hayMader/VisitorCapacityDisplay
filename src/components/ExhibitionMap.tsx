@@ -11,6 +11,7 @@ interface ExhibitionMapProps {
   onDataUpdate?: (areaStatus: AreaStatus[]) => void;
   onAreaSelect?: (areaNumber: AreaStatus) => void;
   selectedArea?: AreaStatus | null;
+  timeFilter?: number; // in minutes, default to 1440 (24 hours)
 }
 
 const ExhibitionMap: React.FC<ExhibitionMapProps> = ({ 
@@ -18,7 +19,8 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
   refreshInterval = 60000, // 1 minute by default
   onDataUpdate,
   onAreaSelect,
-  selectedArea = null
+  selectedArea = null,
+  timeFilter = 0, // default to 0 minutes
 }) => {
   const [areaStatus, setAreaStatus] = useState<AreaStatus[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -29,7 +31,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
   const fetchData = async () => {
     try {
       setIsRefreshing(true);
-      const newAreaStatus = await getAreaSettings();
+      const newAreaStatus = await getAreaSettings(timeFilter);
       console.log(newAreaStatus)
       
       setAreaStatus(newAreaStatus);
@@ -54,7 +56,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
   // Initial data fetch
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [timeFilter]);
 
   // Set up auto refresh
   useEffect(() => {

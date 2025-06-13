@@ -14,34 +14,9 @@ import { useNavigate } from 'react-router-dom';
 const Admin = () => {
   const [areas, setAreas] = useState<AreaStatus[]>([]);
   const [selectedArea, setSelectedArea] = useState<AreaStatus>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [filterText, setFilterText] = useState('');
+  const [timeFilter, setTimeFilter] = useState(1440);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      try {
-        const areaData = await getAreaSettings();
-        
-        setAreas(areaData);
-        if (areaData.length > 0) {
-          setSelectedArea(areaData[0]);
-        }
-      } catch (error) {
-        console.error('Error fetching initial data:', error);
-        toast({
-          title: 'Fehler',
-          description: 'Die Einstellungen konnten nicht geladen werden.',
-          variant: 'destructive',
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchInitialData();
-  }, []);
 
   const handleAreaUpdate = (updatedArea: AreaStatus) => {
     setAreas(areas.map(area => 
@@ -61,24 +36,6 @@ const Admin = () => {
       description: "Sie wurden erfolgreich abgemeldet."
     });
   };
-
-  // Group areas by type (halls, parking, etc.)
-  const halls = areas.filter(area => 
-    area.area_name.startsWith('A') || 
-    area.area_name.startsWith('B') || 
-    area.area_name.startsWith('C')
-  );
-  
-  const entrances = areas.filter(area => 
-    area.area_name.toLowerCase().includes('eingang')
-  );
-  
-  const other = areas.filter(area => 
-    !area.area_name.startsWith('A') && 
-    !area.area_name.startsWith('B') && 
-    !area.area_name.startsWith('C') &&
-    !area.area_name.toLowerCase().includes('eingang')
-  );
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -113,55 +70,32 @@ const Admin = () => {
                 onDataUpdate={handleDataUpdate} 
                 onAreaSelect={setSelectedArea}
                 selectedArea={selectedArea}
+                timeFilter={timeFilter}
               />
             </div>
-            
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <span>Hallen und Gelände</span>
+            <div>
+              {/* Filter HDM data by sliding the datetime */}
+              <label htmlFor="timeRange" className="block text-sm font-medium text-gray-700">
+                Zeitbereich (vor 24 Stunden bis jetzt)
+              </label>
+              <input
+                id="timeRange"
+                type="range"
+                min="0"
+                max="1440"
+                step="10"
+                onChange={(e) => {
+                  const minutesAgo = 1440 - parseInt(e.target.value, 10); // Convert to minutes ago
+                  setTimeFilter(minutesAgo);
+                }}
+                defaultValue={1440}
+                className="w-full mt-2"
+                style={{ appearance: 'none', height: '4px', background: '#ddd', borderRadius: '2px' }}
+              />
+              <div className="flex justify-between text-sm text-gray-500 mt-1">
+                <span>Vor 24 Stunden</span>
+                <span>Jetzt</span>
               </div>
-              <Separator className="mb-4" />
-              
-              <div className="flex flex-wrap gap-2">
-                {halls.map(area => (
-                  <Button
-                    key={area.id}
-                    variant={selectedArea === area ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSelectedArea(area)}
-                  >
-                    {area.area_name}
-                  </Button>
-                ))}
-              </div>
-              
-              <div className="mt-4 flex flex-wrap gap-2">
-                {entrances.map(area => (
-                  <Button
-                    key={area.id}
-                    variant={selectedArea === area ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSelectedArea(area)}
-                  >
-                    {area.area_name}
-                  </Button>
-                ))}
-              </div>
-              
-              {other.length > 0 && (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {other.map(area => (
-                    <Button
-                      key={area.id}
-                      variant={selectedArea === area ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setSelectedArea(area)}
-                    >
-                      {area.area_name}
-                    </Button>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
           

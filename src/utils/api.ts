@@ -22,12 +22,10 @@ export const getVisitorData = async (): Promise<VisitorData[]> => {
 };
 
 // Function to get area settings
-export const getAreaSettings = async (): Promise<AreaStatus[]> => {
+export const getAreaSettings = async (filter_minutes?: number): Promise<AreaStatus[]> => {
   try {
-    const { data, error } = await supabase
-      .from('area_status')
-      .select('*');
-    
+    const { data, error } = await supabase.rpc("get_area_status_filtered", { filter_minutes: filter_minutes || 0 });
+
     if (error) throw error;
     
     return data.map((item: any) => ({
