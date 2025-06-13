@@ -14,13 +14,6 @@ interface ExhibitionMapProps {
   showGermanLabels?: boolean; //
 }
 
-const LABEL_TRANSLATIONS: Record<string, { en: string; de: string }> = {
-  'Haupteingang Ost': { en: 'Main Entrance East', de: 'Haupteingang Ost' },
-  'Lingang Nord': { en: 'North Entrance', de: 'Lingang Nord' },
-  'Haupteingang West': { en: 'Main Entrance West', de: 'Haupteingang West' },
-  'Freigelände Mitte': { en: 'Open-air area Central', de: 'Freigelände Mitte' },
-  'Eingang Nord': { en: 'North Entrance', de: 'Eingang Nord' }
-}
 const ExhibitionMap: React.FC<ExhibitionMapProps> = ({ 
   autoRefresh = true, 
   refreshInterval = 60000, // 1 minute by default
@@ -174,7 +167,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                       fontWeight="bold"
                       fontSize="26"
                     >
-                      {LABEL_TRANSLATIONS[area.area_name]?.[showGermanLabels? 'de' : 'en'] || area.area_name}
+                      {showGermanLabels ? area.area_name : area.area_name_en}
                     </text>
                     <text
                       x={cx}

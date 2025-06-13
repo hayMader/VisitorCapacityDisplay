@@ -18,8 +18,17 @@ const Admin = () => {
   const [selectedArea, setSelectedArea] = useState<AreaStatus>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [filterText, setFilterText] = useState('');
+  const [showGermanTitle, setShowGermanTitle] = useState<boolean>(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+      const intervalId = setInterval(() => {
+      setShowGermanTitle((prev) => !prev);
+    }, 3000);
+    
+    return () => clearInterval (intervalId);
+  }, []);
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -119,6 +128,7 @@ const Admin = () => {
                 refreshInterval={60000}
                 onDataUpdate={handleDataUpdate} 
                 onAreaSelect={setSelectedArea}
+                showGermanLabels={showGermanTitle}
                 selectedArea={selectedArea}
               />
             </div>
