@@ -1,6 +1,5 @@
 import { VisitorData, AreaSettings, OccupancyLevel, AreaStatus, Threshold, LegendRow } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
-import { Legend } from "recharts";
 
 // Function to get the latest visitor data
 export const getVisitorData = async (): Promise<VisitorData[]> => {
@@ -203,5 +202,20 @@ export const refreshLegend = async (LegendRows: Partial<LegendRow>[]) => {
   } catch (error) {
     console.error('Error refreshing legend:', error);
     return null;
+  }
+}
+
+export const getLegend = async (): Promise<LegendRow[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('legend')
+      .select('*')
+      .order('id', { ascending: true });
+    
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching legend:', error);
+    return [];
   }
 }

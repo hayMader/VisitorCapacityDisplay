@@ -11,6 +11,27 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      legend: {
+        Row: {
+          id: number
+          object: string
+          description_de: string
+          description_en: string
+        }
+        Insert: {
+          id?: number
+          object: string
+          description_de: string
+          description_en: string
+        }
+        Update: {
+          id?: number
+          object?: string
+          description_de?: string
+          description_en?: string
+        }
+        Relationships: []
+      }
       area_settings: {
         Row: {
           area_name: string
