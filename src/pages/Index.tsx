@@ -56,6 +56,7 @@ const handleDataUpdate = () => {
           autoRefresh={true}
           refreshInterval={60000} // 60 seconds
           onDataUpdate={handleDataUpdate}
+          showGermanLabels={showGermanTitle}
         />
       </main>
       

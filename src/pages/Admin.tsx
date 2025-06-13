@@ -15,8 +15,18 @@ const Admin = () => {
   const [areas, setAreas] = useState<AreaStatus[]>([]);
   const [selectedArea, setSelectedArea] = useState<AreaStatus>(null);
   const [timeFilter, setTimeFilter] = useState(1440);
+  const [showGermanTitle, setShowGermanTitle] = useState<boolean>(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+      const intervalId = setInterval(() => {
+      setShowGermanTitle((prev) => !prev);
+    }, 3000);
+    
+    return () => clearInterval (intervalId);
+  }, []);
+  
 
   const handleAreaUpdate = (updatedArea: AreaStatus) => {
     setAreas(areas.map(area => 
@@ -69,6 +79,7 @@ const Admin = () => {
                 refreshInterval={60000}
                 onDataUpdate={handleDataUpdate} 
                 onAreaSelect={setSelectedArea}
+                showGermanLabels={showGermanTitle}
                 selectedArea={selectedArea}
                 timeFilter={timeFilter}
               />

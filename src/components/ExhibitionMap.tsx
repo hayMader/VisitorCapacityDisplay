@@ -12,6 +12,7 @@ interface ExhibitionMapProps {
   onAreaSelect?: (areaNumber: AreaStatus) => void;
   selectedArea?: AreaStatus | null;
   timeFilter?: number; // in minutes, default to 1440 (24 hours)
+  showGermanLabels?: boolean; //
 }
 
 const ExhibitionMap: React.FC<ExhibitionMapProps> = ({ 
@@ -19,8 +20,9 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
   refreshInterval = 60000, // 1 minute by default
   onDataUpdate,
   onAreaSelect,
-  selectedArea = null,
-  timeFilter = 0, // default to 0 minutes
+  showGermanLabels,
+  timeFilter,
+  selectedArea = null
 }) => {
   const [areaStatus, setAreaStatus] = useState<AreaStatus[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -177,7 +179,7 @@ const pct = area.capacity_usage
                             fontWeight="bold"
                             fontSize="26"
                             >
-                            {area.area_name}
+                            {showGermanLabels ? area.area_name : area.area_name_en}
                             </text>
                         )}
 
