@@ -155,7 +155,7 @@ const Admin = () => {
                <div className="space-y-6">
                 {legendRows.map((row, index) => (
                   <div key={row.id} className="grid grid-cols-[2fr,2.5fr,2.5fr,0.5fr] gap-6 items-center">
-                    {/* Input für Object */}
+                    {/* Input for Object */}
                     <Input
                       type="text"
                       value={row.object}
@@ -165,8 +165,9 @@ const Admin = () => {
                         setLegendRows(updatedRows);
                       }}
                       className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                      placeholder="Abkürzung"
+                      placeholder="Abkürzung oder #RRGGBB"
                     />
+
 
                     {/* Input field description_de */}
                     <Input
@@ -180,6 +181,7 @@ const Admin = () => {
                       className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="Beschreibung (Deutsch)"
                     />
+                    
 
                     {/* Input field description_en */}
                     <Input
@@ -203,6 +205,16 @@ const Admin = () => {
                       >
                         <Trash className="h-4 w-4" />
                       </button>
+                      {/^#[0-9A-Fa-f]{6}$/.test(row.object) ? (
+                    <div
+                      className="w-4 h-4 rounded-full"
+                      style={{ backgroundColor: row.object }}
+                    ></div>
+                ) : (
+              <span className="text-xs font-bold">{row.object}</span>
+                )}
+
+
                   </div>
                 ))}
               </div>
