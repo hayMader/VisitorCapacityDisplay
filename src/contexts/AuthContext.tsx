@@ -30,26 +30,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true); // Add loading state
 
-  useEffect(() => {
-    const currentUser = getCurrentUser();
-    setUser(currentUser)
-  }, []);
-
-  const getCurrentUser = () => {
-    // Check if user is already logged in
-    const storedAuth = localStorage.getItem('auth');
-    if (storedAuth) {
-      try {
-        const authData = JSON.parse(storedAuth);
-        if (authData.isAuthenticated) {
-          return authData;
-        }
-      } catch (error) {
-        console.error('Failed to parse auth data:', error);
-        localStorage.removeItem('auth');
+  const getCurrentUser = (): AuthUser | null => {
+  const storedAuth = localStorage.getItem('auth');
+  if (storedAuth) {
+    try {
+      const authData = JSON.parse(storedAuth);
+      if (authData.isAuthenticated) {
+        return authData;
       }
+    } catch (error) {
+      console.error('Failed to parse auth data:', error);
+      localStorage.removeItem('auth');
     }
-  };
+  }
+  return null;
+};
 
   const login = (userData: AuthUser) => {
     setUser(userData);

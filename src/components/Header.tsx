@@ -47,22 +47,13 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle, isAdmin = false }) => 
             )}
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2">
           {user?.isAuthenticated ? (
-            window.location.pathname === '/' ? (
-              <Link to="/admin">
-                <Settings className="h-4 w-4 mr-2" />
-              </Link>
-            ) : (
-              <Button variant="outline" size="sm" onClick={handleLogout}>
-                <LogOut className="h-4 w-4 mr-2" />
-                Abmelden
-              </Button>
-            )
+                <LogOut className="h-4 w-4 cursor-pointer" onClick={handleLogout} />
           ) : (
             <Link to="/login">
-                <LogIn className="h-4 w-4 mr-2" />
+                <LogIn className="h-4 w-4 cursor-pointer" />
             </Link>
           )}
         </div>
