@@ -10,7 +10,7 @@ import { AreaStatus } from '@/types';
 import AreaSettingsAccordion from '@/components/AreaSettingsAccordion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { refreshLegend } from "@/utils/api";
+import { refreshLegend, getLegend } from "@/utils/api";
 import { LegendRow } from "@/types";
 import { Label } from '@/components/ui/label';
 import { Trash, Save } from 'lucide-react';
@@ -32,7 +32,8 @@ const Admin = () => {
     const fetchInitialData = async () => {
       try {
         const areaData = await getAreaSettings();
-        
+        const legendData = await getLegend();
+        setLegendRows(legendData);
         setAreas(areaData);
         if (areaData.length > 0) {
           setSelectedArea(areaData[0]);
@@ -146,7 +147,7 @@ const Admin = () => {
               <span>Legenden Einstellungen</span>
               <p className="text-muted-foreground mb-4">Fügen Sie der Legende einen neuen Wert hinzu:</p>
 
-              <div className="grid grid-cols-[2fr,2.5fr,2.5fr,0.5fr] gap-6 items-center mb-4">
+              <div className="grid grid-cols-[2.5fr,2.5fr,2.5fr,0.5fr] gap-4 items-center mb-4">
                 <Label className="col-span-1">Abkürzung</Label>
                 <Label className="col-span-1">Beschreibung (Deutsch)</Label>
                 <Label className="col-span-1">Beschreibung (Englisch)</Label>
@@ -154,20 +155,34 @@ const Admin = () => {
 
                <div className="space-y-6">
                 {legendRows.map((row, index) => (
-                  <div key={row.id} className="grid grid-cols-[2fr,2.5fr,2.5fr,0.5fr] gap-6 items-center">
+                  <div key={row.id} className="grid grid-cols-[2.5fr,2.5fr,2.5fr,0.5fr] gap-4 items-center">
                     {/* Input for Object */}
-                    <Input
-                      type="text"
-                      value={row.object}
-                      onChange={(e) => {
-                        const updatedRows = [...legendRows];
-                        updatedRows[index].object = e.target.value;
-                        setLegendRows(updatedRows);
-                      }}
-                      className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                      placeholder="Abkürzung oder #RRGGBB"
-                    />
-
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="text"
+                        value={row.object}
+                        onChange={(e) => {
+                          const updatedRows = [...legendRows];
+                          updatedRows[index].object = e.target.value;
+                          setLegendRows(updatedRows);
+                        }}
+                        className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                        placeholder="Abkürzung oder #RRGGBB"
+                      />
+                      {/* Color picker for hex color */}
+                      <div className="relative">
+                        <input
+                          type="color"
+                          value={/^#[0-9A-Fa-f]{6}$/.test(row.object) ? row.object : "#000000"}
+                          onChange={(e) => {
+                            const updatedRows = [...legendRows];
+                            updatedRows[index].object = e.target.value;
+                            setLegendRows(updatedRows);
+                          }}
+                          className="w-8 h-8 p-0 border rounded-md"
+                        />
+                      </div>
+                    </div>
 
                     {/* Input field description_de */}
                     <Input
@@ -181,7 +196,6 @@ const Admin = () => {
                       className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="Beschreibung (Deutsch)"
                     />
-                    
 
                     {/* Input field description_en */}
                     <Input
@@ -196,25 +210,15 @@ const Admin = () => {
                       placeholder="Beschreibung (Englisch)"
                     />
 
-                     <button
-                        onClick={() => {
-                          const updatedRows = legendRows.filter((_, i) => i !== index);
-                          setLegendRows(updatedRows);
-                    }}
-                        className="text-destructive"
-                      >
-                        <Trash className="h-4 w-4" />
-                      </button>
-                      {/^#[0-9A-Fa-f]{6}$/.test(row.object) ? (
-                    <div
-                      className="w-4 h-4 rounded-full"
-                      style={{ backgroundColor: row.object }}
-                    ></div>
-                ) : (
-              <span className="text-xs font-bold">{row.object}</span>
-                )}
-
-
+                    <button
+                      onClick={() => {
+                        const updatedRows = legendRows.filter((_, i) => i !== index);
+                        setLegendRows(updatedRows);
+                      }}
+                      className="text-destructive"
+                    >
+                      <Trash className="h-4 w-4" />
+                    </button>
                   </div>
                 ))}
               </div>

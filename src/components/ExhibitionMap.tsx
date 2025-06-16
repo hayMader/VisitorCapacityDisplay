@@ -34,6 +34,8 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
     try {
       setIsRefreshing(true);
       const newAreaStatus = await getAreaSettings();
+      const newLegendRows = await getLegend();
+      setLegendRows(newLegendRows);
       
       setAreaStatus(newAreaStatus);
       setLastRefreshed(new Date());
