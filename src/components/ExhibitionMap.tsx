@@ -102,15 +102,6 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
     fetchLegend();
   }, []);
 
-  // Language switsch of legend every 3 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsEnglish((prev) => !prev); // Toggle zwischen Deutsch und Englisch
-    }, 3000);
-
-    return () => clearInterval(interval); // Timer bereinigen
-  }, []);
-
   // Function to determine occupancy level based on visitor count and thresholds
   const getOccupancyLevel = (visitorCount: number, thresholds: Threshold[]) => {
     // Get the highest threshold that is less than or equal to the visitor count
@@ -262,7 +253,7 @@ const pct = area.capacity_usage
               <h3 className="mr-4 font-bold">{ row.object}</h3>
               )}
               <h3>
-                {isEnglish ? row.description_en : row.description_de}
+                {showGermanLabels ? row.description_de : row.description_en}
               </h3>
             </div>
           ))}

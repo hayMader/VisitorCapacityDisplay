@@ -17,7 +17,7 @@ const Index = () => {
   useEffect(() => {
     const intervalId = setInterval(() => {
     setShowGermanTitle((prev) => !prev);
-  }, 3000);
+  }, 8000);
   
   return () => clearInterval (intervalId);
 }, []);

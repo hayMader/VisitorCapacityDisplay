@@ -45,8 +45,6 @@ const Admin = () => {
           description: 'Die Einstellungen konnten nicht geladen werden.',
           variant: 'destructive',
         });
-      } finally {
-        setIsLoading(false);
       }
     };
     
@@ -56,7 +54,7 @@ const Admin = () => {
   useEffect(() => {
       const intervalId = setInterval(() => {
       setShowGermanTitle((prev) => !prev);
-    }, 3000);
+    }, 8000);
     
     return () => clearInterval (intervalId);
   }, []);
@@ -133,6 +131,31 @@ const Admin = () => {
                 selectedArea={selectedArea}
                 timeFilter={timeFilter}
               />
+            </div>
+            
+            <div>
+              {/* Filter HDM data by sliding the datetime */}
+              <label htmlFor="timeRange" className="block text-sm font-medium text-gray-700">
+                Zeitbereich (vor 24 Stunden bis jetzt)
+              </label>
+              <input
+                id="timeRange"
+                type="range"
+                min="0"
+                max="1440"
+                step="10"
+                onChange={(e) => {
+                  const minutesAgo = 1440 - parseInt(e.target.value, 10); // Convert to minutes ago
+                  setTimeFilter(minutesAgo);
+                }}
+                defaultValue={1440}
+                className="w-full mt-2"
+                style={{ appearance: 'none', height: '4px', background: '#ddd', borderRadius: '2px' }}
+              />
+              <div className="flex justify-between text-sm text-gray-500 mt-1">
+                <span>Vor 24 Stunden</span>
+                <span>Jetzt</span>
+              </div>
             </div>
             
             <div className="bg-white p-4 rounded-lg shadow-sm">
@@ -233,32 +256,9 @@ const Admin = () => {
                 </Button>
               </div>
             </div>
-            <div>
-              {/* Filter HDM data by sliding the datetime */}
-              <label htmlFor="timeRange" className="block text-sm font-medium text-gray-700">
-                Zeitbereich (vor 24 Stunden bis jetzt)
-              </label>
-              <input
-                id="timeRange"
-                type="range"
-                min="0"
-                max="1440"
-                step="10"
-                onChange={(e) => {
-                  const minutesAgo = 1440 - parseInt(e.target.value, 10); // Convert to minutes ago
-                  setTimeFilter(minutesAgo);
-                }}
-                defaultValue={1440}
-                className="w-full mt-2"
-                style={{ appearance: 'none', height: '4px', background: '#ddd', borderRadius: '2px' }}
-              />
-              <div className="flex justify-between text-sm text-gray-500 mt-1">
-                <span>Vor 24 Stunden</span>
-                <span>Jetzt</span>
-              </div>
-            </div>
+            
+            
           </div>
-            </div>
           
           {/* Right column: Area settings */}
           <div className="lg:col-span-1">
