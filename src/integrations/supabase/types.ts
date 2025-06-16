@@ -1,3 +1,5 @@
+import type { LegendRow } from "@/types/index"
+
 import { AreaStatus } from "@/types"
 
 export type Json =
@@ -11,6 +13,27 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      legend: {
+        Row: {
+          id: number
+          object: string
+          description_de: string
+          description_en: string
+        }
+        Insert: {
+          id?: number
+          object: string
+          description_de: string
+          description_en: string
+        }
+        Update: {
+          id?: number
+          object?: string
+          description_de?: string
+          description_en?: string
+        }
+        Relationships: []
+      }
       area_settings: {
         Row: {
           area_name: string
@@ -167,6 +190,10 @@ export type Database = {
       get_area_status_filtered: {
         Args: {filter_minutes: Json}
         Returns: AreaStatus[]
+      }
+      refresh_legend: {
+        Args: { legend_rows: Partial<LegendRow>[] }
+        Returns: null
       }
     }
     Enums: {

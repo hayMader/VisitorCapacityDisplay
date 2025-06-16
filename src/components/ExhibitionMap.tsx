@@ -4,6 +4,8 @@ import { AreaStatus, Threshold } from '@/types';
 import { getAreaSettings } from '@/utils/api';
 import { RefreshCw } from 'lucide-react';
 import { Area } from 'recharts';
+import { getLegend } from '@/utils/api';
+import { LegendRow } from '@/types';
 
 interface ExhibitionMapProps {
   autoRefresh?: boolean;
@@ -28,13 +30,16 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
+  const [legendRows, setLegendRows] = useState<LegendRow[]>([]);
+  const [isEnglish, setIsEnglish] = useState(false); 
 
   // Function to fetch the latest data
   const fetchData = async () => {
     try {
       setIsRefreshing(true);
-      const newAreaStatus = await getAreaSettings(timeFilter);
-      console.log(newAreaStatus)
+      const newAreaStatus = await getAreaSettings();
+      const newLegendRows = await getLegend();
+      setLegendRows(newLegendRows);
       
       setAreaStatus(newAreaStatus);
       setLastRefreshed(new Date());
@@ -82,6 +87,29 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
       onAreaSelect(area);
     }
   };
+
+  // Function to catch legend data
+  const fetchLegend = async () => {
+    try {
+      const legendData = await getLegend();
+      setLegendRows(legendData);
+    } catch (error) {
+      console.error('Fehler beim Abrufen der Legende:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchLegend();
+  }, []);
+
+  // Language switsch of legend every 3 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsEnglish((prev) => !prev); // Toggle zwischen Deutsch und Englisch
+    }, 3000);
+
+    return () => clearInterval(interval); // Timer bereinigen
+  }, []);
 
   // Function to determine occupancy level based on visitor count and thresholds
   const getOccupancyLevel = (visitorCount: number, thresholds: Threshold[]) => {
@@ -217,8 +245,31 @@ const pct = area.capacity_usage
               );
             })}
           </svg>
+        
+
+      {/* Legend */}
+      <div className="absolute bottom-4 right-10 z-10 bg-white p-4 rounded shadow"
+        style={{ width: '25%'}}>
+        <div className="space-y-1">
+          {legendRows.map((row) => (
+            <div key={row.id} className="grid grid-cols-[1fr,3fr] gap-2 items-center">
+              {/^#[0-9A-Fa-f]{6}$/.test(row.object) ? (
+          <div
+            className="w-9 h-9 rounded-full"
+            style={{ backgroundColor: row.object }}
+          ></div>
+        ) : (
+              <h3 className="mr-4 font-bold">{ row.object}</h3>
+              )}
+              <h3>
+                {isEnglish ? row.description_en : row.description_de}
+              </h3>
+            </div>
+          ))}
         </div>
       </div>
+    </div>
+    </div>
     </div>
   );
 };

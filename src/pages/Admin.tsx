@@ -10,6 +10,11 @@ import { AreaStatus } from '@/types';
 import AreaSettingsAccordion from '@/components/AreaSettingsAccordion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { refreshLegend, getLegend } from "@/utils/api";
+import { LegendRow } from "@/types";
+import { Label } from '@/components/ui/label';
+import { Trash, Save } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 const Admin = () => {
   const [areas, setAreas] = useState<AreaStatus[]>([]);
@@ -18,6 +23,35 @@ const Admin = () => {
   const [showGermanTitle, setShowGermanTitle] = useState<boolean>(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  const [legendRows, setLegendRows] = useState<Partial<LegendRow>[]>([
+    { object: "", description_de: "", description_en: "" }
+  ])
+
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        const areaData = await getAreaSettings();
+        const legendData = await getLegend();
+        setLegendRows(legendData);
+        setAreas(areaData);
+        if (areaData.length > 0) {
+          setSelectedArea(areaData[0]);
+        }
+      } catch (error) {
+        console.error('Error fetching initial data:', error);
+        toast({
+          title: 'Fehler',
+          description: 'Die Einstellungen konnten nicht geladen werden.',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchInitialData();
+  }, []);
 
   useEffect(() => {
       const intervalId = setInterval(() => {
@@ -47,6 +81,22 @@ const Admin = () => {
     });
   };
 
+  const handleLegendRefresh = async () => {
+    try {
+      await refreshLegend(legendRows)
+      toast({
+        title: "Legende aktualisiert",
+        description: "Die Schwellenwerte für die Legende wurden erfolgreich aktualisiert.",
+      })
+    } catch (error) {
+      toast({
+        title: "Fehler",
+        description: "Aktualisierung der Legende fehlgeschlagen.",
+        variant: "destructive",
+      })
+    }
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header 
@@ -61,7 +111,7 @@ const Admin = () => {
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white p-4 rounded-lg shadow-sm">
               <div className="flex justify-between items-center mb-4">
-                <h3>Aktueller Besucherfüllstand</h3>
+                <h3>Besucherfüllstand</h3>
                 <div className="text-muted-foreground">
                   {new Date().toLocaleDateString('de-DE', {
                     day: '2-digit', 
@@ -83,6 +133,105 @@ const Admin = () => {
                 selectedArea={selectedArea}
                 timeFilter={timeFilter}
               />
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg shadow-sm">
+              {/* Legend editor */}
+              <span>Legenden Einstellungen</span>
+              <p className="text-muted-foreground mb-4">Fügen Sie der Legende einen neuen Wert hinzu:</p>
+
+              <div className="grid grid-cols-[2.5fr,2.5fr,2.5fr,0.5fr] gap-4 items-center mb-4">
+                <Label className="col-span-1">Abkürzung</Label>
+                <Label className="col-span-1">Beschreibung (Deutsch)</Label>
+                <Label className="col-span-1">Beschreibung (Englisch)</Label>
+              </div>
+
+               <div className="space-y-6">
+                {legendRows.map((row, index) => (
+                  <div key={row.id} className="grid grid-cols-[2.5fr,2.5fr,2.5fr,0.5fr] gap-4 items-center">
+                    {/* Input for Object */}
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="text"
+                        value={row.object}
+                        onChange={(e) => {
+                          const updatedRows = [...legendRows];
+                          updatedRows[index].object = e.target.value;
+                          setLegendRows(updatedRows);
+                        }}
+                        className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                        placeholder="Abkürzung oder #RRGGBB"
+                      />
+                      {/* Color picker for hex color */}
+                      <div className="relative">
+                        <input
+                          type="color"
+                          value={/^#[0-9A-Fa-f]{6}$/.test(row.object) ? row.object : "#000000"}
+                          onChange={(e) => {
+                            const updatedRows = [...legendRows];
+                            updatedRows[index].object = e.target.value;
+                            setLegendRows(updatedRows);
+                          }}
+                          className="w-8 h-8 p-0 border rounded-md"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Input field description_de */}
+                    <Input
+                      type="text"
+                      value={row.description_de}
+                      onChange={(e) => {
+                        const updatedRows = [...legendRows];
+                        updatedRows[index].description_de = e.target.value;
+                        setLegendRows(updatedRows);
+                      }}
+                      className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="Beschreibung (Deutsch)"
+                    />
+
+                    {/* Input field description_en */}
+                    <Input
+                      type="text"
+                      value={row.description_en}
+                      onChange={(e) => {
+                        const updatedRows = [...legendRows];
+                        updatedRows[index].description_en = e.target.value;
+                        setLegendRows(updatedRows);
+                      }}
+                      className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="Beschreibung (Englisch)"
+                    />
+
+                    <button
+                      onClick={() => {
+                        const updatedRows = legendRows.filter((_, i) => i !== index);
+                        setLegendRows(updatedRows);
+                      }}
+                      className="text-destructive"
+                    >
+                      <Trash className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Buttons */}
+              <div className="flex justify-end mt-6 gap-3">
+                <Button
+                  variant="outline" onClick={() => setLegendRows([...legendRows,
+                      { id: Date.now(), object: "", description_de: "", description_en: "" },
+                    ])
+                  }
+                >
+                  + Hinzufügen
+                </Button>
+                <Button variant="default" onClick={handleLegendRefresh}>
+                  <Save className="h-4 w-4"/>
+                  Speichern
+            
+                </Button>
+              </div>
             </div>
             <div>
               {/* Filter HDM data by sliding the datetime */}
@@ -109,6 +258,7 @@ const Admin = () => {
               </div>
             </div>
           </div>
+            </div>
           
           {/* Right column: Area settings */}
           <div className="lg:col-span-1">

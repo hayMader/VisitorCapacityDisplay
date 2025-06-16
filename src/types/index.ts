@@ -42,4 +42,11 @@ export interface AreaStatus {
   hidden_percentage?: boolean; 
 }
 
+export interface LegendRow{
+  id: number;
+  object: string;
+  description_de: string;
+  description_en: string;
+}
+
 export type OccupancyLevel = 'low' | 'medium' | 'high';
