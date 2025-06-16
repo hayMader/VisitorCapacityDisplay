@@ -32,6 +32,7 @@ export interface AreaStatus {
   amount_visitors: number;
   highlight: string | null;
   thresholds: Threshold[]
+  area_name_en?: string;
 }
 
 export type OccupancyLevel = 'low' | 'medium' | 'high';
