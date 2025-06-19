@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 import ExhibitionMap from '@/components/ExhibitionMap';
 import { formatDateTime } from '@/utils/formatDatetime';
-import { AreaStatus } from '@/types';
 
 const getLocalizedTimeSuffix = (isUSFormat: boolean): string => {
   return isUSFormat ? '' : 'Uhr';
@@ -16,31 +15,31 @@ const Index = () => {
  
   useEffect(() => {
     const intervalId = setInterval(() => {
-    setShowGermanTitle((prev) => !prev);
-  }, 8000);
+      setShowGermanTitle((prev) => !prev);
+    }, 8000);
   
-  return () => clearInterval (intervalId);
-}, []);
+    return () => clearInterval(intervalId);
+  }, []);
 
-useEffect(() => {
-  if (!latestTimestampISO) return;
-  setLatestTimestamp(formatDateTime(latestTimestampISO, isUSFormat));
-}, [isUSFormat, latestTimestampISO]);
+  useEffect(() => {
+    if (!latestTimestampISO) return;
+    setLatestTimestamp(formatDateTime(latestTimestampISO, isUSFormat));
+  }, [isUSFormat, latestTimestampISO]);
 
-useEffect(() => {
-  const tick = setInterval(() => {
-    const now = new Date().toISOString();
-    setLatestTimestampISO(now);
-  }, 1000);
+  useEffect(() => {
+    const tick = setInterval(() => {
+      const now = new Date().toISOString();
+      setLatestTimestampISO(now);
+    }, 1000);
 
-  return () => clearInterval(tick);
-}, []);
+    return () => clearInterval(tick);
+  }, []);
 
-const handleDataUpdate = () => {
-  const iso = new Date().toISOString();
-  setLatestTimestampISO(iso);
-  setLatestTimestamp(formatDateTime(iso, isUSFormat));
-};
+  const handleDataUpdate = () => {
+    const iso = new Date().toISOString();
+    setLatestTimestampISO(iso);
+    setLatestTimestamp(formatDateTime(iso, isUSFormat));
+  };
   
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -51,7 +50,7 @@ const handleDataUpdate = () => {
           : undefined}
       />
       
-      <main className="flex-1 overflow-hidden flex items-center justify-center" style={{ maxHeight: '85vh' }}>
+      <main className="flex-1 overflow-hidden flex flex-col lg:flex-row items-center justify-center lg:justify-between" style={{ maxHeight: '85vh' }}>
         <ExhibitionMap 
           autoRefresh={true}
           refreshInterval={60000} // 60 seconds

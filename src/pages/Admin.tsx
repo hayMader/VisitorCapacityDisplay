@@ -99,7 +99,6 @@ const Admin = () => {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header 
         title="Willkommen im Management Dashboard"
-        subtitle={user?.name ? user.name : undefined}
         isAdmin={true} 
       />
       
@@ -154,7 +153,16 @@ const Admin = () => {
               />
               <div className="flex justify-between text-sm text-gray-500 mt-1">
                 <span>Vor 24 Stunden</span>
+                <span>
+                  {new Date(Date.now() - timeFilter * 60000).toLocaleTimeString('de-DE', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  })} Uhr
+                </span>
                 <span>Jetzt</span>
+              </div>
+              <div className="text-sm text-gray-700 mt-2">
+
               </div>
             </div>
             

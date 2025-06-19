@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogIn, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { Clock } from 'lucide-react';
 
 interface HeaderProps {
   title: string;
@@ -21,51 +22,57 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle, isAdmin = false }) => 
 
   return (
     <header className="bg-white shadow-sm border-b px-4 py-3" style={{ maxHeight: '190px' }}>
-      <div className="container mx-auto flex justify-between items-center">
-        <div className="flex items-center gap-5">
-          <Link to="/" className="flex-shrink-0">
-            <img 
-              src="/messe-muenchen-logo.png" 
-              alt="Messe München Logo" 
-              className="h-20 w-auto"
-            />
-          </Link>
-          
-          <div className="border-l h-12 border-gray-300 mx-2"></div>
-          
-          <div>
-            <h2>{title}</h2>
+      <div className="flex-col w-full">
+        <div className='flex flex-row items-center justify-between gap-4 sm:gap-0'>
+          <div className="flex flex-row items-center gap-5">
+            <Link to="/" className="flex-shrink-0">
+              <img 
+                src="/messe-muenchen-logo.png" 
+                alt="Messe München Logo" 
+                className="h-20 w-auto"
+              />
+            </Link>
+            
+            <div className="border-l h-12 border-gray-300 mx-2 hidden sm:block"></div>
+            <h2 className="text-center sm:text-left text-lg sm:text-2xl">{title}</h2>
+
             {subtitle && (
-              <div className="flex items-center">
-                <h3 className="inline-flex items-center font-light">
-                  <svg className="w-7 h-7 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
+              <div className="items-center sm:ml-2 sm:border-l sm:border-gray-300 sm:pl-2 sm:flex hidden">
+                <Clock className="w-4 h-4 mr-1" />
+                <h3 className="inline-flex items-center font-light text-center sm:text-left">
                   {subtitle}
                 </h3>
               </div>
             )}
           </div>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          {user?.isAuthenticated ? (
-            window.location.pathname === '/' ? (
-              <Link to="/admin">
-                <Settings className="h-4 w-4 mr-2" />
-              </Link>
+          
+          <div className="flex items-center gap-2 mt-4 sm:mt-0">
+            {user?.isAuthenticated ? (
+              window.location.pathname === '/' ? (
+                <Link to="/admin">
+                  <Settings className="h-4 w-4 mr-2" />
+                </Link>
+              ) : (
+                <Button variant="outline" size="sm" onClick={handleLogout}>
+                  <LogOut className="h-5 w-5 mr-2" />
+                  Abmelden
+                </Button>
+              )
             ) : (
-              <Button variant="outline" size="sm" onClick={handleLogout}>
-                <LogOut className="h-5 w-5 mr-2" />
-                Abmelden
-              </Button>
-            )
-          ) : (
-            <Link to="/login">
-                <LogIn className="h-5 w-5 mr-2" />
-            </Link>
-          )}
+              <Link to="/login">
+                  <LogIn className="h-5 w-5 mr-2" />
+              </Link>
+            )}
+          </div>
         </div>
+          {subtitle && (
+            <div className="flex items-center sm:ml-2 sm:border-l sm:border-gray-300 sm:pl-2 sm:hidden flex">
+              <Clock className="w-4 h-4 mr-1" />
+                <h3 className="inline-flex items-center font-light text-center sm:text-left text-sm">
+                {subtitle}
+                </h3>
+            </div>
+          )}
       </div>
     </header>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { AreaStatus, Threshold } from '@/types';
 import { getAreaSettings } from '@/utils/api';
@@ -31,19 +31,23 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
   const [legendRows, setLegendRows] = useState<LegendRow[]>([]);
-  const [isEnglish, setIsEnglish] = useState(false); 
+  const [isEnglish, setIsEnglish] = useState(false);
+  const [isMediumSize, setIsMediumSize] = useState(false);
 
-  // Function to fetch the latest data
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const fetchData = async () => {
     try {
       setIsRefreshing(true);
-      const newAreaStatus = await getAreaSettings();
+      const newAreaStatus = await getAreaSettings(timeFilter);
       const newLegendRows = await getLegend();
       setLegendRows(newLegendRows);
       
       setAreaStatus(newAreaStatus);
       setLastRefreshed(new Date());
-      
+
+      checkContainerSize();
+
       if (onDataUpdate) {
         onDataUpdate(newAreaStatus);
       }
@@ -60,12 +64,21 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
     }
   };
 
-  // Initial data fetch
   useEffect(() => {
+    console.log('Fetching data with time filter:', timeFilter);
     fetchData();
   }, [timeFilter]);
 
-  // Set up auto refresh
+  // Detect parent container width
+  useEffect(() => {
+    checkContainerSize();
+    window.addEventListener('resize', checkContainerSize);
+
+    return () => {
+      window.removeEventListener('resize', checkContainerSize);
+    };
+  }, [containerRef.current]);
+
   useEffect(() => {
     if (!autoRefresh) return;
     
@@ -76,37 +89,26 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
     return () => clearInterval(interval);
   }, [autoRefresh, refreshInterval]);
 
-  // Manual refresh handler
   const handleRefresh = () => {
     fetchData();
   };
   
-  // Handle area click
   const handleAreaClick = (area: AreaStatus) => {
     if (onAreaSelect) {
       onAreaSelect(area);
     }
   };
 
-  // Function to catch legend data
-  const fetchLegend = async () => {
-    try {
-      const legendData = await getLegend();
-      setLegendRows(legendData);
-    } catch (error) {
-      console.error('Fehler beim Abrufen der Legende:', error);
-    }
+  const getOccupancyLevel = (visitorCount: number, thresholds: Threshold[]) => {
+    const activeThreshold = thresholds.find(threshold => visitorCount <= threshold.upper_threshold);
+    return activeThreshold;
   };
 
-  useEffect(() => {
-    fetchLegend();
-  }, []);
-
-  // Function to determine occupancy level based on visitor count and thresholds
-  const getOccupancyLevel = (visitorCount: number, thresholds: Threshold[]) => {
-    // Get the highest threshold that is less than or equal to the visitor count
-    const activeThreshold = thresholds.find(threshold => visitorCount <= threshold.upper_threshold);
-    return activeThreshold
+  const checkContainerSize = () => {
+    if (containerRef.current) {
+      const width = containerRef.current.offsetWidth;
+      setIsMediumSize(width >= 640 && width <= 900);
+    }
   };
 
   if (isLoading) {
@@ -119,51 +121,47 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
   }
 
   return (
-    <div className="relative h-full w-full flex flex-col items-center justify-center overflow-hidden">
-      <div className="absolute top-4 right-4 z-10">
-        <button 
-          onClick={handleRefresh}
-          disabled={isRefreshing}
-          className="bg-white p-2 rounded-full shadow hover:bg-gray-50 transition-colors"
-          aria-label="Aktualisieren"
-        >
-          <RefreshCw 
-            className={`h-5 w-5 text-primary ${isRefreshing ? 'animate-spin' : ''}`}
-          />
-        </button>
-      </div>
-      
-      {/* Map container with responsive scaling */}
-      <div className="relative h-full w-full flex items-center justify-center">
-        {/* Floor plan background image */}
+    <div 
+      ref={containerRef} 
+      className={`flex sm:flex-row flex-col h-full w-full items-center justify-center overflow-hidden ${isMediumSize ? 'relative' : ''}`}
+    >
+      <div className={`flex ${isMediumSize ? 'relative' : ''} h-full w-full flex items-center justify-center`}>
         <div className="relative max-h-full max-w-full">
+          <div className={`absolute top-4 right-4 z-10`}>
+            <button 
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className={`bg-white p-2 rounded-full shadow hover:bg-gray-50 transition-colors `}
+                aria-label="Aktualisieren"
+                  >
+                <RefreshCw 
+                  className={`h-5 w-5 text-primary ${isRefreshing ? 'animate-spin' : ''} `}
+                />
+            </button>
+          </div>
           <img 
             src="/plan-exhibtion-area.jpg" 
             alt="MMG Messegelände" 
             className="max-h-[85vh] w-auto object-contain"
           />
           
-          {/* SVG overlay positioned absolutely on top of the image */}
           <svg 
             className="absolute inset-0 w-full h-full" 
             viewBox="0 0 2050 1248" 
             preserveAspectRatio="xMidYMid meet"
           >
-            {/* Exhibition halls */}
             {areaStatus.map((area) => {
               const visitorCount = area.amount_visitors;
               const thresholds = area.thresholds;
               const activeTreshold = getOccupancyLevel(visitorCount, thresholds);
               const isSelected = selectedArea === area;
-              // ----------------------------------------------------
-// NEU: Flags auswerten und %-Wert berechnen
-const pct = area.capacity_usage
-  ? Math.round((area.amount_visitors / area.capacity_usage) * 100)
-  : 0;
-// ----------------------------------------------------
+              const pct = area.capacity_usage
+                ? Math.round((area.amount_visitors / area.capacity_usage) * 100)
+                : 0;
 
               return (
                 <g key={area.id}>
+                  
                   <polygon
                     points={area.coordinates.map((point: { x: number; y: number }) => `${point.x},${point.y}`).join(' ')}
                     fill={area.highlight || activeTreshold?.color || 'lightgray'}
@@ -173,7 +171,6 @@ const pct = area.capacity_usage
                     className="exhibition-hall cursor-pointer"
                     onClick={() => handleAreaClick(area)}
                   />
-                  {/* Calculate centroid for label placement */}
                   {(() => {
                     const pts = area.coordinates;
                     const n = pts.length;
@@ -187,7 +184,6 @@ const pct = area.capacity_usage
 
                     return (
                       <>
-                        {/* Bereichsname */}
                         {!area.hidden_name && (
                             <text
                             x={cx}
@@ -196,13 +192,12 @@ const pct = area.capacity_usage
                             dominantBaseline="middle"
                             fill="#1e293b"
                             fontWeight="bold"
-                            fontSize="26"
+                            fontSize={isMediumSize ? "20" : "26"}
                             >
                             {showGermanLabels ? area.area_name : area.area_name_en}
                             </text>
                         )}
 
-                        {/* Besucherzahl */}
                         {!area.hidden_absolute && (
                             <text
                             x={cx}
@@ -210,13 +205,12 @@ const pct = area.capacity_usage
                             textAnchor="middle"
                             dominantBaseline="middle"
                             fill="#1e293b"
-                            fontSize="24"
+                            fontSize={isMediumSize ? "18" : "24"}
                             >
                             {area.amount_visitors}
                             </text>
                         )}
 
-                        {/* %-Auslastung */}
                         {!area.hidden_percentage && (
                           <text
                             x={cx}
@@ -224,7 +218,7 @@ const pct = area.capacity_usage
                             textAnchor="middle"
                             dominantBaseline="middle"
                             fill="#1e293b"
-                            fontSize="22"
+                            fontSize={isMediumSize ? "16" : "22"}
                           >
                             {pct} %
                           </text>
@@ -236,31 +230,49 @@ const pct = area.capacity_usage
               );
             })}
           </svg>
+        </div>
+      </div>
         
-
-      {/* Legend */}
-      <div className="absolute bottom-4 right-10 z-10 bg-white p-4 rounded shadow"
-        style={{ width: '25%'}}>
+      <div 
+        className={`flex ${isMediumSize ? 'absolute' : ''} bottom-4 right-4 z-10 bg-gray-300 p-4 rounded sm:shadow-xl items-right mr-4`}
+        style={{ width: 'fit-content', minWidth: '10%', flexGrow: 1 }}
+      >
         <div className="space-y-1">
           {legendRows.map((row) => (
-            <div key={row.id} className="grid grid-cols-[1fr,3fr] gap-2 items-center">
+            <div key={row.id} className={`grid grid-cols-[auto,1fr] gap-2 items-center `} style={{ width: 'fit-content' }}>
               {/^#[0-9A-Fa-f]{6}$/.test(row.object) ? (
-          <div
-            className="w-9 h-9 rounded-full"
-            style={{ backgroundColor: row.object }}
-          ></div>
-        ) : (
-              <h3 className="mr-4 font-bold">{ row.object}</h3>
-              )}
-              <h3>
+                <div
+                  className={`w-9 h-9 rounded-full `}
+                  style={{ backgroundColor: row.object }}
+                >
+                </div>
+              ) : (
+                <h4 
+                  className={`font-bold whitespace-nowrap`} 
+                  style={{ 
+                  width: 'fit-content', 
+                  fontSize: isMediumSize ? '1rem' : '1.25rem' 
+                  }}
+                >
+                  {row.object}
+                </h4>
+                )}
+                <h4 
+                style={{ 
+                  textAlign: 'left', 
+                  minWidth: `${Math.max(
+                  showGermanLabels ? row.description_de.length : 0,
+                  showGermanLabels ? 0 : row.description_en.length
+                  )}ch`,
+                  fontSize: isMediumSize ? '1rem' : '1.25rem'
+                }}
+                >
                 {showGermanLabels ? row.description_de : row.description_en}
-              </h3>
+                </h4>
             </div>
           ))}
         </div>
       </div>
-    </div>
-    </div>
     </div>
   );
 };
