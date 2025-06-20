@@ -69,6 +69,11 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
     fetchData();
   }, [timeFilter]);
 
+  useEffect(() => {
+    // Initial check for container size
+    checkContainerSize();
+  }, []);
+
   // Detect parent container width
   useEffect(() => {
     checkContainerSize();
@@ -113,7 +118,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-full">
+      <div className="flex flex-col items-center justify-center h-full m-auto">
         <RefreshCw className="h-10 w-10 text-primary animate-spin" />
         <p className="mt-4 text-lg text-muted-foreground">Daten werden geladen...</p>
       </div>
@@ -235,7 +240,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
         
       <div 
         className={`flex ${isMediumSize ? 'absolute' : ''} bottom-4 right-4 z-10 bg-gray-300 p-4 rounded sm:shadow-xl items-right mr-4`}
-        style={{ width: 'fit-content', minWidth: '10%', flexGrow: 1 }}
+        style={{minWidth: "20%", flexGrow: 1 }}
       >
         <div className="space-y-1">
           {legendRows.map((row) => (

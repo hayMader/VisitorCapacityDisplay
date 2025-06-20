@@ -132,7 +132,7 @@ const Admin = () => {
               />
             </div>
             
-            <div>
+            <div className="bg-white p-4 rounded-lg shadow-sm">
               {/* Filter HDM data by sliding the datetime */}
               <label htmlFor="timeRange" className="block text-sm font-medium text-gray-700">
                 Zeitbereich (vor 24 Stunden bis jetzt)
