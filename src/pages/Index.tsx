@@ -56,6 +56,7 @@ const Index = () => {
           refreshInterval={60000} // 60 seconds
           onDataUpdate={handleDataUpdate}
           showGermanLabels={showGermanTitle}
+          showNumbers={false}
         />
       </main>
       

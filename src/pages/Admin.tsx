@@ -129,6 +129,7 @@ const Admin = () => {
                 showGermanLabels={showGermanTitle}
                 selectedArea={selectedArea}
                 timeFilter={timeFilter}
+                showNumbers={true}
               />
             </div>
             

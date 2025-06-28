@@ -15,6 +15,7 @@ interface ExhibitionMapProps {
   selectedArea?: AreaStatus | null;
   timeFilter?: number; // in minutes, default to 1440 (24 hours)
   showGermanLabels?: boolean; //
+  showNumbers?: boolean;
 }
 
 const ExhibitionMap: React.FC<ExhibitionMapProps> = ({ 
@@ -24,7 +25,8 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
   onAreaSelect,
   showGermanLabels,
   timeFilter,
-  selectedArea = null
+  selectedArea = null,
+  showNumbers = false,
 }) => {
   const [areaStatus, setAreaStatus] = useState<AreaStatus[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -203,7 +205,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                             </text>
                         )}
 
-                        {!area.hidden_absolute && (
+                        {showNumbers &&!area.hidden_absolute && (
                             <text
                             x={cx}
                             y={cy + (!area.hidden_percentage ? 11 : 22)}
@@ -216,7 +218,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                             </text>
                         )}
 
-                        {!area.hidden_percentage && (
+                        {showNumbers &&!area.hidden_percentage && (
                           <text
                             x={cx}
                             y={cy + (!area.hidden_absolute ? 44 : 22)}
@@ -249,10 +251,11 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                 <div
                   className={`w-9 h-9 rounded-full `}
                   style={{ backgroundColor: row.object }}
-                >
-                </div>
+                />
+                
               ) : (
-                <h4 
+                (!/^\d+$/.test(row.object) || showNumbers) && (
+                <span
                   className={`font-bold whitespace-nowrap`} 
                   style={{ 
                   width: 'fit-content', 
@@ -260,9 +263,10 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                   }}
                 >
                   {row.object}
-                </h4>
+                </span>
+                )
                 )}
-                <h4 
+                <span 
                 style={{ 
                   textAlign: 'left', 
                   minWidth: `${Math.max(
@@ -273,7 +277,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                 }}
                 >
                 {showGermanLabels ? row.description_de : row.description_en}
-                </h4>
+                </span>
             </div>
           ))}
         </div>
