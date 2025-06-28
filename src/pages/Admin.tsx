@@ -15,6 +15,7 @@ import { LegendRow } from "@/types";
 import { Label } from '@/components/ui/label';
 import { Trash, Save } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const Admin = () => {
   const [areas, setAreas] = useState<AreaStatus[]>([]);
@@ -23,6 +24,8 @@ const Admin = () => {
   const [showGermanTitle, setShowGermanTitle] = useState<boolean>(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [hideAbsolute, setHideAbsolute] = useState(false);
+  const [hidePercentage, setHidePercentage] = useState(false);
 
   const [legendRows, setLegendRows] = useState<Partial<LegendRow>[]>([
     { object: "", description_de: "", description_en: "" }
@@ -129,8 +132,29 @@ const Admin = () => {
                 showGermanLabels={showGermanTitle}
                 selectedArea={selectedArea}
                 timeFilter={timeFilter}
-                showNumbers={true}
+                showNumbers={!hideAbsolute}
+                showPercentage={!hidePercentage}
               />
+
+              <div className="flex gap-6 mb-2 mt-4">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="master-absolute"
+                    checked={hideAbsolute}
+                    onCheckedChange={checked => setHideAbsolute(!!checked)}
+                  />
+                  <Label htmlFor="master-absolute">Absolute Besucherzahl ausblenden</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="master-percentage"
+                    checked={hidePercentage}
+                    onCheckedChange={checked => setHidePercentage(!!checked)}
+                  />
+                  <Label htmlFor="master-percentage">Prozentuale Auslastung ausblenden</Label>
+                </div>
+              </div>
+
             </div>
             
             <div className="bg-white p-4 rounded-lg shadow-sm">

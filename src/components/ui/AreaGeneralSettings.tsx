@@ -61,7 +61,7 @@ const AreaGeneralSettings: React.FC<AreaGeneralSettingsProps> = ({
         />
       </div>
 
-      <div className="space-y-2">
+      {/*<div className="space-y-2">
         <Label>Anzeige-Optionen</Label>
         <div className="space-y-2">
           <div className="flex items-center space-x-2">
@@ -75,7 +75,7 @@ const AreaGeneralSettings: React.FC<AreaGeneralSettingsProps> = ({
                 )
               }
             />
-            <Label htmlFor="show-absolute">Absolute Besucherzahl ausblenden</Label>
+            <Label htmlFor="show-absolute">Absolute Besucherzahl für {formData.area_name || 'diesen Bereich'} ausblenden</Label>
           </div>
           
           <div className="flex items-center space-x-2">
@@ -89,10 +89,11 @@ const AreaGeneralSettings: React.FC<AreaGeneralSettingsProps> = ({
                 )
               }
             />
-            <Label htmlFor="show-percentage">Prozentuale Auslastung ausblenden</Label>
+            <Label htmlFor="show-percentage">Prozentuale Auslastung {formData.area_name || 'diesen Bereich'} ausblenden</Label>
           </div>
         </div>
       </div>
+      */}
 
       {/* Optional: Highlight color section (currently commented out) */}
       {/* <div className="space-y-2">

@@ -16,6 +16,7 @@ interface ExhibitionMapProps {
   timeFilter?: number; // in minutes, default to 1440 (24 hours)
   showGermanLabels?: boolean; //
   showNumbers?: boolean;
+  showPercentage?: boolean;
 }
 
 const ExhibitionMap: React.FC<ExhibitionMapProps> = ({ 
@@ -27,6 +28,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
   timeFilter,
   selectedArea = null,
   showNumbers = false,
+  showPercentage = false,
 }) => {
   const [areaStatus, setAreaStatus] = useState<AreaStatus[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -218,7 +220,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                             </text>
                         )}
 
-                        {showNumbers &&!area.hidden_percentage && (
+                        {showPercentage &&!area.hidden_percentage && (
                           <text
                             x={cx}
                             y={cy + (!area.hidden_absolute ? 44 : 22)}
