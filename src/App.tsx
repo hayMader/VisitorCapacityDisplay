@@ -9,6 +9,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
 import Login from "./pages/Login";
+import Security from "./pages/Security";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,11 @@ const App = () => (
             <Route path="/admin" element={
               <ProtectedRoute> {/* Check if the user is authenticated. If not -> login page */}
                 <Admin />
+              </ProtectedRoute>
+            } />
+            <Route path="/security" element={
+              <ProtectedRoute> {/* Check if the user is authenticated. If not -> login page */}
+                <Security />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

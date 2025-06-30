@@ -31,9 +31,10 @@ interface Props {
   area: AreaStatus;
   onUpdate: (a: AreaStatus) => void;
   allAreas: AreaStatus[]; // List of all areas for copying thresholds
+  currentPage?: "management" | "security"; // Current page context
 }
 
-const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas }) => {
+const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas, currentPage }) => {
   /* ---------------------------------------------------------------- */
   /*  State                                                           */
   /* ---------------------------------------------------------------- */
@@ -133,6 +134,7 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas }) =>
       setting_id: area.id,
       upper_threshold: newThreshold.upper_threshold,
       color: newThreshold.color,
+      type: currentPage,
       alert: false,
       alert_message: "",
     };
@@ -258,26 +260,27 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas }) =>
   return (
     <div>
     <form onSubmit={handleSubmit}>
+      {currentPage !== "security" ? (
       <Accordion type="single" collapsible defaultValue="general" className="w-full">
         {/* ---------------- allgemeine Einstellungen ---------------- */}
         <AccordionItem value="general">
-          <AccordionTrigger className="py-4">
-            <div className="flex items-center">
-              <Settings className="mr-2 h-5 w-5" />
-              <span className='text'>Allgemeine Einstellungen</span>
-            </div>            
-          </AccordionTrigger>
-          <AccordionContent>
-            <AreaGeneralSettings formData={formData} onChange={handleChange} />
-          </AccordionContent>
+        <AccordionTrigger className="py-4">
+          <div className="flex items-center">
+          <Settings className="mr-2 h-5 w-5" />
+          <span className="text">Allgemeine Einstellungen</span>
+          </div>
+        </AccordionTrigger>
+        <AccordionContent>
+          <AreaGeneralSettings formData={formData} onChange={handleChange} />
+        </AccordionContent>
         </AccordionItem>
 
-        {/* ---------------- Grenzwerte ---------------- */}
+        {/* ---------------- Grenzwerte Management ---------------- */}
         <AccordionItem value="thresholds">
           <AccordionTrigger className="py-4">
             <div className="flex items-center">
-              <SlidersHorizontal className="mr-2 h-5 w-5" />
-              <span className="text">Grenzwerte Besucherzahl</span>
+            <SlidersHorizontal className="mr-2 h-5 w-5" />
+            <span className="text">Grenzwerte Besucherzahl</span>
             </div>
           </AccordionTrigger>
           <AccordionContent>
@@ -286,11 +289,32 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas }) =>
               setFormData={setFormData}
               newThreshold={newThreshold}
               setNewThreshold={setNewThreshold}
+              type={currentPage}
               MAX_LEVELS={MAX_LEVELS}
               onCopyThresholds={() => setIsCopyModalOpen(true)}
             />
           </AccordionContent>
         </AccordionItem>
+      </Accordion>
+      ) : (
+        <div className="w-full">
+          {/* ---------------- Grenzwerte Management ---------------- */}
+          <h2 className="py-4 flex items-center text-lg font-semibold">
+          <SlidersHorizontal className="mr-2 h-5 w-5" />
+            Grenzwerte Besucherzahl
+          </h2>
+          <h4>Bereich: {formData.area_name}</h4>
+          <ThresholdSettings
+            formData={formData}
+            setFormData={setFormData}
+            newThreshold={newThreshold}
+            setNewThreshold={setNewThreshold}
+            type={currentPage}
+            MAX_LEVELS={MAX_LEVELS}
+            onCopyThresholds={() => setIsCopyModalOpen(true)}
+          />
+        </div>
+      )}
 
         {/* Area Position Settings */}
         {/* <AccordionItem value="position">
@@ -304,7 +328,6 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas }) =>
             <AreaPositionSettings formData={formData} onChange={handleChange} />
           </AccordionContent>
         </AccordionItem> */}
-      </Accordion>
 
       {/* ---------- Footer (Speichern) ---------- */}
       <div className="mt-6 flex justify-end">

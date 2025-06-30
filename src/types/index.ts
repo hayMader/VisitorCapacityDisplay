@@ -24,6 +24,7 @@ export interface Threshold {
   setting_id: number;
   upper_threshold: number;
   color?: string;
+  type: 'security' | 'management';
   alert: boolean;
   alert_message?: string;
 }

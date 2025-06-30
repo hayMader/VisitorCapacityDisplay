@@ -72,6 +72,7 @@ export type Database = {
           upper_threshold: number
           alert: boolean
           alert_message?: string | null
+          type: "security" | "management"
         }
         Insert: {
           color: string
@@ -80,6 +81,7 @@ export type Database = {
           upper_threshold: number
           alert: boolean
           alert_message?: string | null
+          type: "security" | "management"
         }
         Update: {
           color?: string
@@ -88,6 +90,7 @@ export type Database = {
           upper_threshold?: number
           alert?: boolean
           alert_message?: string | null
+          type?: "security" | "management"
         }
         Relationships: [
           {

@@ -17,6 +17,7 @@ interface ExhibitionMapProps {
   showGermanLabels?: boolean; //
   showNumbers?: boolean;
   showPercentage?: boolean;
+  currentPage?: 'security' | 'management';
 }
 
 const ExhibitionMap: React.FC<ExhibitionMapProps> = ({ 
@@ -29,6 +30,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
   selectedArea = null,
   showNumbers = false,
   showPercentage = false,
+  currentPage = 'management', // default to 'management'
 }) => {
   const [areaStatus, setAreaStatus] = useState<AreaStatus[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -113,6 +115,13 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
     return activeThreshold;
   };
 
+  const getPreviousThreshold = (visitorCount: number, thresholds: Threshold[]) => {
+    return thresholds.reduce((max, t) =>
+      visitorCount > t.upper_threshold && t.upper_threshold > max.upper_threshold ? t : max,
+      { upper_threshold: -Infinity } as Threshold
+    );
+  };
+
   const checkContainerSize = () => {
     if (containerRef.current) {
       const width = containerRef.current.offsetWidth;
@@ -130,6 +139,26 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
   }
 
   return (
+    <>
+    <style>
+        {`
+          .blink {
+            animation: blink-animation 1s infinite;
+          }
+
+          @keyframes blink-animation {
+            0% {
+              fill-opacity: 0.4;
+            }
+            50% {
+              fill-opacity: 1;
+            }
+            100% {
+              fill-opacity: 0.4;
+            }
+          }
+        `}
+    </style>
     <div 
       ref={containerRef} 
       className={`flex sm:flex-row flex-col h-full w-full items-center justify-center overflow-hidden ${isMediumSize ? 'relative' : ''}`}
@@ -161,23 +190,24 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
           >
             {areaStatus.map((area) => {
               const visitorCount = area.amount_visitors;
-              const thresholds = area.thresholds;
+              const thresholds = area.thresholds.filter(t => t.type === currentPage); // Filter thresholds based on the page type
               const activeTreshold = getOccupancyLevel(visitorCount, thresholds);
+              const previousThreshold = getPreviousThreshold(visitorCount, thresholds);
               const isSelected = selectedArea === area;
               const pct = area.capacity_usage
                 ? Math.round((area.amount_visitors / area.capacity_usage) * 100)
                 : 0;
+              const shouldBlink = previousThreshold.alert;
 
               return (
                 <g key={area.id}>
-                  
                   <polygon
                     points={area.coordinates.map((point: { x: number; y: number }) => `${point.x},${point.y}`).join(' ')}
-                    fill={area.highlight || activeTreshold?.color || 'lightgray'}
+                    fill={shouldBlink ? activeTreshold?.color || 'lightgray' : activeTreshold?.color || 'lightgray'}
                     fillOpacity={0.4}
                     stroke={isSelected ? "#000" : "#667080"}
                     strokeWidth={isSelected ? 2 : 0}
-                    className="exhibition-hall cursor-pointer"
+                    className={`exhibition-hall cursor-pointer ${shouldBlink ? 'blink' : ''}`}
                     onClick={() => handleAreaClick(area)}
                   />
                   {(() => {
@@ -241,11 +271,9 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
           </svg>
         </div>
       </div>
-        
-      <div 
-        className={`flex ${isMediumSize ? 'absolute' : ''} bottom-4 right-4 z-10 bg-white p-4 rounded sm:shadow-xl items-right mr-4`}
-        style={{minWidth: "20%", flexGrow: 1 }}
-      >
+
+      {currentPage === 'management' && (
+      <div ref={containerRef} className={`flex ${isMediumSize ? 'absolute' : ''} bottom-4 right-4 z-10 bg-white p-4 rounded sm:shadow-xl items-right mr-4`} style={{minWidth: "20%", flexGrow: 1 }}>
         <div className="space-y-1">
           {legendRows.map((row) => (
             <div key={row.id} className={`grid grid-cols-[auto,1fr] gap-2 items-center `} style={{ width: 'fit-content' }}>
@@ -284,7 +312,9 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
           ))}
         </div>
       </div>
+      )}
     </div>
+    </>
   );
 };
 

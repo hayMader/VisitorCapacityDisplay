@@ -28,10 +28,7 @@ export const getAreaSettings = async (filter_minutes?: number): Promise<AreaStat
 
     if (error) throw error;
     
-    return data.map((item: any) => ({
-      ...item,
-      thresholds: Array.isArray(item.thresholds) ? item.thresholds : JSON.parse(item.thresholds || '[]'),
-    }));
+    return data
   } catch (error) {
     console.error('Error fetching area settings:', error);
     return [];

@@ -3,13 +3,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus } from 'lucide-react';
+import { Threshold } from '@/types';
 
 interface NewThresholdFormProps {
-  newThreshold: { upper_threshold: number; color: string };
-  onChange: (changes: Partial<{ upper_threshold: number; color: string }>) => void;
+  newThreshold: Partial<Threshold>;
+  onChange: (changes: Partial<Threshold>) => void;
   onAdd: () => void;
   /** optional – set to true when the parent already has 4 thresholds */
   disabled?: boolean;
+  type?: 'security' | 'management';
 }
 
 const NewThresholdForm: React.FC<NewThresholdFormProps> = ({
@@ -17,6 +19,7 @@ const NewThresholdForm: React.FC<NewThresholdFormProps> = ({
   onChange,
   onAdd,
   disabled = false,
+  type = 'management',
 }) => {
   return (
     <div className="pt-4 border-t">
@@ -56,12 +59,48 @@ const NewThresholdForm: React.FC<NewThresholdFormProps> = ({
           Hinzufügen
         </Button>
       </div>
+      {type === 'security' && (
+        <>
+          {/* warnhinweis checkbox */}
+          <div className="mt-4 flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="warnhinweis"
+              checked={newThreshold.alert}
+            onChange={(e) => onChange({ alert: e.target.checked })}
+            disabled={disabled}
+            className="h-4 w-4"
+          />
+          <Label htmlFor="warnhinweis" className="text-sm">
+            Alarm bei Überschreitung des Schwellenwerts aktivieren
+          </Label>
+        </div>
 
-      {/* helper text when max levels reached */}
-      {disabled && (
-        <p className="mt-2 text-xs text-muted-foreground">
-    Maximal 4 Levels erlaubt.
-        </p>
+        {/* alert_message input field */}
+        {newThreshold.alert && (
+          <div className="mt-2">
+            <Label htmlFor="alert_message" className="text-sm">
+              Warnhinweis Nachricht
+            </Label>
+            <Input
+              type="text"
+              id="alert_message"
+              placeholder="Warnhinweis Nachricht"
+              className="mt-1 w-full"
+              value={newThreshold.alert_message || ''}
+              onChange={(e) => onChange({ alert_message: e.target.value })}
+              disabled={disabled}
+            />
+          </div>
+        )}
+
+        {/* helper text when max levels reached */}
+        {disabled && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            Maximal 4 Levels erlaubt.
+          </p>
+        )}
+      </>
       )}
     </div>
   );
