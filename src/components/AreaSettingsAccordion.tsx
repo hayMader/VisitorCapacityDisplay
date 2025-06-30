@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import {
   Accordion,
@@ -16,11 +14,9 @@ import {
   Save,
 } from "lucide-react";
 
-import ThresholdItemActions from "@/components/ui/ThresholdItemActions";
-import NewThresholdForm from "@/components/ui/NewThresholdForm";
 import AreaGeneralSettings from "@/components/ui/AreaGeneralSettings";
-import AreaPositionSettings from "@/components/ui/AreaPositionSettings";
 import CopyThresholdsModal from "@/components/ui/CopyThresholdsModal";
+import ThresholdSettings from "@/components/ThresholdSettings";
 import { AreaStatus, Threshold } from "@/types";
 import { updateAreaSettings, copyThresholdsToAreas } from "@/utils/api";
 
@@ -281,121 +277,18 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas }) =>
           <AccordionTrigger className="py-4">
             <div className="flex items-center">
               <SlidersHorizontal className="mr-2 h-5 w-5" />
-              <span className='text'>Grenzwerte Besucherzahl</span>
-            </div>     
-          </AccordionTrigger>
-
-          <AccordionContent>
-            <div className="space-y-4 py-2">
-              {/* Liste bestehender Schwellen */}
-              {formData.thresholds.length ? (
-                <div className="space-y-2">
-                  <Label>Aktuelle Grenzwerte</Label>
-                  <div className="border rounded-md">
-                    {formData.thresholds
-                      .sort((a, b) => a.upper_threshold - b.upper_threshold)
-                      .map((t, idx, arr) => {
-                        const lower = idx === 0 ? 0 : arr[idx - 1].upper_threshold + 1;
-                        const isEditing = editingId === t.id;
-
-                        return (
-                          <div
-                            key={t.id}
-                            className="grid grid-cols-[24px_72px_24px_72px_auto] items-center gap-2 p-2 border-b last:border-0"
-                          >
-                            {/* Farbe */}
-                            {isEditing ? (
-                              <input
-                                type="color"
-                                value={edited.color}
-                                onChange={(e) =>
-                                  setEdited((p) => ({ ...p, color: e.target.value }))
-                                }
-                                className="h-6 w-6 p-0 border rounded"
-                              />
-                            ) : (
-                              <div
-                                className="h-4 w-4 rounded-full border"
-                                style={{ background: t.color }}
-                              />
-                            )}
-
-                            {/* von */}
-                            <Input
-                              type="number"
-                              value={lower}
-                              readOnly
-                              disabled
-                              className="w-16 bg-transparent border-none p-0 text-right
-                                         focus-visible:ring-0 cursor-default select-none"
-                            />
-
-                            <span className="text-xs text-muted-foreground">bis</span>
-
-                            {/* bis */}
-                            {isEditing ? (
-                              <Input
-                                type="number"
-                                value={edited.upper_threshold}
-                                onChange={(e) =>
-                                  setEdited((p) => ({
-                                    ...p,
-                                    upper_threshold: parseInt(e.target.value, 10) || 0,
-                                  }))
-                                }
-                                className="w-16"
-                              />
-                            ) : (
-                              <Input
-                                type="number"
-                                value={t.upper_threshold}
-                                readOnly
-                                disabled
-                                className="w-16 bg-transparent border-none p-0 text-right
-                                           focus-visible:ring-0 cursor-default"
-                              />
-                            )}
-
-                            {/* Action Icons */}
-                            <ThresholdItemActions
-                              isEditing={isEditing}
-                              onEdit={() => beginEdit(t)}
-                              onSave={() => saveEdit(t.id)}
-                              onCancel={cancelEdit}
-                              onDelete={() => deleteThreshold(t.id)}
-                            />
-                            
-                          </div>
-                        );
-                      })}
-                      {/* Copy Thresholds Button */}
-                
-                  </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => setIsCopyModalOpen(true)}
-                    className="flex items-center"
-                    >
-                    <Copy className="h-4 w-4" />
-                    Schwellenwerte kopieren
-                  </Button>
-                </div>
-              ) : (
-                <p className="text-muted-foreground">Keine Grenzwerte definiert.</p>
-              )}
-
-              {/* Neuer Schwellenwert */}
-              <NewThresholdForm
-                newThreshold={newThreshold}
-                onChange={(c) => setNewThreshold((p) => ({ ...p, ...c }))}
-                onAdd={handleAddThreshold}
-                disabled={formData.thresholds.length >= MAX_LEVELS}
-              />
-
-              
-
+              <span className="text">Grenzwerte Besucherzahl</span>
             </div>
+          </AccordionTrigger>
+          <AccordionContent>
+            <ThresholdSettings
+              formData={formData}
+              setFormData={setFormData}
+              newThreshold={newThreshold}
+              setNewThreshold={setNewThreshold}
+              MAX_LEVELS={MAX_LEVELS}
+              onCopyThresholds={() => setIsCopyModalOpen(true)}
+            />
           </AccordionContent>
         </AccordionItem>
 
