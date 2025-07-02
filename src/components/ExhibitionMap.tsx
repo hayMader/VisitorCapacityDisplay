@@ -111,8 +111,10 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
   };
 
   const getOccupancyLevel = (visitorCount: number, thresholds: Threshold[]) => {
-    const activeThreshold = thresholds.find(threshold => visitorCount <= threshold.upper_threshold);
-    return activeThreshold;
+    return thresholds.reduce((min, t) =>
+      visitorCount <= t.upper_threshold && t.upper_threshold < min.upper_threshold ? t : min,
+      { upper_threshold: Infinity } as Threshold
+    );
   };
 
   const getPreviousThreshold = (visitorCount: number, thresholds: Threshold[]) => {
