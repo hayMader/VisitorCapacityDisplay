@@ -221,49 +221,100 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                     cx /= n;
                     cy /= n;
 
-                    return (
-                      <>
-                        {!area.hidden_name && (
+                    // Check if this area should use side-by-side layout
+                    const useSideBySideLayout = area.area_name.toLowerCase() === 'atrium';
+                    
+                    if (useSideBySideLayout) {
+                      // Side-by-side layout for Atrium
+                      return (
+                        <>
+                          {!area.hidden_name && (
                             <text
-                            x={cx}
-                            y={cy - (!area.hidden_absolute && !area.hidden_percentage ? 22 : 0)}
-                            textAnchor="middle"
-                            dominantBaseline="middle"
-                            fill="#1e293b"
-                            fontWeight="bold"
-                            fontSize={isMediumSize ? "20" : "26"}
+                              x={cx - (showNumbers || showPercentage ? 40 : 0)}
+                              y={cy}
+                              textAnchor={(showNumbers || showPercentage) ? "end" : "middle"}
+                              dominantBaseline="middle"
+                              fill="#1e293b"
+                              fontWeight="bold"
+                              fontSize={isMediumSize ? "20" : "26"}
                             >
-                            {showGermanLabels ? area.area_name : area.area_name_en}
+                              {showGermanLabels ? area.area_name : area.area_name_en}
                             </text>
-                        )}
+                          )}
 
-                        {showNumbers &&!area.hidden_absolute && (
+                          {showNumbers && !area.hidden_absolute && (
                             <text
-                            x={cx}
-                            y={cy + (!area.hidden_percentage ? 11 : 22)}
-                            textAnchor="middle"
-                            dominantBaseline="middle"
-                            fill="#1e293b"
-                            fontSize={isMediumSize ? "18" : "24"}
+                              x={cx + (!area.hidden_name ? 10 : 0)}
+                              y={cy}
+                              textAnchor={!area.hidden_name ? "start" : "middle"}
+                              dominantBaseline="middle"
+                              fill="#1e293b"
+                              fontSize={isMediumSize ? "18" : "24"}
                             >
-                            {area.amount_visitors}
+                              {area.amount_visitors}
                             </text>
-                        )}
+                          )}
 
-                        {showPercentage &&!area.hidden_percentage && (
-                          <text
-                            x={cx}
-                            y={cy + (!area.hidden_absolute ? 44 : 22)}
-                            textAnchor="middle"
-                            dominantBaseline="middle"
-                            fill="#1e293b"
-                            fontSize={isMediumSize ? "16" : "22"}
-                          >
-                            {pct} %
-                          </text>
-                        )}
-                      </>
-                    );
+                          {showPercentage && !area.hidden_percentage && (
+                            <text
+                              x={cx + (!area.hidden_name ? (showNumbers && !area.hidden_absolute ? 60 : 10) : (showNumbers && !area.hidden_absolute ? 30 : 0))}
+                              y={cy}
+                              textAnchor={!area.hidden_name ? "start" : "middle"}
+                              dominantBaseline="middle"
+                              fill="#1e293b"
+                              fontSize={isMediumSize ? "16" : "22"}
+                            >
+                              {pct} %
+                            </text>
+                          )}
+                        </>
+                      );
+                    } else {
+                      // Standard vertical layout for all other areas
+                      return (
+                        <>
+                          {!area.hidden_name && (
+                            <text
+                              x={cx}
+                              y={cy - (!area.hidden_absolute && !area.hidden_percentage ? 22 : 0)}
+                              textAnchor="middle"
+                              dominantBaseline="middle"
+                              fill="#1e293b"
+                              fontWeight="bold"
+                              fontSize={isMediumSize ? "20" : "26"}
+                            >
+                              {showGermanLabels ? area.area_name : area.area_name_en}
+                            </text>
+                          )}
+
+                          {showNumbers && !area.hidden_absolute && (
+                            <text
+                              x={cx}
+                              y={cy + (!area.hidden_percentage ? 11 : 22)}
+                              textAnchor="middle"
+                              dominantBaseline="middle"
+                              fill="#1e293b"
+                              fontSize={isMediumSize ? "18" : "24"}
+                            >
+                              {area.amount_visitors}
+                            </text>
+                          )}
+
+                          {showPercentage && !area.hidden_percentage && (
+                            <text
+                              x={cx}
+                              y={cy + (!area.hidden_absolute ? 44 : 22)}
+                              textAnchor="middle"
+                              dominantBaseline="middle"
+                              fill="#1e293b"
+                              fontSize={isMediumSize ? "16" : "22"}
+                            >
+                              {pct} %
+                            </text>
+                          )}
+                        </>
+                      );
+                    }
                   })()}
                 </g>
               );
