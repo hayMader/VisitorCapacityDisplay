@@ -222,7 +222,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                     cy /= n;
 
                     // Check if this area should use side-by-side layout
-                    const useSideBySideLayout = area.area_name.toLowerCase() === 'atrium';
+                    const useSideBySideLayout = area.id === 26; // Atrium's ID
                     
                     if (useSideBySideLayout) {
                       // Side-by-side layout for Atrium
