@@ -58,12 +58,14 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas, curr
 
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false); // Modal for copying thresholds
 
+  const [accordionValue, setAccordionValue] = useState<string | null>("general");
   /* ---------------------------------------------------------------- */
   /*  Sync incoming area → local state                                 */
   /* ---------------------------------------------------------------- */
   useEffect(() => {
     setOriginalData(area);
     setFormData(area);
+    setAccordionValue("general");
   }, [area]);
 
   useEffect(() => {
@@ -259,9 +261,9 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas, curr
 
   return (
     <div>
-    <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
       {currentPage !== "security" ? (
-      <Accordion type="single" collapsible defaultValue="general" className="w-full">
+      <Accordion type="single" collapsible value={accordionValue} onValueChange={setAccordionValue} className="w-full">
         {/* ---------------- allgemeine Einstellungen ---------------- */}
         <AccordionItem value="general">
         <AccordionTrigger className="py-4">

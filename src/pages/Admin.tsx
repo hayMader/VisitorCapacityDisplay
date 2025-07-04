@@ -26,6 +26,8 @@ const Admin = () => {
   const navigate = useNavigate();
   const [hideAbsolute, setHideAbsolute] = useState(false);
   const [hidePercentage, setHidePercentage] = useState(false);
+  const [isHighlighted, setIsHighlighted] = useState(false);
+  const [hasUserSelectedArea, setHasUserSelectedArea] = useState(false);
 
   const [legendRows, setLegendRows] = useState<Partial<LegendRow>[]>([
     { object: "", description_de: "", description_en: "" }
@@ -61,6 +63,21 @@ const Admin = () => {
     
     return () => clearInterval (intervalId);
   }, []);
+
+  useEffect(() => {
+    if (selectedArea && hasUserSelectedArea) {
+      setIsHighlighted(true);
+      const timer = setTimeout(() => {
+        setIsHighlighted(false);
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedArea, hasUserSelectedArea]);
+
+  const handleAreaSelect = (area: AreaStatus) => {
+    setHasUserSelectedArea(true);
+    setSelectedArea(area);
+  };
   
 
   const handleAreaUpdate = (updatedArea: AreaStatus) => {
@@ -128,7 +145,7 @@ const Admin = () => {
                 autoRefresh={true} 
                 refreshInterval={60000}
                 onDataUpdate={handleDataUpdate} 
-                onAreaSelect={setSelectedArea}
+                onAreaSelect={handleAreaSelect}
                 showGermanLabels={showGermanTitle}
                 selectedArea={selectedArea}
                 timeFilter={timeFilter}
@@ -295,7 +312,8 @@ const Admin = () => {
           
           {/* Right column: Area settings */}
           <div className="lg:col-span-1">
-            <div className="bg-white p-4 rounded-lg shadow-sm">
+            <div className={`bg-white p-4 rounded-lg shadow-sm transition-all duration-300 ease-in-out
+              ${isHighlighted ? 'ring-2 ring-primary-400 ring-opacity-50 shadow-lg shadow-primary-100' : ''}`}>
               <div className="items-center mb-4">
                 <span>Bereichseinstellungen: {selectedArea?.area_name || ''}</span>
                 <p className="text-muted-foreground"> Konfigurieren Sie Ihre Besucherfüllstandsanzeige</p>
