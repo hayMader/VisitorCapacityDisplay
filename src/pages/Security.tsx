@@ -27,8 +27,6 @@ const Security = () => {
   const [hideAbsolute, setHideAbsolute] = useState(false);
   const [hidePercentage, setHidePercentage] = useState(false);
 
-  const [currentPage, setCurrentPage] = useState<"management" | "security">("management");
-
   const [legendRows, setLegendRows] = useState<Partial<LegendRow>[]>([
     { object: "", description_de: "", description_en: "" }
   ])
@@ -56,7 +54,6 @@ const Security = () => {
     };
     
     fetchInitialData();
-    setCurrentPage(window.location.pathname.includes("security") ? "security" : "management");
   }, []);
 
   useEffect(() => {
@@ -139,7 +136,7 @@ const Security = () => {
                 timeFilter={timeFilter}
                 showNumbers={!hideAbsolute}
                 showPercentage={!hidePercentage}
-                currentPage={currentPage}
+                currentPage='security'
               />
 
               <div className="flex gap-6 mb-2 mt-4">
@@ -253,7 +250,7 @@ const Security = () => {
                   area={selectedArea}
                   onUpdate={handleAreaUpdate}
                   allAreas={areas}
-                  currentPage={currentPage}
+                  currentPage='security'
                 />
               ) : (
                 <p className="text-muted-foreground text-center py-8">

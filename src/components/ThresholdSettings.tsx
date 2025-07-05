@@ -206,8 +206,9 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
                       onCancel={cancelEdit}
                       onDelete={() => deleteThreshold(t.id)}
                     />
-
                     {/* Alert Icon */}
+                    {type === "security" && (
+                    
                     <div
                       className="absolute right-0 top-1/2 transform -translate-y-1/2 flex items-center gap-2 group"
                       onClick={() => toggleAlert(t.id)}
@@ -219,6 +220,7 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
                         <Bell className="h-4 w-4" />
                       </span>
                     </div>
+                    )}
                   </div>
                   {                    isEditing && (
                     <div className="p-2 bg-gray-50 border-t">

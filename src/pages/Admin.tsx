@@ -306,6 +306,7 @@ const Admin = () => {
                   area={selectedArea}
                   onUpdate={handleAreaUpdate}
                   allAreas={areas}
+                  currentPage='management'
                 />
               ) : (
                 <p className="text-muted-foreground text-center py-8">
