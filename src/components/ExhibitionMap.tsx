@@ -222,31 +222,60 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                     cy /= n;
 
                     // Check if this area should use side-by-side layout
-                    const useSideBySideLayout = area.id === 26; // Atrium's ID
+                    const useSideBySideLayout = area.id === 26 || area.id === 27; // Atrium (26) and Freigelände Mitte (27)
                     
                     if (useSideBySideLayout) {
                       // Side-by-side layout for Atrium
                       return (
                         <>
                           {!area.hidden_name && (
-                            <text
-                              x={cx - (showNumbers || showPercentage ? 40 : 0)}
-                              y={cy}
-                              textAnchor={(showNumbers || showPercentage) ? "end" : "middle"}
-                              dominantBaseline="middle"
-                              fill="#1e293b"
-                              fontWeight="bold"
-                              fontSize={isMediumSize ? "20" : "26"}
-                            >
-                              {showGermanLabels ? area.area_name : area.area_name_en}
-                            </text>
+                            area.id === 27 ? (
+                              // Special two-line layout for Freigelände Mitte / Center Outdoor Area
+                              <>
+                                <text
+                                  x={cx - 80}
+                                  y={cy - 15}
+                                  textAnchor="middle"
+                                  dominantBaseline="middle"
+                                  fill="#1e293b"
+                                  fontWeight="bold"
+                                  fontSize={isMediumSize ? "20" : "26"}
+                                >
+                                  {showGermanLabels ? "Freigelände" : "Center Outdoor"}
+                                </text>
+                                <text
+                                  x={cx - 80}
+                                  y={cy + 15}
+                                  textAnchor="middle"
+                                  dominantBaseline="middle"
+                                  fill="#1e293b"
+                                  fontWeight="bold"
+                                  fontSize={isMediumSize ? "20" : "26"}
+                                >
+                                  {showGermanLabels ? "Mitte" : "Area"}
+                                </text>
+                              </>
+                            ) : (
+                              // Standard single-line layout for other areas using side-by-side
+                              <text
+                                x={cx - (showNumbers || showPercentage ? 40 : 0)}
+                                y={cy}
+                                textAnchor={(showNumbers || showPercentage) ? "end" : "middle"}
+                                dominantBaseline="middle"
+                                fill="#1e293b"
+                                fontWeight="bold"
+                                fontSize={isMediumSize ? "20" : "26"}
+                              >
+                                {showGermanLabels ? area.area_name : area.area_name_en}
+                              </text>
+                            )
                           )}
 
                           {showNumbers && !area.hidden_absolute && (
                             <text
-                              x={cx + (!area.hidden_name ? 10 : 0)}
-                              y={cy}
-                              textAnchor={!area.hidden_name ? "start" : "middle"}
+                              x={area.id === 27 ? cx - 80 : (cx + (!area.hidden_name ? 10 : 0))}
+                              y={area.id === 27 ? cy + 45 : (cy + (area.id === 27 && !area.hidden_name ? 40 : 0))}
+                              textAnchor={area.id === 27 ? "middle" : (!area.hidden_name ? "start" : "middle")}
                               dominantBaseline="middle"
                               fill="#1e293b"
                               fontSize={isMediumSize ? "18" : "24"}
@@ -257,9 +286,9 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
 
                           {showPercentage && !area.hidden_percentage && (
                             <text
-                              x={cx + (!area.hidden_name ? (showNumbers && !area.hidden_absolute ? 60 : 10) : (showNumbers && !area.hidden_absolute ? 30 : 0))}
-                              y={cy}
-                              textAnchor={!area.hidden_name ? "start" : "middle"}
+                              x={area.id === 27 ? cx - 80 : (cx + (!area.hidden_name ? (showNumbers && !area.hidden_absolute ? 60 : 10) : (showNumbers && !area.hidden_absolute ? 30 : 0)))}
+                              y={area.id === 27 ? cy + 70 : (cy + (area.id === 27 && !area.hidden_name ? 40 : 0))}
+                              textAnchor={area.id === 27 ? "middle" : (!area.hidden_name ? "start" : "middle")}
                               dominantBaseline="middle"
                               fill="#1e293b"
                               fontSize={isMediumSize ? "16" : "22"}
