@@ -38,7 +38,6 @@ const NewThresholdForm: React.FC<NewThresholdFormProps> = ({
             value={lowerBound}
             readOnly
             disabled
-            className="bg-transparent border-none p-0 text-right text-muted-foreground cursor-default"
           />
         </div>
 
