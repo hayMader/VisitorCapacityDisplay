@@ -125,6 +125,16 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
     }));
   };
 
+  // Filter and sort thresholds of the specified type
+  const thresholdsOfType = formData.thresholds
+    .filter((t) => t.type === type)
+    .sort((a, b) => a.upper_threshold - b.upper_threshold);
+
+  // Calculate the lower bound for new thresholds
+  const lowerBound = thresholdsOfType.length
+    ? thresholdsOfType[thresholdsOfType.length - 1].upper_threshold + 1
+    : 1;
+
   return (
     <div className="space-y-4 py-2">
       {/* List of Existing Thresholds */}
@@ -261,6 +271,7 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
         onAdd={handleAddThreshold}
         disabled={formData.thresholds.filter((t) => t.type === type).length >= MAX_LEVELS}
         type={type}
+        lowerBound={lowerBound}
       />
     </div>
   );
