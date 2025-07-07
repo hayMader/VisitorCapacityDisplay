@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import ExhibitionMap from '@/components/ExhibitionMap';
@@ -13,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { refreshLegend, getLegend } from "@/utils/api";
 import { LegendRow } from "@/types";
 import { Label } from '@/components/ui/label';
-import { Trash, Save } from 'lucide-react';
+import { Trash, Save, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 
@@ -31,6 +30,10 @@ const Security = () => {
     { object: "", description_de: "", description_en: "" }
   ])
 
+  // Filter states for warnings
+  const [warningSearchTerm, setWarningSearchTerm] = useState("");
+  const [showEntrances, setShowEntrances] = useState(true);
+  const [showHalls, setShowHalls] = useState(true);
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -99,6 +102,32 @@ const Security = () => {
       })
     }
   }
+
+  // Filter function for warnings
+  const filterWarnings = (area: AreaStatus) => {
+    // Check if area has active warnings
+    const hasWarning = area.thresholds.some(threshold => 
+      threshold.type === "security" &&
+      threshold.alert &&
+      area.amount_visitors > threshold.upper_threshold
+    );
+
+    if (!hasWarning) return false;
+
+    // Filter by search term
+    if (warningSearchTerm && !area.area_name.toLowerCase().includes(warningSearchTerm.toLowerCase())) {
+      return false;
+    }
+
+    // Filter by area type
+    const isEntrance = area.area_name.toLowerCase().includes("eingang");
+    const isHall = area.area_name.toLowerCase().includes("halle");
+
+    if (!showEntrances && isEntrance) return false;
+    if (!showHalls && isHall) return false;
+
+    return true;
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -198,13 +227,34 @@ const Security = () => {
               
               <div className="bg-white p-4 rounded-lg shadow-sm">
                 <h3 className="text-lg font-semibold mb-4">Warnungen</h3>
-                {areas.filter(area => 
-                    area.thresholds.some(threshold => 
-                      threshold.type === "security" &&
-                      threshold.alert &&
-                      area.amount_visitors > threshold.upper_threshold
-                    )
-                  )
+                
+                {/* Filter Controls */}
+                <div className="mb-4 space-y-3">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      type="text"
+                      placeholder="Bereich suchen..."
+                      value={warningSearchTerm}
+                      onChange={(e) => setWarningSearchTerm(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                  
+                  
+                </div>
+
+                <Separator className="mb-4" />
+                
+                {/* Warnings List */}
+                {areas.filter(filterWarnings)
+                  .sort((a, b) => {
+                    // Natural alphanumerical sort that handles numbers properly
+                    return a.area_name.localeCompare(b.area_name, 'de-DE', { 
+                      numeric: true, 
+                      sensitivity: 'base' 
+                    });
+                  })
                   .map(area => (
                     <div key={area.id} className="border p-4 rounded-lg mb-4 bg-red-50">
                       <h4 className="font-bold text-red-600">{area.area_name}</h4>
@@ -221,14 +271,12 @@ const Security = () => {
                         ))}
                     </div>
                   ))}
-                {areas.filter(area => 
-                  area.thresholds.some(threshold => 
-                    threshold.type === "security" &&
-                    threshold.alert_message &&
-                    area.amount_visitors > threshold.upper_threshold
-                  )
-                ).length === 0 && (
-                  <p className="text-sm text-gray-500">Keine Warnungen vorhanden.</p>
+                {areas.filter(filterWarnings).length === 0 && (
+                  <p className="text-sm text-gray-500">
+                    {warningSearchTerm || !showEntrances || !showHalls 
+                      ? "Keine Warnungen gefunden mit den aktuellen Filtereinstellungen."
+                      : "Keine Warnungen vorhanden."}
+                  </p>
                 )}
               </div>
               
