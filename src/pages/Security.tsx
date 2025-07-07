@@ -244,24 +244,7 @@ const Security = () => {
                     />
                   </div>
                   
-                  <div className="flex gap-4">
-                    <div className="flex items-center gap-2">
-                      <Checkbox
-                        id="filter-entrances"
-                        checked={showEntrances}
-                        onCheckedChange={checked => setShowEntrances(!!checked)}
-                      />
-                      <Label htmlFor="filter-entrances">Eingänge</Label>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Checkbox
-                        id="filter-halls"
-                        checked={showHalls}
-                        onCheckedChange={checked => setShowHalls(!!checked)}
-                      />
-                      <Label htmlFor="filter-halls">Hallen</Label>
-                    </div>
-                  </div>
+                  
                 </div>
 
                 <Separator className="mb-4" />
