@@ -28,7 +28,7 @@ const Admin = () => {
   const [hidePercentage, setHidePercentage] = useState(false);
 
   const [legendRows, setLegendRows] = useState<Partial<LegendRow>[]>([
-    { object: "", description_de: "", description_en: "" }
+    { object: "", object_en: "", description_de: "", description_en: "" }
   ])
 
   useEffect(() => {
@@ -196,17 +196,19 @@ const Admin = () => {
               <span>Legenden Einstellungen</span>
               <p className="text-muted-foreground mb-4">Fügen Sie der Legende einen neuen Wert hinzu:</p>
 
-              <div className="grid grid-cols-[2.5fr,2.5fr,2.5fr,0.5fr] gap-4 items-center mb-4">
-                <Label className="col-span-1">Abkürzung</Label>
+              <div className="grid grid-cols-[2fr,2fr,0.5fr,2fr,2fr,0.5fr] gap-4 items-center mb-4">
+                <Label className="col-span-1">Abkürzung (Deutsch)</Label>
+                <Label className="col-span-1">Abkürzung (Englisch)</Label>
+                <Label className="col-span-1">Farbe</Label>
                 <Label className="col-span-1">Beschreibung (Deutsch)</Label>
                 <Label className="col-span-1">Beschreibung (Englisch)</Label>
               </div>
 
                <div className="space-y-6">
                 {legendRows.map((row, index) => (
-                  <div key={row.id} className="grid grid-cols-[2.5fr,2.5fr,2.5fr,0.5fr] gap-4 items-center">
-                    {/* Input for Object */}
-                    <div className="flex items-center gap-2">
+                  <div key={row.id} className="grid grid-cols-[2fr,2fr,0.5fr,2fr,2fr,0.5fr] gap-4 items-center">
+                    
+                    {/* Input for Object (DE) */}
                       <Input
                         type="text"
                         value={row.object}
@@ -216,10 +218,24 @@ const Admin = () => {
                           setLegendRows(updatedRows);
                         }}
                         className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="Abkürzung oder #RRGGBB"
+                        placeholder="Abkürzung / #RRGGBB"
                       />
+
+                    {/* Input for Object (EN) */}
+                      <Input
+                        type="text"
+                        value={row.object_en}
+                        onChange={(e) => {
+                          const updatedRows = [...legendRows];
+                          updatedRows[index].object_en = e.target.value;
+                          setLegendRows(updatedRows);
+                        }}
+                        className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                        placeholder="Abkürzung"
+                        disabled={/^#[0-9A-Fa-f]{6}$/.test(row.object)}
+                      />
+
                       {/* Color picker for hex color */}
-                      <div className="relative">
                         <input
                           type="color"
                           value={/^#[0-9A-Fa-f]{6}$/.test(row.object) ? row.object : "#000000"}
@@ -230,8 +246,6 @@ const Admin = () => {
                           }}
                           className="w-8 h-8 p-0 border rounded-md"
                         />
-                      </div>
-                    </div>
 
                     {/* Input field description_de */}
                     <Input
@@ -243,7 +257,7 @@ const Admin = () => {
                         setLegendRows(updatedRows);
                       }}
                       className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                      placeholder="Beschreibung (Deutsch)"
+                      placeholder="Beschreibung"
                     />
 
                     {/* Input field description_en */}
@@ -256,7 +270,7 @@ const Admin = () => {
                         setLegendRows(updatedRows);
                       }}
                       className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                      placeholder="Beschreibung (Englisch)"
+                      placeholder="Beschreibung"
                     />
 
                     <button
@@ -276,7 +290,7 @@ const Admin = () => {
               <div className="flex justify-end mt-6 gap-3">
                 <Button
                   variant="outline" onClick={() => setLegendRows([...legendRows,
-                      { id: Date.now(), object: "", description_de: "", description_en: "" },
+                      { id: Date.now(), object: "", object_en: "", description_de: "", description_en: "" },
                     ])
                   }
                 >

@@ -294,7 +294,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                   fontSize: isMediumSize ? '1rem' : '1.25rem' 
                   }}
                 >
-                  {row.object}
+                  {showGermanLabels || !row.object_en ? row.object : row.object_en}
                 </span>
                 )
                 )}

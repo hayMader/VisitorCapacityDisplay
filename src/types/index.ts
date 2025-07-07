@@ -43,9 +43,10 @@ export interface AreaStatus {
   hidden_percentage?: boolean; 
 }
 
-export interface LegendRow{
+export interface LegendRow {
   id: number;
   object: string;
+  object_en: string;
   description_de: string;
   description_en: string;
 }
