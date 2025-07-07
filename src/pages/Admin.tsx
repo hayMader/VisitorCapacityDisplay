@@ -26,6 +26,8 @@ const Admin = () => {
   const navigate = useNavigate();
   const [hideAbsolute, setHideAbsolute] = useState(false);
   const [hidePercentage, setHidePercentage] = useState(false);
+  const [isHighlighted, setIsHighlighted] = useState(false);
+  const [hasUserSelectedArea, setHasUserSelectedArea] = useState(false);
 
   const [legendRows, setLegendRows] = useState<Partial<LegendRow>[]>([
     { object: "", object_en: "", description_de: "", description_en: "" }
@@ -61,6 +63,21 @@ const Admin = () => {
     
     return () => clearInterval (intervalId);
   }, []);
+
+  useEffect(() => {
+    if (selectedArea && hasUserSelectedArea) {
+      setIsHighlighted(true);
+      const timer = setTimeout(() => {
+        setIsHighlighted(false);
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedArea, hasUserSelectedArea]);
+
+  const handleAreaSelect = (area: AreaStatus) => {
+    setHasUserSelectedArea(true);
+    setSelectedArea(area);
+  };
   
 
   const handleAreaUpdate = (updatedArea: AreaStatus) => {
@@ -128,7 +145,7 @@ const Admin = () => {
                 autoRefresh={true} 
                 refreshInterval={60000}
                 onDataUpdate={handleDataUpdate} 
-                onAreaSelect={setSelectedArea}
+                onAreaSelect={handleAreaSelect}
                 showGermanLabels={showGermanTitle}
                 selectedArea={selectedArea}
                 timeFilter={timeFilter}
@@ -194,7 +211,7 @@ const Admin = () => {
             <div className="bg-white p-4 rounded-lg shadow-sm">
               {/* Legend editor */}
               <span>Legenden Einstellungen</span>
-              <p className="text-muted-foreground mb-4">Fügen Sie der Legende einen neuen Wert hinzu:</p>
+              <p className="text-muted-foreground mb-4">Fügen Sie der Legende einen neuen, eindeutigen Wert hinzu, um Unklarheiten zu vermeiden.</p>
 
               <div className="grid grid-cols-[2fr,2fr,0.5fr,2fr,2fr,0.5fr] gap-4 items-center mb-4">
                 <Label className="col-span-1">Abkürzung (Deutsch)</Label>
@@ -309,9 +326,11 @@ const Admin = () => {
           
           {/* Right column: Area settings */}
           <div className="lg:col-span-1">
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <div className="flex justify-between items-center mb-4">
-                <span>Bereichseinstellungen</span>
+            <div className={`bg-white p-4 rounded-lg shadow-sm transition-all duration-300 ease-in-out
+              ${isHighlighted ? 'ring-2 ring-primary-400 ring-opacity-50 shadow-lg shadow-primary-100' : ''}`}>
+              <div className="items-center mb-4">
+                <span>Bereichseinstellungen: {selectedArea?.area_name || ''}</span>
+                <p className="text-muted-foreground"> Konfigurieren Sie Ihre Besucherfüllstandsanzeige</p>
               </div>
               <Separator className="mb-4" />
               

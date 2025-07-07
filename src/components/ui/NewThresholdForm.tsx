@@ -25,7 +25,7 @@ const NewThresholdForm: React.FC<NewThresholdFormProps> = ({
 }) => {
   return (
     <div className="pt-4 border-t">
-      <Label className="mb-2 block">Neuer Grenzwert</Label>
+      <Label className="mb-2 block">Neuer Schwellenwert</Label>
 
       <div className="grid grid-cols-[1fr_1fr_auto] gap-2 items-end">
 

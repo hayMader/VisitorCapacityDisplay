@@ -58,12 +58,14 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas, curr
 
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false); // Modal for copying thresholds
 
+  const [accordionValue, setAccordionValue] = useState<string | null>("general");
   /* ---------------------------------------------------------------- */
   /*  Sync incoming area → local state                                 */
   /* ---------------------------------------------------------------- */
   useEffect(() => {
     setOriginalData(area);
     setFormData(area);
+    setAccordionValue("general");
   }, [area]);
 
   useEffect(() => {
@@ -103,8 +105,8 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas, curr
   const handleAddThreshold = () => {
     if (newThreshold.upper_threshold <= 0) {
       toast({
-        title: "Ungültiger Grenzwert",
-        description: "Der Grenzwert muss größer als 0 sein.",
+        title: "Ungültiger Schwellenwert",
+        description: "Der Schwellenwert muss größer als 0 sein.",
         variant: "destructive",
       });
       return;
@@ -112,7 +114,7 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas, curr
     if (formData.thresholds.length >= MAX_LEVELS) {
       toast({
         title: "Limit erreicht",
-        description: `Maximal ${MAX_LEVELS} Grenzwerte erlaubt.`,
+        description: `Maximal ${MAX_LEVELS} Schwellenwerte erlaubt.`,
         variant: "destructive",
       });
       return;
@@ -121,7 +123,7 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas, curr
     const maxSoFar = Math.max(0, ...formData.thresholds.map((t) => t.upper_threshold));
     if (newThreshold.upper_threshold <= maxSoFar) {
       toast({
-        title: "Grenzwert zu niedrig",
+        title: "Schwellenwert zu niedrig",
         description: `Er muss größer sein als ${maxSoFar}.`,
         variant: "destructive",
       });
@@ -162,7 +164,7 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas, curr
 
     if (edited.upper_threshold <= prev || edited.upper_threshold >= next) {
       toast({
-        title: "Ungültiger Grenzwert",
+        title: "Ungültiger Schwellenwert",
         description: `Er muss zwischen ${prev + 1} und ${
           next === Infinity ? "∞" : next - 1
         } liegen.`,
@@ -259,15 +261,18 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas, curr
 
   return (
     <div>
-    <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
       {currentPage !== "security" ? (
-      <Accordion type="single" collapsible defaultValue="general" className="w-full">
+      <Accordion type="single" collapsible value={accordionValue} onValueChange={setAccordionValue} className="w-full">
         {/* ---------------- allgemeine Einstellungen ---------------- */}
         <AccordionItem value="general">
         <AccordionTrigger className="py-4">
-          <div className="flex items-center">
+          <div className="flex items-start flex-col">
+          <div className="flex items-center mb-1">
           <Settings className="mr-2 h-5 w-5" />
           <span className="text">Allgemeine Einstellungen</span>
+          </div>
+          <p className="text-muted-foreground">Setzen Sie einen Namen und maximale Kapazität</p>
           </div>
         </AccordionTrigger>
         <AccordionContent>
@@ -275,12 +280,15 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas, curr
         </AccordionContent>
         </AccordionItem>
 
-        {/* ---------------- Grenzwerte Management ---------------- */}
+        {/* ---------------- Schwellenwert Management ---------------- */}
         <AccordionItem value="thresholds">
           <AccordionTrigger className="py-4">
-            <div className="flex items-center">
+            <div className="flex items-start flex-col">
+            <div className="flex items-center mb-1">
             <SlidersHorizontal className="mr-2 h-5 w-5" />
-            <span className="text">Grenzwerte Besucherzahl</span>
+            <span className="text">Schwellenwerte Besucherzahl</span>
+            </div>
+            <p className="text-muted-foreground">Definieren Sie bis zu 4 Schwellenwerte</p>
             </div>
           </AccordionTrigger>
           <AccordionContent>
@@ -298,10 +306,10 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas, curr
       </Accordion>
       ) : (
         <div className="w-full">
-          {/* ---------------- Grenzwerte Management ---------------- */}
+          {/* ---------------- Schwellenwert Management ---------------- */}
           <h2 className="py-4 flex items-center text-lg font-semibold">
           <SlidersHorizontal className="mr-2 h-5 w-5" />
-            Grenzwerte Besucherzahl
+            Schwellenwerte Besucherzahl
           </h2>
           <h4>Bereich: {formData.area_name}</h4>
           <ThresholdSettings
