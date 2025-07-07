@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/components/ui/use-toast';
 import { getAreaSettings } from '@/utils/api';
-import AreaConfiguratorAccordion from '@/components/AreaConfiguratorAccordion';
 import { AreaStatus } from '@/types';
 import AreaSettingsAccordion from '@/components/AreaSettingsAccordion';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Trash, Save } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
+import Areaconfigurator from '@/components/Areaconfigurator';
 
 const Admin = () => {
   const [areas, setAreas] = useState<AreaStatus[]>([]);
@@ -27,11 +27,10 @@ const Admin = () => {
   const navigate = useNavigate();
   const [hideAbsolute, setHideAbsolute] = useState(false);
   const [hidePercentage, setHidePercentage] = useState(false)
-  const [showConfigurator, setShowConfigurator] = useState(false);
-  const [selectedAreaData, setSelectedAreaData] = useState<null | AreaStatus>(null);
   const handleEditClick = (area: AreaStatus) => {
-  setSelectedAreaData(area);
   setSelectedArea(area);
+  setSelectedArea(area);
+  const handleEditClick = (area: AreaStatus) => setSelectedArea(area);
 };
 
 
@@ -133,17 +132,16 @@ const Admin = () => {
               </div>
               
               <ExhibitionMap 
-                autoRefresh={true} 
+                autoRefresh={true}
                 refreshInterval={60000}
-                onDataUpdate={handleDataUpdate} 
-                onAreaSelect={handleEditClick}
-                setShowConfigurator={setShowConfigurator}
+                onDataUpdate={handleDataUpdate}
                 showGermanLabels={showGermanTitle}
                 selectedArea={selectedArea}
                 timeFilter={timeFilter}
                 showNumbers={!hideAbsolute}
-                showPercentage={!hidePercentage}
-              />
+                showPercentage={!hidePercentage} setShowConfigurator={function (value: React.SetStateAction<boolean>): void {
+                  throw new Error('Function not implemented.');
+                } }              />
               <div className="flex gap-6 mb-2 mt-4">
                 <div className="flex items-center gap-2">
                   <Checkbox
@@ -317,14 +315,13 @@ const Admin = () => {
                   allAreas={areas}
                   />
                   <Separator className="my-4" />
-                  </>
-                  )}
-                      
-                < AreaConfiguratorAccordion
-                  area={selectedArea}
-                  onUpdate={handleAreaUpdate}
-                  onClose={() =>{}}
+
+                < Areaconfigurator
+                  selectedArea={selectedArea}
+                  onSave={handleAreaUpdate}
             />
+            </>
+              )}
           </div>                      
         </div>
       </div>

@@ -1,6 +1,3 @@
-/* ------------------------------------------------------------------
-   Area-Configurator   (styled like AreaSettingsAccordion)
-------------------------------------------------------------------- */
 import React, { useState } from "react";
 import {
   Accordion,
@@ -14,71 +11,65 @@ import { Separator } from "@/components/ui/separator";
 import { Plus, Save, Undo2, MapPin } from "lucide-react";
 import { AreaStatus } from "@/types";
 
-/* ─────────────────────   props   ───────────────────── */
+
 export interface AreaConfiguratorProps {
-  /** currently selected hall (or undefined for “new hall”) */
   selectedArea?: AreaStatus;
-  /** propagate changes back to parent (admin.tsx) */
   onSave: (updated: AreaStatus) => void;
   onClose?: () => void;
 }
 
-/* ───────────────────── component ───────────────────── */
+
+const emptyCoords = [
+  { x: 0, y: 0 },
+  { x: 0, y: 0 },
+  { x: 0, y: 0 },
+  { x: 0, y: 0 },
+];
+
 const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
   selectedArea,
   onSave,
 }) => {
-  /* initial state ------------------------------------------------- */
   const [nameDe, setNameDe] = useState(selectedArea?.area_name ?? "");
   const [nameEn, setNameEn] = useState(selectedArea?.area_name_en ?? "");
-  const [coords, setCoords] = useState<
-    { x: number; y: number }[]
-  >(
-    selectedArea?.coordinates?.length
-      ? selectedArea.coordinates
-      : [
-          { x: 0, y: 0 },
-          { x: 0, y: 0 },
-          { x: 0, y: 0 },
-          { x: 0, y: 0 },
-        ],
+  const [coords, setCoords] = useState<{ x: number; y: number }[]>(
+    selectedArea?.coordinates?.length ? selectedArea.coordinates : emptyCoords,
   );
 
-  /* handlers ------------------------------------------------------- */
-  const updateCoord = (
-    idx: number,
-    axis: "x" | "y",
-    value: string,
-  ) => {
+
+  const updateCoord = (idx: number, axis: "x" | "y", value: string) => {
     const c = [...coords];
     c[idx][axis] = Number(value) || 0;
     setCoords(c);
   };
 
-  const addPoint = () =>
-    setCoords([...coords, { x: 0, y: 0 }]);
+  const addPoint = () => setCoords([...coords, { x: 0, y: 0 }]);
 
   const reset = () => {
     setNameDe("");
     setNameEn("");
-    setCoords([
-      { x: 0, y: 0 },
-      { x: 0, y: 0 },
-      { x: 0, y: 0 },
-      { x: 0, y: 0 },
-    ]);
+    setCoords(emptyCoords);
   };
+
+
+  const newArea = () => reset();
 
   const handleSave = () => {
     if (!nameDe.trim() || !nameEn.trim()) return;
+
     const base: AreaStatus =
       selectedArea ??
       ({
-        id: Date.now(), // temp id for new hall
+        id: Date.now(),            
         area_name: "",
         area_name_en: "",
         coordinates: [],
-        /* + the other AreaStatus fields with sensible defaults */
+        thresholds: [],
+        amount_visitors: 0,
+        capacity_usage: 0,
+        hidden_name: false,
+        hidden_absolute: false,
+        hidden_percentage: false,
       } as unknown as AreaStatus);
 
     onSave({
@@ -89,14 +80,9 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
     });
   };
 
-  /* ─────────────────── UI ─────────────────── */
+
   return (
-    <Accordion
-      type="single"
-      collapsible
-      defaultValue="config"
-      className="w-full"
-    >
+    <Accordion type="single" collapsible defaultValue="config" className="w-full">
       <AccordionItem value="config">
         <AccordionTrigger className="py-4">
           <div className="flex items-center">
@@ -106,11 +92,18 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
         </AccordionTrigger>
 
         <AccordionContent>
-          {/* names -------------------------------------------------- */}
+          <div className="flex justify-end mb-4">
+            <Button variant="outline" size="sm" onClick={newArea}>
+              <Plus className="mr-1 h-4 w-4" />
+              Neues&nbsp;Areal
+            </Button>
+          </div>
+
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block mb-1 text-sm font-medium">
-                Bereichsname (DE)
+                Bereichsname&nbsp;(DE)
               </label>
               <Input
                 value={nameDe}
@@ -121,7 +114,7 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
 
             <div>
               <label className="block mb-1 text-sm font-medium">
-                Bereichsname (EN)
+                Bereichsname&nbsp;(EN)
               </label>
               <Input
                 value={nameEn}
@@ -133,27 +126,20 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
 
           <Separator className="my-4" />
 
-          {/* coordinates ------------------------------------------- */}
+
           <p className="font-medium mb-2">Koordinaten</p>
           {coords.map((c, i) => (
-            <div
-              key={i}
-              className="grid grid-cols-2 gap-4 mb-2"
-            >
+            <div key={i} className="grid grid-cols-2 gap-4 mb-2">
               <Input
                 type="number"
                 value={c.x}
-                onChange={(e) =>
-                  updateCoord(i, "x", e.target.value)
-                }
+                onChange={(e) => updateCoord(i, "x", e.target.value)}
                 placeholder={`X${i + 1}`}
               />
               <Input
                 type="number"
                 value={c.y}
-                onChange={(e) =>
-                  updateCoord(i, "y", e.target.value)
-                }
+                onChange={(e) => updateCoord(i, "y", e.target.value)}
                 placeholder={`Y${i + 1}`}
               />
             </div>
@@ -166,16 +152,12 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
             onClick={addPoint}
           >
             <Plus className="mr-1 h-4 w-4" />
-            Hinzufügen
+            Koordinate&nbsp;hinzufügen
           </Button>
 
-          {/* footer buttons ---------------------------------------- */}
+
           <div className="mt-6 flex justify-end gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={reset}
-            >
+            <Button type="button" variant="outline" onClick={reset}>
               <Undo2 className="mr-1 h-4 w-4" />
               Zurücksetzen
             </Button>
