@@ -201,6 +201,63 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                 : 0;
               const shouldBlink = previousThreshold.alert;
 
+              // Calculate the centroid and bounding box center
+              const pts = area.coordinates;
+              const n = pts.length;
+              let sumX = 0, sumY = 0;
+              let minX = Infinity, maxX = -Infinity;
+              let minY = Infinity, maxY = -Infinity;
+
+              for (let i = 0; i < n; i++) {
+                const { x, y } = pts[i];
+                sumX += x;
+                sumY += y;
+                if (x < minX) minX = x;
+                if (x > maxX) maxX = x;
+                if (y < minY) minY = y;
+                if (y > maxY) maxY = y;
+              }
+
+              const centroidX = sumX / n;
+              const centroidY = sumY / n;
+              const bboxCenterX = (minX + maxX) / 2;
+              const bboxCenterY = (minY + maxY) / 2;
+
+              // Choose horizontal center from bounding box for better horizontal fit
+              const cx = bboxCenterX;
+
+              // We'll still use centroidY for vertical alignment (optionally adjust lower)
+              let cy = centroidY;
+
+              // Prepare lines of text to render
+              const lines: { text: string; fontSize: number }[] = [];
+
+              const titleText = showGermanLabels ? area.area_name : area.area_name_en;
+              if (!area.hidden_name) {
+                lines.push({
+                  text: titleText,
+                  fontSize: isMediumSize ? 20 : 26,
+                });
+              }
+
+              if (showNumbers && !area.hidden_absolute) {
+                lines.push({
+                  text: `${area.amount_visitors}`,
+                  fontSize: isMediumSize ? 18 : 24,
+                });
+              }
+
+              if (showPercentage && !area.hidden_percentage) {
+                lines.push({
+                  text: `${pct} %`,
+                  fontSize: isMediumSize ? 16 : 22,
+                });
+              }
+
+              const lineHeight = 28; // adjust as needed
+              const totalHeight = lines.length * lineHeight;
+              const startY = cy - totalHeight / 2 + lineHeight / 2;
+
               return (
                 <g key={area.id}>
                   <polygon
@@ -212,141 +269,20 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                     className={`exhibition-hall cursor-pointer ${shouldBlink ? 'blink' : ''}`}
                     onClick={() => handleAreaClick(area)}
                   />
-                  {(() => {
-                    const pts = area.coordinates;
-                    const n = pts.length;
-                    let cx = 0, cy = 0;
-                    for (let i = 0; i < n; i++) {
-                      cx += pts[i].x;
-                      cy += pts[i].y;
-                    }
-                    cx /= n;
-                    cy /= n;
-
-                    // Check if this area should use side-by-side layout
-                    const useSideBySideLayout = area.id === 26 || area.id === 27; // Atrium (26) and Freigelände Mitte (27)
-                    
-                    if (useSideBySideLayout) {
-                      // Side-by-side layout for Atrium
-                      return (
-                        <>
-                          {!area.hidden_name && (
-                            area.id === 27 ? (
-                              // Special two-line layout for Freigelände Mitte / Center Outdoor Area
-                              <>
-                                <text
-                                  x={cx - 80}
-                                  y={cy - 15}
-                                  textAnchor="middle"
-                                  dominantBaseline="middle"
-                                  fill="#1e293b"
-                                  fontWeight="bold"
-                                  fontSize={isMediumSize ? "20" : "26"}
-                                >
-                                  {showGermanLabels ? "Freigelände" : "Center Outdoor"}
-                                </text>
-                                <text
-                                  x={cx - 80}
-                                  y={cy + 15}
-                                  textAnchor="middle"
-                                  dominantBaseline="middle"
-                                  fill="#1e293b"
-                                  fontWeight="bold"
-                                  fontSize={isMediumSize ? "20" : "26"}
-                                >
-                                  {showGermanLabels ? "Mitte" : "Area"}
-                                </text>
-                              </>
-                            ) : (
-                              // Standard single-line layout for other areas using side-by-side
-                              <text
-                                x={cx - (showNumbers || showPercentage ? 40 : 0)}
-                                y={cy}
-                                textAnchor={(showNumbers || showPercentage) ? "end" : "middle"}
-                                dominantBaseline="middle"
-                                fill="#1e293b"
-                                fontWeight="bold"
-                                fontSize={isMediumSize ? "20" : "26"}
-                              >
-                                {showGermanLabels ? area.area_name : area.area_name_en}
-                              </text>
-                            )
-                          )}
-
-                          {showNumbers && !area.hidden_absolute && (
-                            <text
-                              x={area.id === 27 ? cx - 80 : (cx + (!area.hidden_name ? 10 : 0))}
-                              y={area.id === 27 ? cy + 45 : (cy + (area.id === 27 && !area.hidden_name ? 40 : 0))}
-                              textAnchor={area.id === 27 ? "middle" : (!area.hidden_name ? "start" : "middle")}
-                              dominantBaseline="middle"
-                              fill="#1e293b"
-                              fontSize={isMediumSize ? "18" : "24"}
-                            >
-                              {area.amount_visitors}
-                            </text>
-                          )}
-
-                          {showPercentage && !area.hidden_percentage && (
-                            <text
-                              x={area.id === 27 ? cx - 80 : (cx + (!area.hidden_name ? (showNumbers && !area.hidden_absolute ? 60 : 10) : (showNumbers && !area.hidden_absolute ? 30 : 0)))}
-                              y={area.id === 27 ? cy + 70 : (cy + (area.id === 27 && !area.hidden_name ? 40 : 0))}
-                              textAnchor={area.id === 27 ? "middle" : (!area.hidden_name ? "start" : "middle")}
-                              dominantBaseline="middle"
-                              fill="#1e293b"
-                              fontSize={isMediumSize ? "16" : "22"}
-                            >
-                              {pct} %
-                            </text>
-                          )}
-                        </>
-                      );
-                    } else {
-                      // Standard vertical layout for all other areas
-                      return (
-                        <>
-                          {!area.hidden_name && (
-                            <text
-                              x={cx}
-                              y={cy - (!area.hidden_absolute && !area.hidden_percentage ? 22 : 0)}
-                              textAnchor="middle"
-                              dominantBaseline="middle"
-                              fill="#1e293b"
-                              fontWeight="bold"
-                              fontSize={isMediumSize ? "20" : "26"}
-                            >
-                              {showGermanLabels ? area.area_name : area.area_name_en}
-                            </text>
-                          )}
-
-                          {showNumbers && !area.hidden_absolute && (
-                            <text
-                              x={cx}
-                              y={cy + (!area.hidden_percentage ? 11 : 22)}
-                              textAnchor="middle"
-                              dominantBaseline="middle"
-                              fill="#1e293b"
-                              fontSize={isMediumSize ? "18" : "24"}
-                            >
-                              {area.amount_visitors}
-                            </text>
-                          )}
-
-                          {showPercentage && !area.hidden_percentage && (
-                            <text
-                              x={cx}
-                              y={cy + (!area.hidden_absolute ? 44 : 22)}
-                              textAnchor="middle"
-                              dominantBaseline="middle"
-                              fill="#1e293b"
-                              fontSize={isMediumSize ? "16" : "22"}
-                            >
-                              {pct} %
-                            </text>
-                          )}
-                        </>
-                      );
-                    }
-                  })()}
+                  {lines.map((line, index) => (
+                    <text
+                      key={index}
+                      x={cx}
+                      y={startY + index * lineHeight}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill="#1e293b"
+                      fontWeight={index === 0 ? "bold" : "normal"}
+                      fontSize={line.fontSize}
+                    >
+                      {line.text}
+                    </text>
+                  ))}
                 </g>
               );
             })}
@@ -374,7 +310,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                   fontSize: isMediumSize ? '1rem' : '1.25rem' 
                   }}
                 >
-                  {showGermanLabels || !row.object_en ? row.object : row.object_en}
+                  {row.object}
                 </span>
                 )
                 )}
