@@ -1,127 +1,197 @@
-// src/components/AreaConfigurator.tsx
-
+/* ------------------------------------------------------------------
+   Area-Configurator   (styled like AreaSettingsAccordion)
+------------------------------------------------------------------- */
 import React, { useState } from "react";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { Plus, Save, Undo2, MapPin } from "lucide-react";
 import { AreaStatus } from "@/types";
-import { Coordinate } from "recharts/types/util/types";
 
-type AreaConfiguratorProps = {
-  selectedArea?: AreaStatus | null;
-  onSave: (updatedArea: AreaStatus) => void;
-  onClose: () => void;
-};
+/* ─────────────────────   props   ───────────────────── */
+export interface AreaConfiguratorProps {
+  /** currently selected hall (or undefined for “new hall”) */
+  selectedArea?: AreaStatus;
+  /** propagate changes back to parent (admin.tsx) */
+  onSave: (updated: AreaStatus) => void;
+  onClose?: () => void;
+}
 
-const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({ selectedArea, onSave, onClose }) => {
-  const [nameDe, setNameDe] = useState(selectedArea?.area_name || "");
-  const [nameEn, setNameEn] = useState(selectedArea?.area_name_en || "");
-  const [coordinates, setCoordinates] = useState<Coordinate[]>(
-    selectedArea?.coordinates || Array(4).fill({ x: 0, y: 0 })
+/* ───────────────────── component ───────────────────── */
+const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
+  selectedArea,
+  onSave,
+}) => {
+  /* initial state ------------------------------------------------- */
+  const [nameDe, setNameDe] = useState(selectedArea?.area_name ?? "");
+  const [nameEn, setNameEn] = useState(selectedArea?.area_name_en ?? "");
+  const [coords, setCoords] = useState<
+    { x: number; y: number }[]
+  >(
+    selectedArea?.coordinates?.length
+      ? selectedArea.coordinates
+      : [
+          { x: 0, y: 0 },
+          { x: 0, y: 0 },
+          { x: 0, y: 0 },
+          { x: 0, y: 0 },
+        ],
   );
 
-  const handleCoordChange = (index: number, key: "x" | "y", value: number) => {
-    const updated = [...coordinates];
-    updated[index][key] = value;
-    setCoordinates(updated);
+  /* handlers ------------------------------------------------------- */
+  const updateCoord = (
+    idx: number,
+    axis: "x" | "y",
+    value: string,
+  ) => {
+    const c = [...coords];
+    c[idx][axis] = Number(value) || 0;
+    setCoords(c);
   };
 
-  const handleAddCoord = () => {
-    setCoordinates([...coordinates, { x: 0, y: 0 }]);
-  };
+  const addPoint = () =>
+    setCoords([...coords, { x: 0, y: 0 }]);
 
-  const handleReset = () => {
+  const reset = () => {
     setNameDe("");
     setNameEn("");
-    setCoordinates(Array(4).fill({ x: 0, y: 0 }));
+    setCoords([
+      { x: 0, y: 0 },
+      { x: 0, y: 0 },
+      { x: 0, y: 0 },
+      { x: 0, y: 0 },
+    ]);
   };
 
   const handleSave = () => {
-    if (!selectedArea) return;
+    if (!nameDe.trim() || !nameEn.trim()) return;
+    const base: AreaStatus =
+      selectedArea ??
+      ({
+        id: Date.now(), // temp id for new hall
+        area_name: "",
+        area_name_en: "",
+        coordinates: [],
+        /* + the other AreaStatus fields with sensible defaults */
+      } as unknown as AreaStatus);
+
     onSave({
-      ...selectedArea,
+      ...base,
       area_name: nameDe,
       area_name_en: nameEn,
-      coordinates,
+      coordinates: coords,
     });
   };
 
+  /* ─────────────────── UI ─────────────────── */
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="font-semibold text-sm">Anpassung Areal</h3>
-        <button
-          className="text-sm bg-black text-white px-3 py-1 rounded hover:bg-gray-800"
-          onClick={() => { onClose(); }}
-        >
-          + Neues Areal
-        </button>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="text-sm font-medium block mb-1">Bereichsname (Deutsch)</label>
-          <input
-            value={nameDe}
-            onChange={(e) => setNameDe(e.target.value)}
-            className="w-full border rounded px-3 py-2"
-            placeholder="B3"
-          />
-        </div>
-        <div>
-          <label className="text-sm font-medium block mb-1">Bereichsname (Englisch)</label>
-          <input
-            value={nameEn}
-            onChange={(e) => setNameEn(e.target.value)}
-            className="w-full border rounded px-3 py-2"
-            placeholder="B3"
-          />
-        </div>
-      </div>
-
-      <div>
-        <label className="font-medium block mb-2">Koordinaten</label>
-        {coordinates.map((coord, index) => (
-          <div className="grid grid-cols-2 gap-4 mb-2" key={index}>
-            <input
-              type="number"
-              className="border rounded px-3 py-2"
-              placeholder={`X${index + 1}`}
-              value={coord.x}
-              onChange={(e) => handleCoordChange(index, "x", parseInt(e.target.value) || 0)}
-            />
-            <input
-              type="number"
-              className="border rounded px-3 py-2"
-              placeholder={`Y${index + 1}`}
-              value={coord.y}
-              onChange={(e) => handleCoordChange(index, "y", parseInt(e.target.value) || 0)}
-            />
+    <Accordion
+      type="single"
+      collapsible
+      defaultValue="config"
+      className="w-full"
+    >
+      <AccordionItem value="config">
+        <AccordionTrigger className="py-4">
+          <div className="flex items-center">
+            <MapPin className="mr-2 h-5 w-5" />
+            <span className="text">Areal-Koordinaten</span>
           </div>
-        ))}
+        </AccordionTrigger>
 
-        <button
-          className="text-sm text-blue-600 hover:underline"
-          onClick={handleAddCoord}
-        >
-          + Hinzufügen
-        </button>
-      </div>
+        <AccordionContent>
+          {/* names -------------------------------------------------- */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block mb-1 text-sm font-medium">
+                Bereichsname (DE)
+              </label>
+              <Input
+                value={nameDe}
+                placeholder="z. B. B3"
+                onChange={(e) => setNameDe(e.target.value)}
+              />
+            </div>
 
-      <div className="text-xs text-gray-500 mt-4">
-        <span className="inline-block mr-1">🞁</span>
-        Oder nutzen Sie das Fadenkreuz, um den Wert für die aktuelle Koordinate auf der Karte auszuwählen.
-      </div>
+            <div>
+              <label className="block mb-1 text-sm font-medium">
+                Bereichsname (EN)
+              </label>
+              <Input
+                value={nameEn}
+                placeholder="e.g. B3"
+                onChange={(e) => setNameEn(e.target.value)}
+              />
+            </div>
+          </div>
 
-      <div className="flex justify-between pt-4">
-        <button onClick={handleReset} className="text-sm px-4 py-2 border rounded">
-          Zurücksetzen
-        </button>
-        <button
-          onClick={handleSave}
-          className="text-sm px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
-        >
-          Speichern
-        </button>
-      </div>
-    </div>
+          <Separator className="my-4" />
+
+          {/* coordinates ------------------------------------------- */}
+          <p className="font-medium mb-2">Koordinaten</p>
+          {coords.map((c, i) => (
+            <div
+              key={i}
+              className="grid grid-cols-2 gap-4 mb-2"
+            >
+              <Input
+                type="number"
+                value={c.x}
+                onChange={(e) =>
+                  updateCoord(i, "x", e.target.value)
+                }
+                placeholder={`X${i + 1}`}
+              />
+              <Input
+                type="number"
+                value={c.y}
+                onChange={(e) =>
+                  updateCoord(i, "y", e.target.value)
+                }
+                placeholder={`Y${i + 1}`}
+              />
+            </div>
+          ))}
+
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-2"
+            onClick={addPoint}
+          >
+            <Plus className="mr-1 h-4 w-4" />
+            Hinzufügen
+          </Button>
+
+          {/* footer buttons ---------------------------------------- */}
+          <div className="mt-6 flex justify-end gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={reset}
+            >
+              <Undo2 className="mr-1 h-4 w-4" />
+              Zurücksetzen
+            </Button>
+
+            <Button
+              type="button"
+              onClick={handleSave}
+              disabled={!nameDe.trim() || !nameEn.trim()}
+            >
+              <Save className="mr-1 h-4 w-4" />
+              Speichern
+            </Button>
+          </div>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 };
 
