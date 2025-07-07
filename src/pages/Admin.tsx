@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/components/ui/use-toast';
 import { getAreaSettings } from '@/utils/api';
+import AreaConfiguratorAccordion from '@/components/AreaConfiguratorAccordion';
 import { AreaStatus } from '@/types';
 import AreaSettingsAccordion from '@/components/AreaSettingsAccordion';
 import { useAuth } from '@/contexts/AuthContext';
@@ -25,7 +26,14 @@ const Admin = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [hideAbsolute, setHideAbsolute] = useState(false);
-  const [hidePercentage, setHidePercentage] = useState(false);
+  const [hidePercentage, setHidePercentage] = useState(false)
+  const [showConfigurator, setShowConfigurator] = useState(false);
+  const [selectedAreaData, setSelectedAreaData] = useState<null | AreaStatus>(null);
+  const handleEditClick = (area: AreaStatus) => {
+  setSelectedAreaData(area);
+  setSelectedArea(area);
+};
+
 
   const [legendRows, setLegendRows] = useState<Partial<LegendRow>[]>([
     { object: "", description_de: "", description_en: "" }
@@ -128,14 +136,14 @@ const Admin = () => {
                 autoRefresh={true} 
                 refreshInterval={60000}
                 onDataUpdate={handleDataUpdate} 
-                onAreaSelect={setSelectedArea}
+                onAreaSelect={handleEditClick}
+                setShowConfigurator={setShowConfigurator}
                 showGermanLabels={showGermanTitle}
                 selectedArea={selectedArea}
                 timeFilter={timeFilter}
                 showNumbers={!hideAbsolute}
                 showPercentage={!hidePercentage}
               />
-
               <div className="flex gap-6 mb-2 mt-4">
                 <div className="flex items-center gap-2">
                   <Checkbox
@@ -301,21 +309,26 @@ const Admin = () => {
               </div>
               <Separator className="mb-4" />
               
-              {selectedArea !== null ? (
+              {selectedArea !== null && (
+                <>
                 <AreaSettingsAccordion
                   area={selectedArea}
                   onUpdate={handleAreaUpdate}
                   allAreas={areas}
-                />
-              ) : (
-                <p className="text-muted-foreground text-center py-8">
-                  Bitte wählen Sie einen Bereich aus, um die Einstellungen zu bearbeiten.
-                </p>
-              )}
-            </div>
-          </div>
+                  />
+                  <Separator className="my-4" />
+                  </>
+                  )}
+                      
+                < AreaConfiguratorAccordion
+                  area={selectedArea}
+                  onUpdate={handleAreaUpdate}
+                  onClose={() =>{}}
+            />
+          </div>                      
         </div>
-      </main>
+      </div>
+    </main>
       
       <footer className="bg-white border-t py-4">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">

@@ -3,7 +3,7 @@ import { toast } from '@/components/ui/use-toast';
 import { AreaStatus, Threshold } from '@/types';
 import { getAreaSettings } from '@/utils/api';
 import { RefreshCw } from 'lucide-react';
-import { Area } from 'recharts';
+import { Pencil } from "lucide-react";;
 import { getLegend } from '@/utils/api';
 import { LegendRow } from '@/types';
 
@@ -12,6 +12,7 @@ interface ExhibitionMapProps {
   refreshInterval?: number;
   onDataUpdate?: (areaStatus: AreaStatus[]) => void;
   onAreaSelect?: (areaNumber: AreaStatus) => void;
+  setShowConfigurator: React.Dispatch<React.SetStateAction<boolean>>;
   selectedArea?: AreaStatus | null;
   timeFilter?: number; // in minutes, default to 1440 (24 hours)
   showGermanLabels?: boolean; //
@@ -88,7 +89,8 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
     return () => {
       window.removeEventListener('resize', checkContainerSize);
     };
-  }, [containerRef.current]);
+  }
+, [containerRef.current]);
 
   useEffect(() => {
     if (!autoRefresh) return;
@@ -104,11 +106,11 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
     fetchData();
   };
   
-  const handleAreaClick = (area: AreaStatus) => {
+  function handleAreaClick(area: AreaStatus) {
     if (onAreaSelect) {
       onAreaSelect(area);
     }
-  };
+  }
 
   const getOccupancyLevel = (visitorCount: number, thresholds: Threshold[]) => {
     return thresholds.reduce((min, t) =>
@@ -138,6 +140,10 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
         <p className="mt-4 text-lg text-muted-foreground">Daten werden geladen...</p>
       </div>
     );
+  }
+
+  function setShowConfigurator(arg0: boolean): void {
+    throw new Error('Function not implemented.');
   }
 
   return (
@@ -178,13 +184,21 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                   className={`h-5 w-5 text-primary ${isRefreshing ? 'animate-spin' : ''} `}
                 />
             </button>
-          </div>
+            {/* Edit Area Button */}
+              <button
+                  onClick={() =>
+                     setShowConfigurator(true)}
+                  className="bg-white p-2 rounded-full shadow hover:bg-gray-50 transition-colors"
+                  aria-label="Edit Area"
+                    >
+                    ✎
+                </button>
+              </div>
           <img 
             src="/plan-exhibtion-area.jpg" 
             alt="MMG Messegelände" 
             className="max-h-[85vh] w-auto object-contain"
           />
-          
           <svg 
             className="absolute inset-0 w-full h-full" 
             viewBox="0 0 2050 1248" 
