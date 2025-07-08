@@ -216,7 +216,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
           >
             {areaStatus.map((area) => {
               const visitorCount = area.amount_visitors;
-              const thresholds = area.thresholds.filter(t => t.type === currentPage); // Filter thresholds based on the page type
+                const thresholds = area.thresholds.filter(t => t.type === (currentPage || 'management')); // Default to 'management' if currentPage is empty
               const activeTreshold = getOccupancyLevel(visitorCount, thresholds);
               const previousThreshold = getPreviousThreshold(visitorCount, thresholds);
               const isSelected = selectedArea === area;
@@ -314,7 +314,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
         </div>
       </div>
 
-      {currentPage === 'management' && (
+      {currentPage === 'management' || !currentPage && (
       <div ref={containerRef} className={`flex ${isMediumSize ? 'absolute' : ''} bottom-4 right-4 z-10 bg-white p-4 rounded sm:shadow-xl items-right mr-4`} style={{minWidth: "20%", flexGrow: 1 }}>
         <div className="space-y-1">
           {legendRows.map((row) => (
