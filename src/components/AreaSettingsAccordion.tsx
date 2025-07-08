@@ -12,6 +12,8 @@ import {
   SlidersHorizontal,
   Copy,
   Save,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
 import AreaGeneralSettings from "@/components/ui/AreaGeneralSettings";
@@ -20,6 +22,7 @@ import ThresholdSettings from "@/components/ThresholdSettings";
 import AreaConfigurator from "./AreaConfigurator";
 import { AreaStatus, Threshold } from "@/types";
 import { updateAreaSettings, copyThresholdsToAreas } from "@/utils/api";
+import { useAreaStatus } from "@/contexts/AreaStatusContext";
 
 import { isEqual } from "lodash";
 
@@ -29,32 +32,28 @@ export const MAX_LEVELS = 4; // ab jetzt 4 Stufen möglich
 /*  Props                                                             */
 /* ------------------------------------------------------------------ */
 interface Props {
-  area: AreaStatus;
+  area: AreaStatus | null; // Area data to be managed
   onUpdate: (a: AreaStatus) => void;
-  allAreas: AreaStatus[]; // List of all areas for copying thresholds
   currentPage?: "management" | "security"; // Current page context
   showConfigurator?: boolean;
   onCloseConfigurator?: () => void;
 }
 
-const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas, currentPage, showConfigurator, onCloseConfigurator }) => {
+const AreaSettingsAccordion: React.FC<Props> = ({ area = null, onUpdate, currentPage, showConfigurator, onCloseConfigurator }) => {
+
+
+  const { updateAreaStatus } = useAreaStatus();
   /* ---------------------------------------------------------------- */
   /*  State                                                           */
   /* ---------------------------------------------------------------- */
-  const [originalData, setOriginalData] = useState<AreaStatus>(area);
-  const [formData, setFormData] = useState<AreaStatus>(area);
+  const [originalData, setOriginalData] = useState<AreaStatus | null>(area);
+  const [formData, setFormData] = useState<AreaStatus | null>(area);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [hasChanges, setHasChanges] = useState(false);
 
   const [newThreshold, setNewThreshold] = useState({
-    upper_threshold: 0,
-    color: "#cccccc",
-  });
-
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [edited, setEdited] = useState<{ upper_threshold: number; color: string }>({
     upper_threshold: 0,
     color: "#cccccc",
   });
@@ -74,7 +73,12 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas, curr
   useEffect(() => {
     setIsLoading(!originalData);
     if (!formData) setFormData(originalData);
-    setHasChanges(!isEqual(formData, originalData));
+    const hasUnsavedChanges = !isEqual(formData, originalData);
+    setHasChanges(hasUnsavedChanges);
+    if (hasUnsavedChanges) {
+      console.log("Changes detected:", formData);
+      handleSubmit();
+    }
   }, [formData, originalData]);
 
   /* ---------------------------------------------------------------- */
@@ -103,121 +107,23 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas, curr
   };
 
   /* ---------------------------------------------------------------- */
-  /*  Threshold Add / Edit / Delete                                    */
-  /* ---------------------------------------------------------------- */
-  const handleAddThreshold = () => {
-    if (newThreshold.upper_threshold <= 0) {
-      toast({
-        title: "Ungültiger Schwellenwert",
-        description: "Der Schwellenwert muss größer als 0 sein.",
-        variant: "destructive",
-      });
-      return;
-    }
-    if (formData.thresholds.length >= MAX_LEVELS) {
-      toast({
-        title: "Limit erreicht",
-        description: `Maximal ${MAX_LEVELS} Schwellenwerte erlaubt.`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const maxSoFar = Math.max(0, ...formData.thresholds.map((t) => t.upper_threshold));
-    if (newThreshold.upper_threshold <= maxSoFar) {
-      toast({
-        title: "Schwellenwert zu niedrig",
-        description: `Er muss größer sein als ${maxSoFar}.`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const tempId = -Date.now();
-    const threshold: Threshold = {
-      id: tempId,
-      setting_id: area.id,
-      upper_threshold: newThreshold.upper_threshold,
-      color: newThreshold.color,
-      type: currentPage,
-      alert: false,
-      alert_message: "",
-    };
-
-    setFormData((p) => ({ ...p, thresholds: [...p.thresholds, threshold] }));
-    setNewThreshold({ upper_threshold: 0, color: "#cccccc" });
-  };
-
-  const beginEdit = (t: Threshold) => {
-    setEditingId(t.id);
-    setEdited({ upper_threshold: t.upper_threshold, color: t.color });
-  };
-
-  const cancelEdit = () => setEditingId(null);
-
-  const saveEdit = (id: number) => {
-    const idx = formData.thresholds.findIndex((t) => t.id === id);
-    if (idx === -1) return;
-
-    const prev = idx === 0 ? 0 : formData.thresholds[idx - 1].upper_threshold;
-    const next =
-      idx === formData.thresholds.length - 1
-        ? Infinity
-        : formData.thresholds[idx + 1].upper_threshold;
-
-    if (edited.upper_threshold <= prev || edited.upper_threshold >= next) {
-      toast({
-        title: "Ungültiger Schwellenwert",
-        description: `Er muss zwischen ${prev + 1} und ${
-          next === Infinity ? "∞" : next - 1
-        } liegen.`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setFormData((p) => ({
-      ...p,
-      thresholds: p.thresholds.map((t) =>
-        t.id === id ? { ...t, ...edited } : t
-      ),
-    }));
-    setEditingId(null);
-  };
-
-  const deleteThreshold = (id: number) => {
-    setFormData((p) => ({
-      ...p,
-      thresholds: p.thresholds.filter((t) => t.id !== id),
-    }));
-  };
-
-  /* ---------------------------------------------------------------- */
   /*  Submit                                                          */
   /* ---------------------------------------------------------------- */
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     setIsSubmitting(true);
-    
+
     try {
-      let updatedArea = null;
-      if (!isEqual(formData, originalData)) {    
-        updatedArea = await updateAreaSettings(area.id, formData);
-      }
+      updateAreaStatus(formData);
+
+      setOriginalData(formData);
       
+      // Notify parent
+      onUpdate(formData);
       
-      // If any changes were made, refetch the latest data
-      if (hasChanges) {        
-        setOriginalData(formData);
-        
-        // Notify parent
-        onUpdate(formData);
-        
-        toast({
-          title: 'Einstellungen aktualisiert',
-          description: `Die Einstellungen für ${area.area_name} wurden erfolgreich aktualisiert.`,
-        });
-      }
+      toast({
+        title: 'Einstellungen aktualisiert',
+        description: `Die Einstellungen für ${area.area_name} wurden erfolgreich aktualisiert.`,
+      });
     } catch (error) {
       console.error('Error updating settings:', error);
       toast({
@@ -262,6 +168,14 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas, curr
     );
   }
 
+  if (!area) {
+    return (
+      <div className="p-4 text-center">
+        <p>Kein Bereich ausgewählt.</p>
+      </div>
+    );
+  }
+
   if (showConfigurator) {
     return (
       <AreaConfigurator
@@ -276,7 +190,6 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas, curr
 
   return (
     <div>
-      <form onSubmit={handleSubmit}>
       {currentPage !== "security" ? (
       <Accordion type="single" collapsible value={accordionValue} onValueChange={setAccordionValue} className="w-full">
         {/* ---------------- allgemeine Einstellungen ---------------- */}
@@ -353,20 +266,45 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas, curr
         </AccordionItem> */}
 
       {/* ---------- Footer (Speichern) ---------- */}
-      <div className="mt-6 flex justify-end">
-        <Button type="submit" disabled={isSubmitting || !hasChanges}>
-          <Save className="mr-2 h-4 w-4" />
-          {isSubmitting ? "Speichern …" : "Speichern"}
-        </Button>
+      <div className="mt-6 flex justify-between">
+        { formData.status === "active" ? (
+          <>
+            <Button type="submit" disabled={isSubmitting}
+              variant="destructive"
+              onClick={() => {
+                setFormData((prev) => ({ ...prev, status: "inactive" }));
+              }}
+            >
+              <EyeOff className="mr-2 h-4 w-4" />
+              {isSubmitting ? "Deaktiviere …" : "Deaktivieren"}
+            </Button>
+            <Button type="submit" disabled={isSubmitting || !hasChanges}
+              onClick={handleSubmit}
+            >
+              <Save className="mr-2 h-4 w-4" />
+              {isSubmitting ? "Speichern …" : "Speichern"}
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button type="submit" disabled={isSubmitting}
+              onClick={() => {
+                setFormData((prev) => ({ ...prev, status: "active" }));
+              }}
+            >
+              <Eye className="mr-2 h-4 w-4" />
+              Aktivieren
+            </Button>
+          </>
+        )}
+        
       </div>
-    </form>
 
     {/*Model for copying thresholds*/}
     <CopyThresholdsModal
       open={isCopyModalOpen}
       onClose={() => setIsCopyModalOpen(false)}
       sourceArea={formData}
-      allAreas={allAreas}
       onApply={handleCopyThresholds}
     />
   </div>

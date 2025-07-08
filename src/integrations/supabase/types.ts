@@ -17,18 +17,21 @@ export type Database = {
         Row: {
           id: number
           object: string
+          object_en: string
           description_de: string
           description_en: string
         }
         Insert: {
           id?: number
           object: string
+          object_en: string
           description_de: string
           description_en: string
         }
         Update: {
           id?: number
           object?: string
+          object_en?: string
           description_de?: string
           description_en?: string
         }
@@ -43,6 +46,7 @@ export type Database = {
           id: number
           last_updated: string
           hidden_name: boolean
+          status: "active" | "inactive";
         }
         Insert: {
           area_name: string
@@ -52,6 +56,7 @@ export type Database = {
           id?: number
           last_updated?: string
           hidden_name?: boolean
+          status?: "active" | "inactive";
         }
         Update: {
           area_name?: string
@@ -61,6 +66,7 @@ export type Database = {
           id?: number
           last_updated?: string
           hidden_name?: boolean
+          status?: "active" | "inactive";
         }
         Relationships: []
       }
@@ -75,13 +81,13 @@ export type Database = {
           type: "security" | "management"
         }
         Insert: {
-          color: string
+          color?: string
           id?: number
-          setting_id: number
-          upper_threshold: number
-          alert: boolean
+          setting_id?: number
+          upper_threshold?: number
+          alert?: boolean
           alert_message?: string | null
-          type: "security" | "management"
+          type?: "security" | "management"
         }
         Update: {
           color?: string
@@ -156,6 +162,7 @@ export type Database = {
           coordinates: { x: number; y: number }[];
           highlight: string | null
           thresholds: Json | null
+          status: "active" | "inactive";
           hidden_name: boolean
         }
         Insert: {
@@ -166,6 +173,7 @@ export type Database = {
           coordinates: { x: number; y: number }[];
           highlight?: string | null
           thresholds?: never
+          status?: "active" | "inactive";
           hidden_name?: boolean
         }
         Update: {
@@ -177,6 +185,7 @@ export type Database = {
           highlight?: string | null
           thresholds?: never
           hidden_name?: boolean
+          status?: "active" | "inactive";
         }
         Relationships: []
       }

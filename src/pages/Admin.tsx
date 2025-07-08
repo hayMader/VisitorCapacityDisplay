@@ -7,22 +7,18 @@ import { toast } from '@/components/ui/use-toast';
 import { getAreaSettings } from '@/utils/api';
 import { AreaStatus } from '@/types';
 import AreaSettingsAccordion from '@/components/AreaSettingsAccordion';
-import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 import { refreshLegend, getLegend } from "@/utils/api";
 import { LegendRow } from "@/types";
 import { Label } from '@/components/ui/label';
 import { Trash, Save } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useAreaStatus } from "@/contexts/AreaStatusContext";
 
 const Admin = () => {
-  const [areas, setAreas] = useState<AreaStatus[]>([]);
-  const [selectedArea, setSelectedArea] = useState<AreaStatus>(null);
+  const { selectedArea, setSelectedArea, updateAreaStatus } = useAreaStatus();
   const [timeFilter, setTimeFilter] = useState(1440);
   const [showGermanTitle, setShowGermanTitle] = useState<boolean>(false);
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
   const [showAbsolute, setShowAbsolute] = useState(true);
   const [showPercentage, setShowPercentage] = useState(true)
   const [showConfigurator, setShowConfigurator] = useState(false);
@@ -34,30 +30,8 @@ const Admin = () => {
   ])
 
   useEffect(() => {
-    const fetchInitialData = async () => {
-      try {
-        const areaData = await getAreaSettings();
-        const legendData = await getLegend();
-        setLegendRows(legendData);
-        setAreas(areaData);
-        if (areaData.length > 0) {
-          setSelectedArea(areaData[0]);
-        }
-      } catch (error) {
-        console.error('Error fetching initial data:', error);
-        toast({
-          title: 'Fehler',
-          description: 'Die Einstellungen konnten nicht geladen werden.',
-          variant: 'destructive',
-        });
-      }
-    };
-    
-    fetchInitialData();
-  }, []);
-
-  useEffect(() => {
-      const intervalId = setInterval(() => {
+    // Set up interval to toggle German title every 8 seconds
+    const intervalId = setInterval(() => {
       setShowGermanTitle((prev) => !prev);
     }, 8000);
     
@@ -81,26 +55,7 @@ const Admin = () => {
   
 
   const handleAreaUpdate = (updatedArea: AreaStatus) => {
-    setAreas(areas.map(area => 
-      area.id === updatedArea.id ? updatedArea : area
-    ));
-  };
-
-  const handleDataUpdate = (newAreaStatus: AreaStatus[]) => {
-    setAreas(newAreaStatus);
-  };
-
-  const handleEditClick = (area: AreaStatus) => {
-    setSelectedArea(area);
-  };
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-    toast({
-      title: "Abgemeldet",
-      description: "Sie wurden erfolgreich abgemeldet."
-    });
+    updateAreaStatus(updatedArea);
   };
 
   const handleLegendRefresh = async () => {
@@ -148,12 +103,11 @@ const Admin = () => {
               <ExhibitionMap 
                 autoRefresh={true}
                 refreshInterval={60000}
-                onDataUpdate={handleDataUpdate}
                 showGermanLabels={showGermanTitle}
-                selectedArea={selectedArea}
                 timeFilter={timeFilter}
                 showNumbers={showAbsolute}
                 showPercentage={showPercentage}
+                onAreaSelect={handleAreaSelect}
                 currentPage='management'
                 setShowConfigurator={setShowConfigurator}
               />
@@ -343,7 +297,6 @@ const Admin = () => {
                 <AreaSettingsAccordion
                   area={selectedArea}
                   onUpdate={handleAreaUpdate}
-                  allAreas={areas}
                   showConfigurator={showConfigurator}
                   onCloseConfigurator={() => setShowConfigurator(false)}
                   currentPage='management'

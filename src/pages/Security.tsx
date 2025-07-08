@@ -7,22 +7,18 @@ import { toast } from '@/components/ui/use-toast';
 import { getAreaSettings } from '@/utils/api';
 import { AreaStatus } from '@/types';
 import AreaSettingsAccordion from '@/components/AreaSettingsAccordion';
-import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 import { refreshLegend, getLegend } from "@/utils/api";
 import { LegendRow } from "@/types";
 import { Label } from '@/components/ui/label';
 import { Trash, Save, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useAreaStatus } from "@/contexts/AreaStatusContext";
 
 const Security = () => {
-  const [areas, setAreas] = useState<AreaStatus[]>([]);
-  const [selectedArea, setSelectedArea] = useState<AreaStatus>(null);
+  const { areaStatus, selectedArea, setSelectedArea, } = useAreaStatus();
   const [timeFilter, setTimeFilter] = useState(1440);
   const [showGermanTitle, setShowGermanTitle] = useState<boolean>(false);
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
   const [hideAbsolute, setHideAbsolute] = useState(false);
   const [hidePercentage, setHidePercentage] = useState(false);
 
@@ -42,9 +38,9 @@ const Security = () => {
         console.log("Fetched area data:", areaData);
         const legendData = await getLegend();
         setLegendRows(legendData);
-        setAreas(areaData);
+        // setAreas(areaData);
         if (areaData.length > 0) {
-          setSelectedArea(areaData[0]);
+          // setSelectedArea(areaData[0]);
         }
       } catch (error) {
         console.error('Error fetching initial data:', error);
@@ -67,41 +63,6 @@ const Security = () => {
     return () => clearInterval (intervalId);
   }, []);
   
-
-  const handleAreaUpdate = (updatedArea: AreaStatus) => {
-    setAreas(areas.map(area => 
-      area.id === updatedArea.id ? updatedArea : area
-    ));
-  };
-
-  const handleDataUpdate = (newAreaStatus: AreaStatus[]) => {
-    setAreas(newAreaStatus);
-  };
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-    toast({
-      title: "Abgemeldet",
-      description: "Sie wurden erfolgreich abgemeldet."
-    });
-  };
-
-  const handleLegendRefresh = async () => {
-    try {
-      await refreshLegend(legendRows)
-      toast({
-        title: "Legende aktualisiert",
-        description: "Die Schwellenwerte für die Legende wurden erfolgreich aktualisiert.",
-      })
-    } catch (error) {
-      toast({
-        title: "Fehler",
-        description: "Aktualisierung der Legende fehlgeschlagen.",
-        variant: "destructive",
-      })
-    }
-  }
 
   // Filter function for warnings
   const filterWarnings = (area: AreaStatus) => {
@@ -128,6 +89,12 @@ const Security = () => {
 
     return true;
   };
+
+  useEffect(() => {
+    if (areaStatus.length > 0) {
+      setSelectedArea(areaStatus[0]);
+    }
+  }, [areaStatus]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -158,10 +125,8 @@ const Security = () => {
               <ExhibitionMap 
                 autoRefresh={true} 
                 refreshInterval={60000}
-                onDataUpdate={handleDataUpdate} 
                 onAreaSelect={setSelectedArea}
                 showGermanLabels={showGermanTitle}
-                selectedArea={selectedArea}
                 timeFilter={timeFilter}
                 showNumbers={!hideAbsolute}
                 showPercentage={!hidePercentage}
@@ -247,7 +212,7 @@ const Security = () => {
                 <Separator className="mb-4" />
                 
                 {/* Warnings List */}
-                {areas.filter(filterWarnings)
+                {areaStatus.filter(filterWarnings)
                   .sort((a, b) => {
                     // Natural alphanumerical sort that handles numbers properly
                     return a.area_name.localeCompare(b.area_name, 'de-DE', { 
@@ -271,7 +236,7 @@ const Security = () => {
                         ))}
                     </div>
                   ))}
-                {areas.filter(filterWarnings).length === 0 && (
+                {areaStatus.filter(filterWarnings).length === 0 && (
                   <p className="text-sm text-gray-500">
                     {warningSearchTerm || !showEntrances || !showHalls 
                       ? "Keine Warnungen gefunden mit den aktuellen Filtereinstellungen."
@@ -296,8 +261,7 @@ const Security = () => {
               {selectedArea !== null ? (
                 <AreaSettingsAccordion
                   area={selectedArea}
-                  onUpdate={handleAreaUpdate}
-                  allAreas={areas}
+                  onUpdate={null}
                   currentPage='security'
                 />
               ) : (

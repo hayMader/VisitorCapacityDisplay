@@ -11,34 +11,37 @@ import Admin from "./pages/Admin";
 import Login from "./pages/Login";
 import Security from "./pages/Security";
 import NotFound from "./pages/NotFound";
+import { AreaStatusProvider } from "./contexts/AreaStatusContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AuthProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/admin" element={
-              <ProtectedRoute> {/* Check if the user is authenticated. If not -> login page */}
-                <Admin />
-              </ProtectedRoute>
-            } />
-            <Route path="/security" element={
-              <ProtectedRoute> {/* Check if the user is authenticated. If not -> login page */}
-                <Security />
-              </ProtectedRoute>
-            } />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
+      <AreaStatusProvider>
+        <AuthProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/admin" element={
+                <ProtectedRoute> {/* Check if the user is authenticated. If not -> login page */}
+                  <Admin />
+                </ProtectedRoute>
+              } />
+              <Route path="/security" element={
+                <ProtectedRoute> {/* Check if the user is authenticated. If not -> login page */}
+                  <Security />
+                </ProtectedRoute>
+              } />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </AreaStatusProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
