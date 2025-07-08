@@ -3,7 +3,7 @@ import { toast } from '@/components/ui/use-toast';
 import { AreaStatus, Threshold } from '@/types';
 import { getAreaSettings } from '@/utils/api';
 import { RefreshCw } from 'lucide-react';
-import { Area } from 'recharts';
+import { Pencil } from "lucide-react";;
 import { getLegend } from '@/utils/api';
 import { LegendRow } from '@/types';
 
@@ -12,6 +12,7 @@ interface ExhibitionMapProps {
   refreshInterval?: number;
   onDataUpdate?: (areaStatus: AreaStatus[]) => void;
   onAreaSelect?: (areaNumber: AreaStatus) => void;
+  setShowConfigurator: React.Dispatch<React.SetStateAction<boolean>>;
   selectedArea?: AreaStatus | null;
   timeFilter?: number; // in minutes, default to 1440 (24 hours)
   showGermanLabels?: boolean; //
@@ -30,7 +31,8 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
   selectedArea = null,
   showNumbers = false,
   showPercentage = false,
-  currentPage = 'management', // default to 'management'
+  currentPage,
+  setShowConfigurator,
 }) => {
   const [areaStatus, setAreaStatus] = useState<AreaStatus[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -88,7 +90,8 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
     return () => {
       window.removeEventListener('resize', checkContainerSize);
     };
-  }, [containerRef.current]);
+  }
+, [containerRef.current]);
 
   useEffect(() => {
     if (!autoRefresh) return;
@@ -104,11 +107,11 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
     fetchData();
   };
   
-  const handleAreaClick = (area: AreaStatus) => {
+  function handleAreaClick(area: AreaStatus) {
     if (onAreaSelect) {
       onAreaSelect(area);
     }
-  };
+  }
 
   const getOccupancyLevel = (visitorCount: number, thresholds: Threshold[]) => {
     return thresholds.reduce((min, t) =>
@@ -139,6 +142,8 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
       </div>
     );
   }
+
+  
 
   return (
     <>
@@ -178,13 +183,32 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                   className={`h-5 w-5 text-primary ${isRefreshing ? 'animate-spin' : ''} `}
                 />
             </button>
+            {/* Edit Area Button */}
+            {currentPage === 'management' && (
+              <button
+                onClick={() => {
+                  if (selectedArea) {
+                    setShowConfigurator(true);
+                  } else {
+                    toast({
+                      title: "Kein Bereich ausgewählt",
+                      description: "Bitte wählen Sie zuerst einen Bereich aus.",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+                className="bg-white p-2 rounded-full shadow hover:bg-gray-50 transition-colors ml-2"
+                aria-label="Bereich bearbeiten"
+              >
+                <Pencil className="h-5 w-5 text-primary" />
+              </button>
+            )}
           </div>
           <img 
             src="/plan-exhibtion-area.jpg" 
             alt="MMG Messegelände" 
             className="max-h-[85vh] w-auto object-contain"
           />
-          
           <svg 
             className="absolute inset-0 w-full h-full" 
             viewBox="0 0 2050 1248" 

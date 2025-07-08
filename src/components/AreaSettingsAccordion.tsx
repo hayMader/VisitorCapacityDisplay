@@ -17,6 +17,7 @@ import {
 import AreaGeneralSettings from "@/components/ui/AreaGeneralSettings";
 import CopyThresholdsModal from "@/components/ui/CopyThresholdsModal";
 import ThresholdSettings from "@/components/ThresholdSettings";
+import AreaConfigurator from "./AreaConfigurator";
 import { AreaStatus, Threshold } from "@/types";
 import { updateAreaSettings, copyThresholdsToAreas } from "@/utils/api";
 
@@ -32,9 +33,11 @@ interface Props {
   onUpdate: (a: AreaStatus) => void;
   allAreas: AreaStatus[]; // List of all areas for copying thresholds
   currentPage?: "management" | "security"; // Current page context
+  showConfigurator?: boolean;
+  onCloseConfigurator?: () => void;
 }
 
-const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas, currentPage }) => {
+const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas, currentPage, showConfigurator, onCloseConfigurator }) => {
   /* ---------------------------------------------------------------- */
   /*  State                                                           */
   /* ---------------------------------------------------------------- */
@@ -256,6 +259,18 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area, onUpdate, allAreas, curr
       <div className="p-4 text-center">
         <p>Einstellungen werden geladen …</p>
       </div>
+    );
+  }
+
+  if (showConfigurator) {
+    return (
+      <AreaConfigurator
+        selectedArea={formData}
+        onSave={(updated) => {
+          onUpdate(updated);
+        }}
+        onClose={onCloseConfigurator}
+      />
     );
   }
 

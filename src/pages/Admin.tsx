@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import ExhibitionMap from '@/components/ExhibitionMap';
@@ -25,7 +24,8 @@ const Admin = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [hideAbsolute, setHideAbsolute] = useState(false);
-  const [hidePercentage, setHidePercentage] = useState(false);
+  const [hidePercentage, setHidePercentage] = useState(false)
+  const [showConfigurator, setShowConfigurator] = useState(false);
   const [isHighlighted, setIsHighlighted] = useState(false);
   const [hasUserSelectedArea, setHasUserSelectedArea] = useState(false);
 
@@ -90,6 +90,10 @@ const Admin = () => {
     setAreas(newAreaStatus);
   };
 
+  const handleEditClick = (area: AreaStatus) => {
+    setSelectedArea(area);
+  };
+
   const handleLogout = () => {
     logout();
     navigate('/');
@@ -142,17 +146,17 @@ const Admin = () => {
               </div>
               
               <ExhibitionMap 
-                autoRefresh={true} 
+                autoRefresh={true}
                 refreshInterval={60000}
-                onDataUpdate={handleDataUpdate} 
-                onAreaSelect={handleAreaSelect}
+                onDataUpdate={handleDataUpdate}
                 showGermanLabels={showGermanTitle}
                 selectedArea={selectedArea}
                 timeFilter={timeFilter}
                 showNumbers={!hideAbsolute}
                 showPercentage={!hidePercentage}
+                currentPage='management'
+                setShowConfigurator={setShowConfigurator}
               />
-
               <div className="flex gap-6 mb-2 mt-4">
                 <div className="flex items-center gap-2">
                   <Checkbox
@@ -334,22 +338,23 @@ const Admin = () => {
               </div>
               <Separator className="mb-4" />
               
-              {selectedArea !== null ? (
+              {selectedArea !== null && (
+                <>
                 <AreaSettingsAccordion
                   area={selectedArea}
                   onUpdate={handleAreaUpdate}
                   allAreas={areas}
+                  showConfigurator={showConfigurator}
+                  onCloseConfigurator={() => setShowConfigurator(false)}
                   currentPage='management'
                 />
-              ) : (
-                <p className="text-muted-foreground text-center py-8">
-                  Bitte wählen Sie einen Bereich aus, um die Einstellungen zu bearbeiten.
-                </p>
-              )}
-            </div>
-          </div>
+                  <Separator className="my-4" />
+                  </>
+                  )}
+          </div>                      
         </div>
-      </main>
+      </div>
+    </main>
       
       <footer className="bg-white border-t py-4">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">

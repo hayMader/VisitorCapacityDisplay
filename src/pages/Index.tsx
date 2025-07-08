@@ -56,8 +56,9 @@ const Index = () => {
           refreshInterval={60000} // 60 seconds
           onDataUpdate={handleDataUpdate}
           showGermanLabels={showGermanTitle}
-          showNumbers={false}
-        />
+          showNumbers={false} setShowConfigurator={function (value: React.SetStateAction<boolean>): void {
+            throw new Error('Function not implemented.');
+          } }        />
       </main>
       
       <footer className="bg-white border-t py-2 text-center text-sm text-muted-foreground" style={{ maxHeight: '5vh' }}>
