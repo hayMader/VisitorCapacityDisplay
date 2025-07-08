@@ -30,6 +30,25 @@ const Admin = () => {
   ])
 
   useEffect(() => {
+    // Fetch legend rows from the API
+    const fetchLegendRows = async () => {
+      try {
+        const data = await getLegend();
+        setLegendRows(data);
+      } catch (error) {
+        console.error("Error fetching legend rows:", error);
+        toast({
+          title: "Fehler",
+          description: "Die Legende konnte nicht geladen werden.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchLegendRows();
+  }, []);
+
+  useEffect(() => {
     // Set up interval to toggle German title every 8 seconds
     const intervalId = setInterval(() => {
       setShowGermanTitle((prev) => !prev);
