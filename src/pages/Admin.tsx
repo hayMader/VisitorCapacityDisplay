@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import ExhibitionMap from '@/components/ExhibitionMap';
@@ -6,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/components/ui/use-toast';
 import { getAreaSettings } from '@/utils/api';
-import AreaConfiguratorAccordion from '@/components/AreaConfiguratorAccordion';
 import { AreaStatus } from '@/types';
 import AreaSettingsAccordion from '@/components/AreaSettingsAccordion';
 import { useAuth } from '@/contexts/AuthContext';
@@ -28,12 +26,6 @@ const Admin = () => {
   const [hideAbsolute, setHideAbsolute] = useState(false);
   const [hidePercentage, setHidePercentage] = useState(false)
   const [showConfigurator, setShowConfigurator] = useState(false);
-  const [selectedAreaData, setSelectedAreaData] = useState<null | AreaStatus>(null);
-  const handleEditClick = (area: AreaStatus) => {
-  setSelectedAreaData(area);
-  setSelectedArea(area);
-};
-
 
   const [legendRows, setLegendRows] = useState<Partial<LegendRow>[]>([
     { object: "", description_de: "", description_en: "" }
@@ -79,6 +71,10 @@ const Admin = () => {
 
   const handleDataUpdate = (newAreaStatus: AreaStatus[]) => {
     setAreas(newAreaStatus);
+  };
+
+  const handleEditClick = (area: AreaStatus) => {
+    setSelectedArea(area);
   };
 
   const handleLogout = () => {
@@ -143,6 +139,7 @@ const Admin = () => {
                 timeFilter={timeFilter}
                 showNumbers={!hideAbsolute}
                 showPercentage={!hidePercentage}
+                currentPage='management'
               />
               <div className="flex gap-6 mb-2 mt-4">
                 <div className="flex items-center gap-2">
@@ -315,16 +312,12 @@ const Admin = () => {
                   area={selectedArea}
                   onUpdate={handleAreaUpdate}
                   allAreas={areas}
-                  />
+                  showConfigurator={showConfigurator}
+                  onCloseConfigurator={() => setShowConfigurator(false)}
+                />
                   <Separator className="my-4" />
                   </>
                   )}
-                      
-                < AreaConfiguratorAccordion
-                  area={selectedArea}
-                  onUpdate={handleAreaUpdate}
-                  onClose={() =>{}}
-            />
           </div>                      
         </div>
       </div>

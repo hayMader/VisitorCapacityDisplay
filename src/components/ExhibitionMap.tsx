@@ -31,7 +31,8 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
   selectedArea = null,
   showNumbers = false,
   showPercentage = false,
-  currentPage = 'management', // default to 'management'
+  currentPage,
+  setShowConfigurator,
 }) => {
   const [areaStatus, setAreaStatus] = useState<AreaStatus[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -142,9 +143,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
     );
   }
 
-  function setShowConfigurator(arg0: boolean): void {
-    throw new Error('Function not implemented.');
-  }
+  
 
   return (
     <>
@@ -185,15 +184,26 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                 />
             </button>
             {/* Edit Area Button */}
+            {currentPage === 'management' && (
               <button
-                  onClick={() =>
-                     setShowConfigurator(true)}
-                  className="bg-white p-2 rounded-full shadow hover:bg-gray-50 transition-colors"
-                  aria-label="Edit Area"
-                    >
-                    ✎
-                </button>
-              </div>
+                onClick={() => {
+                  if (selectedArea) {
+                    setShowConfigurator(true);
+                  } else {
+                    toast({
+                      title: "Kein Bereich ausgewählt",
+                      description: "Bitte wählen Sie zuerst einen Bereich aus.",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+                className="bg-white p-2 rounded-full shadow hover:bg-gray-50 transition-colors ml-2"
+                aria-label="Bereich bearbeiten"
+              >
+                <Pencil className="h-5 w-5 text-primary" />
+              </button>
+            )}
+          </div>
           <img 
             src="/plan-exhibtion-area.jpg" 
             alt="MMG Messegelände" 
