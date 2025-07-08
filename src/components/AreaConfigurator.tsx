@@ -15,14 +15,19 @@ import { updateAreaSettings } from "@/utils/api";
 
 /* ─────────────────────   props   ───────────────────── */
 export interface AreaConfiguratorProps {
-  /** currently selected hall (or undefined for “new hall”) */
   selectedArea?: AreaStatus;
-  /** propagate changes back to parent (admin.tsx) */
   onSave: (updated: AreaStatus) => void;
   onClose?: () => void;
 }
 
-/* ───────────────────── component ───────────────────── */
+
+const emptyCoords = [
+  { x: 0, y: 0 },
+  { x: 0, y: 0 },
+  { x: 0, y: 0 },
+  { x: 0, y: 0 },
+];
+
 const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
   selectedArea,
   onSave,
@@ -49,19 +54,14 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
     );
   }, [selectedArea]);
 
-  /* handlers ------------------------------------------------------- */
-  const updateCoord = (
-    idx: number,
-    axis: "x" | "y",
-    value: string,
-  ) => {
+
+  const updateCoord = (idx: number, axis: "x" | "y", value: string) => {
     const c = [...coords];
     c[idx][axis] = Number(value) || 0;
     setCoords(c);
   };
 
-  const addPoint = () =>
-    setCoords([...coords, { x: 0, y: 0 }]);
+  const addPoint = () => setCoords([...coords, { x: 0, y: 0 }]);
 
   const handleSave = async () => {
     if (!nameDe.trim() || !nameEn.trim() || !selectedArea) return;
@@ -93,14 +93,9 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
     }
   };
 
-  /* ─────────────────── UI ─────────────────── */
+
   return (
-    <Accordion
-      type="single"
-      collapsible
-      defaultValue="config"
-      className="w-full"
-    >
+    <Accordion type="single" collapsible defaultValue="config" className="w-full">
       <AccordionItem value="config">
         <AccordionTrigger className="py-4">
           <div className="flex items-center">
@@ -110,7 +105,8 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
         </AccordionTrigger>
 
         <AccordionContent>
-          {/* names -------------------------------------------------- */}
+
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block mb-1 text-sm font-medium">
@@ -137,7 +133,7 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
 
           <Separator className="my-4" />
 
-          {/* coordinates ------------------------------------------- */}
+
           <p className="font-medium mb-2">Koordinaten</p>
           {coords.map((c, i) => (
             <div
@@ -190,10 +186,10 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
             onClick={addPoint}
           >
             <Plus className="mr-1 h-4 w-4" />
-            Hinzufügen
+            Koordinate&nbsp;hinzufügen
           </Button>
 
-          {/* footer buttons ---------------------------------------- */}
+
           <div className="mt-6 flex justify-end gap-3">
             <Button
               type="button"

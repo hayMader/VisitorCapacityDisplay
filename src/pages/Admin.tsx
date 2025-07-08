@@ -129,17 +129,16 @@ const Admin = () => {
               </div>
               
               <ExhibitionMap 
-                autoRefresh={true} 
+                autoRefresh={true}
                 refreshInterval={60000}
-                onDataUpdate={handleDataUpdate} 
-                onAreaSelect={handleEditClick}
-                setShowConfigurator={setShowConfigurator}
+                onDataUpdate={handleDataUpdate}
                 showGermanLabels={showGermanTitle}
                 selectedArea={selectedArea}
                 timeFilter={timeFilter}
                 showNumbers={!hideAbsolute}
                 showPercentage={!hidePercentage}
                 currentPage='management'
+                setShowConfigurator={setShowConfigurator}
               />
               <div className="flex gap-6 mb-2 mt-4">
                 <div className="flex items-center gap-2">
