@@ -31,6 +31,7 @@ export interface Threshold {
 
 export interface AreaStatus {
   id: number;
+  active: boolean; 
   area_name: string;
   area_name_en?: string;
   capacity_usage: number;

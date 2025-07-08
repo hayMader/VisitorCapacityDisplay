@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
@@ -27,6 +28,8 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
   MAX_LEVELS,
   onCopyThresholds,
 }) => {
+  const toggleHallActive = () =>
+  setFormData((p) => ({ ...p, active: !p.active }));
   const [editingId, setEditingId] = useState<number | null>(null);
   const [edited, setEdited] = useState<Partial<Threshold>>({
     upper_threshold: 0,
@@ -127,6 +130,17 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
 
   return (
     <div className="space-y-4 py-2">
+     <div className="flex items-center gap-2">
+      {/* ───── Hall active toggle ───── */}
+       <Checkbox
+          id="hall-active"
+          checked={formData.active}
+          onCheckedChange={toggleHallActive}
+        />
+      <Label htmlFor="hall-active" className="text-sm select-none">
+        Halle deaktivieren (grau anzeigen, ohne Zahlen)
+      </Label>
+    </div>  
       {/* List of Existing Thresholds */}
       {formData.thresholds.filter((t) => t.type === type).length ? (
         <div className="space-y-2">

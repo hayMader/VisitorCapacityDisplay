@@ -3,7 +3,6 @@ import { toast } from '@/components/ui/use-toast';
 import { AreaStatus, Threshold } from '@/types';
 import { getAreaSettings } from '@/utils/api';
 import { RefreshCw } from 'lucide-react';
-import { Pencil } from "lucide-react";;
 import { getLegend } from '@/utils/api';
 import { LegendRow } from '@/types';
 
@@ -186,8 +185,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
             </button>
             {/* Edit Area Button */}
               <button
-                  onClick={() =>
-                     setShowConfigurator(true)}
+                  onClick={() => setShowConfigurator(true)}
                   className="bg-white p-2 rounded-full shadow hover:bg-gray-50 transition-colors"
                   aria-label="Edit Area"
                     >
@@ -214,12 +212,18 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                 ? Math.round((area.amount_visitors / area.capacity_usage) * 100)
                 : 0;
               const shouldBlink = previousThreshold.alert;
+              const isInactive = area.active === false; 
+              const hallFill   = isInactive                        
+                  ? "#d1d5db"                                       
+                  : shouldBlink
+                        ? activeTreshold?.color || "lightgray"
+                        : activeTreshold?.color || "lightgray";
 
               return (
                 <g key={area.id}>
                   <polygon
                     points={area.coordinates.map((point: { x: number; y: number }) => `${point.x},${point.y}`).join(' ')}
-                    fill={shouldBlink ? activeTreshold?.color || 'lightgray' : activeTreshold?.color || 'lightgray'}
+                    fill={hallFill}
                     fillOpacity={0.4}
                     stroke={isSelected ? "#000" : "#667080"}
                     strokeWidth={isSelected ? 2 : 0}
