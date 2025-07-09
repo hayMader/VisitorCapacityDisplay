@@ -166,7 +166,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                 ); // Default to 'management' if currentPage is empty
                 const activeTreshold = getOccupancyLevel(visitorCount, thresholds);
                 const previousThreshold = getPreviousThreshold(visitorCount, thresholds);
-                const isSelected = selectedArea.id === area.id;
+                const isSelected = selectedArea?.id === area.id;
                 const pct = area.capacity_usage
                   ? Math.round((area.amount_visitors / area.capacity_usage) * 100)
                   : 0;
