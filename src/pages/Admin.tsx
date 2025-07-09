@@ -283,7 +283,7 @@ const Admin = () => {
               </div>
               <Separator className="mb-4" />
               
-              {selectedArea !== null && (
+              {selectedArea !== null ? (
                 <>
                 <AreaSettingsAccordion
                   area={selectedArea}
@@ -293,7 +293,11 @@ const Admin = () => {
                 />
                   <Separator className="my-4" />
                   </>
-                  )}
+                  ): (
+                    <p className="text-muted-foreground text-center py-8">
+                      Bitte wählen Sie einen Bereich aus, um die Einstellungen zu bearbeiten.
+                    </p>
+                )}
           </div>                      
         </div>
       </div>
