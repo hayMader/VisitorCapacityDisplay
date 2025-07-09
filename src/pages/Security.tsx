@@ -18,8 +18,8 @@ import { useAreaStatus } from "@/contexts/AreaStatusContext";
 const Security = () => {
   const { selectedArea, legendRows, setLegendRows, setSelectedArea, updateAreaStatus, setTimeFilter, timeFilter, areaStatus } = useAreaStatus();
   const [showGermanTitle, setShowGermanTitle] = useState<boolean>(false);
-  const [hideAbsolute, setHideAbsolute] = useState(false);
-  const [hidePercentage, setHidePercentage] = useState(false);
+  const [showAbsolute, setShowAbsolute] = useState(true);
+  const [showPercentage, setShowPercentage] = useState(true);
 
 
   // Filter states for warnings
@@ -124,8 +124,8 @@ const Security = () => {
                 onAreaSelect={setSelectedArea}
                 showGermanLabels={showGermanTitle}
                 timeFilter={timeFilter}
-                showNumbers={!hideAbsolute}
-                showPercentage={!hidePercentage}
+                showNumbers={showAbsolute}
+                showPercentage={showPercentage}
                 currentPage='security'
               />
 
@@ -133,18 +133,18 @@ const Security = () => {
                 <div className="flex items-center gap-2">
                   <Checkbox
                     id="master-absolute"
-                    checked={hideAbsolute}
-                    onCheckedChange={checked => setHideAbsolute(!!checked)}
+                    checked={showAbsolute}
+                    onCheckedChange={checked => setShowAbsolute(!!checked)}
                   />
-                  <Label htmlFor="master-absolute">Absolute Besucherzahl ausblenden</Label>
+                  <Label htmlFor="master-absolute">Absolute Besucherzahl anzeigen</Label>
                 </div>
                 <div className="flex items-center gap-2">
                   <Checkbox
                     id="master-percentage"
-                    checked={hidePercentage}
-                    onCheckedChange={checked => setHidePercentage(!!checked)}
+                    checked={showPercentage}
+                    onCheckedChange={checked => setShowPercentage(!!checked)}
                   />
-                  <Label htmlFor="master-percentage">Prozentuale Auslastung ausblenden</Label>
+                  <Label htmlFor="master-percentage">Prozentuale Auslastung anzeigen</Label>
                 </div>
               </div>
 
