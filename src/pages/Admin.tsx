@@ -16,37 +16,14 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useAreaStatus } from "@/contexts/AreaStatusContext";
 
 const Admin = () => {
-  const { selectedArea, setSelectedArea, updateAreaStatus } = useAreaStatus();
-  const [timeFilter, setTimeFilter] = useState(1440);
+  const { selectedArea, legendRows, setLegendRows, setSelectedArea, setTimeFilter, timeFilter } = useAreaStatus();
+
   const [showGermanTitle, setShowGermanTitle] = useState<boolean>(false);
   const [showAbsolute, setShowAbsolute] = useState(true);
   const [showPercentage, setShowPercentage] = useState(true)
   const [showConfigurator, setShowConfigurator] = useState(false);
   const [isHighlighted, setIsHighlighted] = useState(false);
   const [hasUserSelectedArea, setHasUserSelectedArea] = useState(false);
-
-  const [legendRows, setLegendRows] = useState<Partial<LegendRow>[]>([
-    { object: "", object_en: "", description_de: "", description_en: "" }
-  ])
-
-  useEffect(() => {
-    // Fetch legend rows from the API
-    const fetchLegendRows = async () => {
-      try {
-        const data = await getLegend();
-        setLegendRows(data);
-      } catch (error) {
-        console.error("Error fetching legend rows:", error);
-        toast({
-          title: "Fehler",
-          description: "Die Legende konnte nicht geladen werden.",
-          variant: "destructive",
-        });
-      }
-    };
-
-    fetchLegendRows();
-  }, []);
 
   useEffect(() => {
     // Set up interval to toggle German title every 8 seconds
@@ -71,11 +48,7 @@ const Admin = () => {
     setHasUserSelectedArea(true);
     setSelectedArea(area);
   };
-  
 
-  const handleAreaUpdate = (updatedArea: AreaStatus) => {
-    updateAreaStatus(updatedArea);
-  };
 
   const handleLegendRefresh = async () => {
     try {
@@ -123,7 +96,6 @@ const Admin = () => {
                 autoRefresh={true}
                 refreshInterval={60000}
                 showGermanLabels={showGermanTitle}
-                timeFilter={timeFilter}
                 showNumbers={showAbsolute}
                 showPercentage={showPercentage}
                 onAreaSelect={handleAreaSelect}
@@ -315,7 +287,6 @@ const Admin = () => {
                 <>
                 <AreaSettingsAccordion
                   area={selectedArea}
-                  onUpdate={handleAreaUpdate}
                   showConfigurator={showConfigurator}
                   onCloseConfigurator={() => setShowConfigurator(false)}
                   currentPage='management'

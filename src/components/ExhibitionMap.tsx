@@ -14,6 +14,7 @@ interface ExhibitionMapProps {
   showNumbers?: boolean;
   showPercentage?: boolean;
   currentPage?: "security" | "management";
+  handleUpdate?: () => void; // Function to handle refresh, can be passed from parent
 }
 
 const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
@@ -25,20 +26,22 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
   showNumbers = false,
   showPercentage = false,
   currentPage,
+  handleUpdate = () => {}, // Function to handle refresh, can be passed from parent
 }) => {
-  const { areaStatus, refreshAreaStatus, isRefreshing, selectedArea } = useAreaStatus(); // Use the context
+  const { areaStatus,legendRows, refreshAreaStatus, isRefreshing, selectedArea } = useAreaStatus(); // Use the context
   const [isMediumSize, setIsMediumSize] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleRefresh = async () => {
+    handleUpdate();
     await refreshAreaStatus();
   };
 
   const handleAreaClick = (area: AreaStatus) => {
-    if (onAreaSelect) {
+
       onAreaSelect(area);
-    }
+    
   };
 
   const checkContainerSize = () => {
@@ -163,7 +166,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                 ); // Default to 'management' if currentPage is empty
                 const activeTreshold = getOccupancyLevel(visitorCount, thresholds);
                 const previousThreshold = getPreviousThreshold(visitorCount, thresholds);
-                const isSelected = selectedArea === area;
+                const isSelected = selectedArea.id === area.id;
                 const pct = area.capacity_usage
                   ? Math.round((area.amount_visitors / area.capacity_usage) * 100)
                   : 0;
@@ -225,8 +228,13 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                   });
                 }
 
-                const lineHeight = 28; // adjust as needed
+                const lineHeight = 18; // adjust as needed
                 const totalHeight = lines.length * lineHeight;
+                const availableHeight = maxY - minY;
+
+                // Determine if horizontal alignment is needed
+                const useHorizontalAlignment = totalHeight > availableHeight;
+
                 const startY = cy - totalHeight / 2 + lineHeight / 2;
 
                 // Handle inactive status
@@ -270,7 +278,24 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                       >
                         inactive
                       </text>
+                    ) : useHorizontalAlignment ? (
+                      // Render lines horizontally
+                      lines.map((line, index) => (
+                        <text
+                          key={index}
+                          x={cx + index * 50} // Adjust spacing between lines
+                          y={cy}
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                          fill="#1e293b"
+                          fontWeight={index === 0 ? "bold" : "normal"}
+                          fontSize={line.fontSize}
+                        >
+                          {line.text}
+                        </text>
+                      ))
                     ) : (
+                      // Render lines vertically
                       lines.map((line, index) => (
                         <text
                           key={index}
@@ -290,6 +315,48 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                 );
               })}
             </svg>
+          </div>
+        </div>
+        <div 
+          className={`flex ${isMediumSize ? 'absolute' : ''} bottom-4 right-4 z-10 bg-white p-4 rounded sm:shadow-xl items-right mr-4`}
+          style={{minWidth: "20%", flexGrow: 1 }}
+        >
+          <div className="space-y-1">
+            {legendRows.map((row) => (
+              <div key={row.id} className={`grid grid-cols-[auto,1fr] gap-2 items-center `} style={{ width: 'fit-content' }}>
+                {/^#[0-9A-Fa-f]{6}$/.test(row.object) ? (
+                  <div
+                    className={`w-9 h-9 rounded-full `}
+                    style={{ backgroundColor: row.object }}
+                  />
+                  
+                ) : (
+                  (!/^\d+$/.test(row.object) || showNumbers) && (
+                  <span
+                    className={`font-bold whitespace-nowrap`} 
+                    style={{ 
+                    width: 'fit-content', 
+                    fontSize: isMediumSize ? '1rem' : '1.25rem' 
+                    }}
+                  >
+                    {showGermanLabels ? row.object : row.object_en}
+                  </span>
+                  )
+                  )}
+                  <span 
+                  style={{ 
+                    textAlign: 'left', 
+                    minWidth: `${Math.max(
+                    showGermanLabels ? row.description_de.length : 0,
+                    showGermanLabels ? 0 : row.description_en.length
+                    )}ch`,
+                    fontSize: isMediumSize ? '1rem' : '1.25rem'
+                  }}
+                  >
+                  {showGermanLabels ? row.description_de : row.description_en}
+                  </span>
+              </div>
+            ))}
           </div>
         </div>
       </div>

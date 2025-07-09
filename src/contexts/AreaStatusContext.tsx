@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { AreaStatus } from "@/types";
-import { getAreaSettings, updateAreaSettings } from "@/utils/api";
+import { AreaStatus, LegendRow } from "@/types";
+import { getAreaSettings, getLegend, refreshLegend, updateAreaSettings } from "@/utils/api";
 import { toast } from "@/components/ui/use-toast";
 
 interface AreaStatusContextProps {
@@ -10,6 +10,10 @@ interface AreaStatusContextProps {
   isRefreshing: boolean;
   selectedArea: AreaStatus | null;
   setSelectedArea: React.Dispatch<React.SetStateAction<AreaStatus | null>>;
+  legendRows: Partial<LegendRow>[];
+  setLegendRows: React.Dispatch<React.SetStateAction<Partial<LegendRow>[]>>;
+  setTimeFilter: React.Dispatch<React.SetStateAction<number>>;
+  timeFilter: number;
 }
 
 const AreaStatusContext = createContext<AreaStatusContextProps | undefined>(undefined);
@@ -17,13 +21,18 @@ const AreaStatusContext = createContext<AreaStatusContextProps | undefined>(unde
 export const AreaStatusProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [areaStatus, setAreaStatus] = useState<AreaStatus[]>([]);
   const [isRefreshing, setRefreshing] = useState(false);
-const [selectedArea, setSelectedArea] = useState<AreaStatus | null>(null);
+  const [selectedArea, setSelectedArea] = useState<AreaStatus | null>(null);
+  const [legendRows, setLegendRowsState] = useState<Partial<LegendRow>[]>([{ object: "", object_en: "", description_de: "", description_en: "" }]);
+  const [timeFilter, setTimeFilter] = useState(1440);
 
   // Fetch initial data
   const refreshAreaStatus = async () => {
     try {
       setRefreshing(true);
-      const data = await getAreaSettings();
+      const data = await getAreaSettings(timeFilter);
+      const data2 = await getLegend();
+      setLegendRows(data2)
+      console.log("Fetched area settings:", data2);
       setAreaStatus(data);
         setRefreshing(false);
     } catch (error) {
@@ -31,6 +40,22 @@ const [selectedArea, setSelectedArea] = useState<AreaStatus | null>(null);
       toast({
         title: "Fehler",
         description: "Die Bereichsdaten konnten nicht aktualisiert werden.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Refresh the legend rows
+  const setLegendRows = async (updatedLegend: Partial<LegendRow>[]) => {
+    try {
+      setLegendRowsState(updatedLegend);
+      const data = await refreshLegend(updatedLegend);
+      console.log("Legend rows refreshed:", data);
+    } catch (error) {
+      console.error("Error refreshing legend rows:", error);
+      toast({
+        title: "Fehler",
+        description: "Die Legende konnte nicht aktualisiert werden.",
         variant: "destructive",
       });
     }
@@ -47,10 +72,10 @@ const [selectedArea, setSelectedArea] = useState<AreaStatus | null>(null);
 
   useEffect(() => {
     refreshAreaStatus();
-  }, []);
+  }, [timeFilter]);
 
   return (
-    <AreaStatusContext.Provider value={{ areaStatus, selectedArea, setSelectedArea, refreshAreaStatus, isRefreshing, updateAreaStatus }}>
+    <AreaStatusContext.Provider value={{ areaStatus, selectedArea, legendRows, setLegendRows, setTimeFilter, timeFilter, setSelectedArea, refreshAreaStatus, isRefreshing, updateAreaStatus }}>
       {children}
     </AreaStatusContext.Provider>
   );

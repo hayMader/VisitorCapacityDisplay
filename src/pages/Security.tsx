@@ -16,15 +16,11 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useAreaStatus } from "@/contexts/AreaStatusContext";
 
 const Security = () => {
-  const { areaStatus, selectedArea, setSelectedArea, } = useAreaStatus();
-  const [timeFilter, setTimeFilter] = useState(1440);
+  const { selectedArea, legendRows, setLegendRows, setSelectedArea, updateAreaStatus, setTimeFilter, timeFilter, areaStatus } = useAreaStatus();
   const [showGermanTitle, setShowGermanTitle] = useState<boolean>(false);
   const [hideAbsolute, setHideAbsolute] = useState(false);
   const [hidePercentage, setHidePercentage] = useState(false);
 
-  const [legendRows, setLegendRows] = useState<Partial<LegendRow>[]>([
-    { object: "", description_de: "", description_en: "" }
-  ])
 
   // Filter states for warnings
   const [warningSearchTerm, setWarningSearchTerm] = useState("");
@@ -261,7 +257,6 @@ const Security = () => {
               {selectedArea !== null ? (
                 <AreaSettingsAccordion
                   area={selectedArea}
-                  onUpdate={null}
                   currentPage='security'
                 />
               ) : (

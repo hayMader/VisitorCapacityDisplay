@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 import ExhibitionMap from '@/components/ExhibitionMap';
 import { formatDateTime } from '@/utils/formatDatetime';
+import { set } from 'date-fns';
+import { get } from 'http';
+import { getLegend } from '@/utils/api';
 
 const getLocalizedTimeSuffix = (isUSFormat: boolean): string => {
   return isUSFormat ? '' : 'Uhr';
@@ -11,9 +14,18 @@ const Index = () => {
   const [latestTimestamp, setLatestTimestamp] = useState<string>('');
   const [latestTimestampISO, setLatestTimestampISO] = useState<string>('');
   const [showGermanTitle, setShowGermanTitle] = useState<boolean>(false);
+  const [legendRows, setLegendRows] = useState<any[]>([]);
   const isUSFormat = !showGermanTitle;
  
   useEffect(() => {
+    // get legend data
+    const fetchLegend = async () => {
+      const data = await getLegend();
+      setLegendRows(data);
+    };
+
+    fetchLegend();
+
     const intervalId = setInterval(() => {
       setShowGermanTitle((prev) => !prev);
     }, 8000);
@@ -54,7 +66,7 @@ const Index = () => {
         <ExhibitionMap 
           autoRefresh={true}
           refreshInterval={60000} // 60 seconds
-          onDataUpdate={handleDataUpdate}
+          handleUpdate={handleDataUpdate}
           showGermanLabels={showGermanTitle}
           showNumbers={false} setShowConfigurator={function (value: React.SetStateAction<boolean>): void {
             throw new Error('Function not implemented.');

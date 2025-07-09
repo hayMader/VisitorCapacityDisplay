@@ -33,13 +33,12 @@ export const MAX_LEVELS = 4; // ab jetzt 4 Stufen möglich
 /* ------------------------------------------------------------------ */
 interface Props {
   area: AreaStatus | null; // Area data to be managed
-  onUpdate: (a: AreaStatus) => void;
   currentPage?: "management" | "security"; // Current page context
   showConfigurator?: boolean;
   onCloseConfigurator?: () => void;
 }
 
-const AreaSettingsAccordion: React.FC<Props> = ({ area = null, onUpdate, currentPage, showConfigurator, onCloseConfigurator }) => {
+const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, showConfigurator, onCloseConfigurator }) => {
 
 
   const { updateAreaStatus } = useAreaStatus();
@@ -47,7 +46,7 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, onUpdate, current
   /*  State                                                           */
   /* ---------------------------------------------------------------- */
   const [originalData, setOriginalData] = useState<AreaStatus | null>(area);
-  const [formData, setFormData] = useState<AreaStatus | null>(area);
+  const [formData,  setFormData] = useState<AreaStatus | null>(area);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -116,9 +115,7 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, onUpdate, current
       updateAreaStatus(formData);
 
       setOriginalData(formData);
-      
-      // Notify parent
-      onUpdate(formData);
+  
       
       toast({
         title: 'Einstellungen aktualisiert',
@@ -181,7 +178,7 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, onUpdate, current
       <AreaConfigurator
         selectedArea={formData}
         onSave={(updated) => {
-          onUpdate(updated);
+          updateAreaStatus(updated);
         }}
         onClose={onCloseConfigurator}
       />
