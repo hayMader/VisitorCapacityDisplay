@@ -41,8 +41,8 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
   const handleAddThreshold = () => {
     if (newThreshold.upper_threshold <= 0) {
       toast({
-        title: "Ungültiger Grenzwert",
-        description: "Der Grenzwert muss größer als 0 sein.",
+        title: "Ungültiger Schwellenwert",
+        description: "Der Schwellenwert muss größer als 0 sein.",
         variant: "destructive",
       });
       return;
@@ -50,7 +50,7 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
     if (formData.thresholds.filter((t) => t.type === type).length >= MAX_LEVELS) {
       toast({
         title: "Limit erreicht",
-        description: `Maximal ${MAX_LEVELS} Grenzwerte erlaubt.`,
+        description: `Maximal ${MAX_LEVELS} Schwellenwerte erlaubt.`,
         variant: "destructive",
       });
       return;
@@ -59,7 +59,7 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
     const maxSoFar = Math.max(0, ...formData.thresholds.filter((t) => t.type === type).map((t) => t.upper_threshold));
     if (newThreshold.upper_threshold <= maxSoFar) {
       toast({
-        title: "Grenzwert zu niedrig",
+        title: "Schwellenwert zu niedrig",
         description: `Er muss größer sein als ${maxSoFar}.`,
         variant: "destructive",
       });
@@ -128,6 +128,16 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
     }));
   };
 
+  // Filter and sort thresholds of the specified type
+  const thresholdsOfType = formData.thresholds
+    .filter((t) => t.type === type)
+    .sort((a, b) => a.upper_threshold - b.upper_threshold);
+
+  // Calculate the lower bound for new thresholds
+  const lowerBound = thresholdsOfType.length
+    ? thresholdsOfType[thresholdsOfType.length - 1].upper_threshold + 1
+    : 1;
+
   return (
     <div className="space-y-4 py-2">
      <div className="flex items-center gap-2">
@@ -144,7 +154,7 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
       {/* List of Existing Thresholds */}
       {formData.thresholds.filter((t) => t.type === type).length ? (
         <div className="space-y-2">
-          <Label>Aktuelle Grenzwerte</Label>
+          <Label>Aktuelle Schwellenwerte</Label>
           <div className="border rounded-md">
             {formData.thresholds
               .filter((t) => t.type === type)
@@ -220,8 +230,9 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
                       onCancel={cancelEdit}
                       onDelete={() => deleteThreshold(t.id)}
                     />
-
                     {/* Alert Icon */}
+                    {type === "security" && (
+                    
                     <div
                       className="absolute right-0 top-1/2 transform -translate-y-1/2 flex items-center gap-2 group"
                       onClick={() => toggleAlert(t.id)}
@@ -233,6 +244,7 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
                         <Bell className="h-4 w-4" />
                       </span>
                     </div>
+                    )}
                   </div>
                   {                    isEditing && (
                     <div className="p-2 bg-gray-50 border-t">
@@ -263,7 +275,7 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
           </Button>
         </div>
       ) : (
-        <p className="text-muted-foreground">Keine Grenzwerte definiert.</p>
+        <p className="text-muted-foreground">Aktuell keine Schwellenwerte definiert.</p>
       )}
 
       {/* New Threshold */}
@@ -273,6 +285,7 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
         onAdd={handleAddThreshold}
         disabled={formData.thresholds.filter((t) => t.type === type).length >= MAX_LEVELS}
         type={type}
+        lowerBound={lowerBound}
       />
     </div>
   );

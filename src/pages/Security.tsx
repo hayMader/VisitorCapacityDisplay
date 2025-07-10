@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import ExhibitionMap from '@/components/ExhibitionMap';
@@ -8,31 +7,29 @@ import { toast } from '@/components/ui/use-toast';
 import { getAreaSettings } from '@/utils/api';
 import { AreaStatus } from '@/types';
 import AreaSettingsAccordion from '@/components/AreaSettingsAccordion';
-import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 import { refreshLegend, getLegend } from "@/utils/api";
 import { LegendRow } from "@/types";
 import { Label } from '@/components/ui/label';
-import { Trash, Save } from 'lucide-react';
+import { Trash, Save, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useAreaStatus } from "@/contexts/AreaStatusContext";
 
 const Security = () => {
-  const [areas, setAreas] = useState<AreaStatus[]>([]);
-  const [selectedArea, setSelectedArea] = useState<AreaStatus>(null);
+  const { areaStatus, selectedArea, setSelectedArea, } = useAreaStatus();
   const [timeFilter, setTimeFilter] = useState(1440);
   const [showGermanTitle, setShowGermanTitle] = useState<boolean>(false);
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
   const [hideAbsolute, setHideAbsolute] = useState(false);
   const [hidePercentage, setHidePercentage] = useState(false);
-
-  const [currentPage, setCurrentPage] = useState<"management" | "security">("management");
 
   const [legendRows, setLegendRows] = useState<Partial<LegendRow>[]>([
     { object: "", description_de: "", description_en: "" }
   ])
 
+  // Filter states for warnings
+  const [warningSearchTerm, setWarningSearchTerm] = useState("");
+  const [showEntrances, setShowEntrances] = useState(true);
+  const [showHalls, setShowHalls] = useState(true);
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -41,9 +38,9 @@ const Security = () => {
         console.log("Fetched area data:", areaData);
         const legendData = await getLegend();
         setLegendRows(legendData);
-        setAreas(areaData);
+        // setAreas(areaData);
         if (areaData.length > 0) {
-          setSelectedArea(areaData[0]);
+          // setSelectedArea(areaData[0]);
         }
       } catch (error) {
         console.error('Error fetching initial data:', error);
@@ -56,7 +53,6 @@ const Security = () => {
     };
     
     fetchInitialData();
-    setCurrentPage(window.location.pathname.includes("security") ? "security" : "management");
   }, []);
 
   useEffect(() => {
@@ -68,40 +64,37 @@ const Security = () => {
   }, []);
   
 
-  const handleAreaUpdate = (updatedArea: AreaStatus) => {
-    setAreas(areas.map(area => 
-      area.id === updatedArea.id ? updatedArea : area
-    ));
-  };
+  // Filter function for warnings
+  const filterWarnings = (area: AreaStatus) => {
+    // Check if area has active warnings
+    const hasWarning = area.thresholds.some(threshold => 
+      threshold.type === "security" &&
+      threshold.alert &&
+      area.amount_visitors > threshold.upper_threshold
+    );
 
-  const handleDataUpdate = (newAreaStatus: AreaStatus[]) => {
-    setAreas(newAreaStatus);
-  };
+    if (!hasWarning) return false;
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-    toast({
-      title: "Abgemeldet",
-      description: "Sie wurden erfolgreich abgemeldet."
-    });
-  };
-
-  const handleLegendRefresh = async () => {
-    try {
-      await refreshLegend(legendRows)
-      toast({
-        title: "Legende aktualisiert",
-        description: "Die Schwellenwerte für die Legende wurden erfolgreich aktualisiert.",
-      })
-    } catch (error) {
-      toast({
-        title: "Fehler",
-        description: "Aktualisierung der Legende fehlgeschlagen.",
-        variant: "destructive",
-      })
+    // Filter by search term
+    if (warningSearchTerm && !area.area_name.toLowerCase().includes(warningSearchTerm.toLowerCase())) {
+      return false;
     }
-  }
+
+    // Filter by area type
+    const isEntrance = area.area_name.toLowerCase().includes("eingang");
+    const isHall = area.area_name.toLowerCase().includes("halle");
+
+    if (!showEntrances && isEntrance) return false;
+    if (!showHalls && isHall) return false;
+
+    return true;
+  };
+
+  useEffect(() => {
+    if (areaStatus.length > 0) {
+      setSelectedArea(areaStatus[0]);
+    }
+  }, [areaStatus]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -132,14 +125,12 @@ const Security = () => {
               <ExhibitionMap 
                 autoRefresh={true} 
                 refreshInterval={60000}
-                onDataUpdate={handleDataUpdate} 
                 onAreaSelect={setSelectedArea}
                 showGermanLabels={showGermanTitle}
-                selectedArea={selectedArea}
                 timeFilter={timeFilter}
                 showNumbers={!hideAbsolute}
                 showPercentage={!hidePercentage}
-                currentPage={currentPage}
+                currentPage='security'
               />
 
               <div className="flex gap-6 mb-2 mt-4">
@@ -201,13 +192,34 @@ const Security = () => {
               
               <div className="bg-white p-4 rounded-lg shadow-sm">
                 <h3 className="text-lg font-semibold mb-4">Warnungen</h3>
-                {areas.filter(area => 
-                    area.thresholds.some(threshold => 
-                      threshold.type === "security" &&
-                      threshold.alert &&
-                      area.amount_visitors > threshold.upper_threshold
-                    )
-                  )
+                
+                {/* Filter Controls */}
+                <div className="mb-4 space-y-3">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      type="text"
+                      placeholder="Bereich suchen..."
+                      value={warningSearchTerm}
+                      onChange={(e) => setWarningSearchTerm(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                  
+                  
+                </div>
+
+                <Separator className="mb-4" />
+                
+                {/* Warnings List */}
+                {areaStatus.filter(filterWarnings)
+                  .sort((a, b) => {
+                    // Natural alphanumerical sort that handles numbers properly
+                    return a.area_name.localeCompare(b.area_name, 'de-DE', { 
+                      numeric: true, 
+                      sensitivity: 'base' 
+                    });
+                  })
                   .map(area => (
                     <div key={area.id} className="border p-4 rounded-lg mb-4 bg-red-50">
                       <h4 className="font-bold text-red-600">{area.area_name}</h4>
@@ -224,14 +236,12 @@ const Security = () => {
                         ))}
                     </div>
                   ))}
-                {areas.filter(area => 
-                  area.thresholds.some(threshold => 
-                    threshold.type === "security" &&
-                    threshold.alert_message &&
-                    area.amount_visitors > threshold.upper_threshold
-                  )
-                ).length === 0 && (
-                  <p className="text-sm text-gray-500">Keine Warnungen vorhanden.</p>
+                {areaStatus.filter(filterWarnings).length === 0 && (
+                  <p className="text-sm text-gray-500">
+                    {warningSearchTerm || !showEntrances || !showHalls 
+                      ? "Keine Warnungen gefunden mit den aktuellen Filtereinstellungen."
+                      : "Keine Warnungen vorhanden."}
+                  </p>
                 )}
               </div>
               
@@ -251,9 +261,8 @@ const Security = () => {
               {selectedArea !== null ? (
                 <AreaSettingsAccordion
                   area={selectedArea}
-                  onUpdate={handleAreaUpdate}
-                  allAreas={areas}
-                  currentPage={currentPage}
+                  onUpdate={null}
+                  currentPage='security'
                 />
               ) : (
                 <p className="text-muted-foreground text-center py-8">

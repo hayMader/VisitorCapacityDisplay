@@ -57,7 +57,7 @@ export const updateAreaSettings = async (areaId: number, settings: Partial<AreaS
   try {
     console.log('Updating area settings:', areaId, settings);
     const { data, error } = await supabase.rpc('update_area_settings', {area_id: areaId, setting_json: settings});
-    
+    console.log('Updated area settings:', areaId, data);
     if (error) throw error;
   } catch (error) {
     console.error('Error updating area settings:', error);

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Accordion,
   AccordionItem,
@@ -8,10 +8,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Save, Undo2, MapPin } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
+import { Plus, Save, MapPin, Trash, X } from "lucide-react";
 import { AreaStatus } from "@/types";
+import { updateAreaSettings } from "@/utils/api";
 
-
+/* ─────────────────────   props   ───────────────────── */
 export interface AreaConfiguratorProps {
   selectedArea?: AreaStatus;
   onSave: (updated: AreaStatus) => void;
@@ -29,12 +31,28 @@ const emptyCoords = [
 const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
   selectedArea,
   onSave,
+  onClose,
 }) => {
-  const [nameDe, setNameDe] = useState(selectedArea?.area_name ?? "");
-  const [nameEn, setNameEn] = useState(selectedArea?.area_name_en ?? "");
-  const [coords, setCoords] = useState<{ x: number; y: number }[]>(
-    selectedArea?.coordinates?.length ? selectedArea.coordinates : emptyCoords,
-  );
+
+  const [nameDe, setNameDe] = useState("");
+  const [nameEn, setNameEn] = useState("");
+  const [coords, setCoords] = useState<{ x: number; y: number }[]>([]);
+
+  // Whenever selectedArea changes, update local state:
+  useEffect(() => {
+    setNameDe(selectedArea?.area_name ?? "");
+    setNameEn(selectedArea?.area_name_en ?? "");
+    setCoords(
+      selectedArea?.coordinates?.length
+        ? selectedArea.coordinates
+        : [
+          { x: 0, y: 0 },
+          { x: 0, y: 0 },
+          { x: 0, y: 0 },
+          { x: 0, y: 0 },
+        ]
+    );
+  }, [selectedArea]);
 
 
   const updateCoord = (idx: number, axis: "x" | "y", value: string) => {
@@ -45,39 +63,34 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
 
   const addPoint = () => setCoords([...coords, { x: 0, y: 0 }]);
 
-  const reset = () => {
-    setNameDe("");
-    setNameEn("");
-    setCoords(emptyCoords);
-  };
+  const handleSave = async () => {
+    if (!nameDe.trim() || !nameEn.trim() || !selectedArea) return;
 
+    try {
+      const updated: AreaStatus = {
+        ...selectedArea,
+        area_name: nameDe,
+        area_name_en: nameEn,
+        coordinates: coords,
+    };
 
-  const newArea = () => reset();
+    await updateAreaSettings(updated.id, updated);
 
-  const handleSave = () => {
-    if (!nameDe.trim() || !nameEn.trim()) return;
-
-    const base: AreaStatus =
-      selectedArea ??
-      ({
-        id: Date.now(),            
-        area_name: "",
-        area_name_en: "",
-        coordinates: [],
-        thresholds: [],
-        amount_visitors: 0,
-        capacity_usage: 0,
-        hidden_name: false,
-        hidden_absolute: false,
-        hidden_percentage: false,
-      } as unknown as AreaStatus);
-
-    onSave({
-      ...base,
-      area_name: nameDe,
-      area_name_en: nameEn,
-      coordinates: coords,
+    toast({
+      title: "Erfolgreich gespeichert",
+      description: `Die Änderungen für ${updated.area_name} wurden übernommen.`,
     });
+
+    onSave(updated);
+  
+    } catch (error) {
+      console.error("Fehler beim Speichern:", error);
+      toast({
+        title: "Fehler beim Speichern",
+        description: "Bitte versuche es erneut.",
+        variant: "destructive",
+      });
+    }
   };
 
 
@@ -92,33 +105,27 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
         </AccordionTrigger>
 
         <AccordionContent>
-          <div className="flex justify-end mb-4">
-            <Button variant="outline" size="sm" onClick={newArea}>
-              <Plus className="mr-1 h-4 w-4" />
-              Neues&nbsp;Areal
-            </Button>
-          </div>
 
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block mb-1 text-sm font-medium">
-                Bereichsname&nbsp;(DE)
+                Bereichsname (Deutsch)
               </label>
               <Input
                 value={nameDe}
-                placeholder="z. B. B3"
+                placeholder="Bereichsname (DE)"
                 onChange={(e) => setNameDe(e.target.value)}
               />
             </div>
 
             <div>
               <label className="block mb-1 text-sm font-medium">
-                Bereichsname&nbsp;(EN)
+                Bereichsname (Englisch)
               </label>
               <Input
                 value={nameEn}
-                placeholder="e.g. B3"
+                placeholder="Bereichsname (EN)"
                 onChange={(e) => setNameEn(e.target.value)}
               />
             </div>
@@ -129,19 +136,46 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
 
           <p className="font-medium mb-2">Koordinaten</p>
           {coords.map((c, i) => (
-            <div key={i} className="grid grid-cols-2 gap-4 mb-2">
+            <div
+              key={i}
+              className="grid grid-cols-[32px_1fr_32px_1fr_auto] items-center gap-2 mb-2"
+            >
+              {/* X Label */}
+              <span>X:</span>
+
+              {/* X Input */}
               <Input
                 type="number"
                 value={c.x}
                 onChange={(e) => updateCoord(i, "x", e.target.value)}
                 placeholder={`X${i + 1}`}
               />
+
+              {/* Y Label */}
+              <span>Y:</span>
+
+              {/* Y Input */}
               <Input
                 type="number"
                 value={c.y}
                 onChange={(e) => updateCoord(i, "y", e.target.value)}
                 placeholder={`Y${i + 1}`}
               />
+
+              {/* Delete Button */}
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  const updated = [...coords];
+                  updated.splice(i, 1);
+                  setCoords(updated);
+                }}
+                className="text-destructive"
+              >
+                <Trash className="h-4 w-4" />
+              </Button>
             </div>
           ))}
 
@@ -157,9 +191,13 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
 
 
           <div className="mt-6 flex justify-end gap-3">
-            <Button type="button" variant="outline" onClick={reset}>
-              <Undo2 className="mr-1 h-4 w-4" />
-              Zurücksetzen
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+            >
+              <X className="mr-1 h-4 w-4" />
+              Schließen
             </Button>
 
             <Button

@@ -12,6 +12,7 @@ interface NewThresholdFormProps {
   /** optional – set to true when the parent already has 4 thresholds */
   disabled?: boolean;
   type?: 'security' | 'management';
+  lowerBound: number;
 }
 
 const NewThresholdForm: React.FC<NewThresholdFormProps> = ({
@@ -20,24 +21,42 @@ const NewThresholdForm: React.FC<NewThresholdFormProps> = ({
   onAdd,
   disabled = false,
   type = 'management',
+  lowerBound,
 }) => {
   return (
     <div className="pt-4 border-t">
-      <Label className="mb-2 block">Neuer Grenzwert</Label>
+      <Label className="mb-2 block">Neuer Schwellenwert</Label>
 
-      <div className="flex gap-2 items-center">
-        {/* numeric upper-threshold input */}
-        <Input
-          type="number"
-          placeholder="Schwellenwert"
-          className="flex-1"
-          value={newThreshold.upper_threshold || ''}
-          onChange={(e) =>
-            onChange({ upper_threshold: parseInt(e.target.value, 10) || 0 })
-          }
-          min={0}
-          disabled={disabled}
-        />
+      <div className="grid grid-cols-[1fr_1fr_auto] gap-2 items-end">
+
+        {/* Lower bound of new threshold (read-only) */}
+        <div>
+          <Label htmlFor="lower_bound" className="text-sm">Von</Label>
+          <Input
+            id="lower_bound"
+            type="number"
+            value={lowerBound}
+            readOnly
+            disabled
+          />
+        </div>
+
+        {/* Upper bound of new threshold (editable) */}
+        <div>
+          <Label htmlFor="upper_threshold" className="text-sm">Bis</Label>
+          <Input
+            id="upper_threshold"
+            type="number"
+            placeholder="Schwellenwert"
+            className="w-full"
+            value={newThreshold.upper_threshold || ''}
+            onChange={(e) =>
+              onChange({ upper_threshold: parseInt(e.target.value, 10) || 0 })
+              }
+            min={0}
+            disabled={disabled}
+          />
+        </div>
 
         {/* colour picker */}
         <Input

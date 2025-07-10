@@ -15,6 +15,7 @@ export interface AreaSettings {
   coordinates: { x: number; y: number }[];
   highlight: string | null;
   hidden_name: boolean;
+  status: "active" | "inactive";
   hidden_absolute?: boolean;    // Controls display of absolute visitor count
   hidden_percentage?: boolean; 
 }
@@ -40,13 +41,15 @@ export interface AreaStatus {
   highlight: string | null;
   thresholds: Threshold[];
   hidden_name: boolean;
+  status: "active" | "inactive";
   hidden_absolute?: boolean;    // Controls display of absolute visitor count
   hidden_percentage?: boolean; 
 }
 
-export interface LegendRow{
+export interface LegendRow {
   id: number;
   object: string;
+  object_en: string;
   description_de: string;
   description_en: string;
 }

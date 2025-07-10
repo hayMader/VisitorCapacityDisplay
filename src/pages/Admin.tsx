@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import ExhibitionMap from '@/components/ExhibitionMap';
@@ -8,85 +7,74 @@ import { toast } from '@/components/ui/use-toast';
 import { getAreaSettings } from '@/utils/api';
 import { AreaStatus } from '@/types';
 import AreaSettingsAccordion from '@/components/AreaSettingsAccordion';
-import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 import { refreshLegend, getLegend } from "@/utils/api";
 import { LegendRow } from "@/types";
 import { Label } from '@/components/ui/label';
 import { Trash, Save } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import Areaconfigurator from '@/components/Areaconfigurator';
+import { useAreaStatus } from "@/contexts/AreaStatusContext";
 
 const Admin = () => {
-  const [areas, setAreas] = useState<AreaStatus[]>([]);
-  const [selectedArea, setSelectedArea] = useState<AreaStatus>(null);
+  const { selectedArea, setSelectedArea, updateAreaStatus } = useAreaStatus();
   const [timeFilter, setTimeFilter] = useState(1440);
   const [showGermanTitle, setShowGermanTitle] = useState<boolean>(false);
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const [hideAbsolute, setHideAbsolute] = useState(false);
-  const [hidePercentage, setHidePercentage] = useState(false)
-  const handleEditClick = (area: AreaStatus) => {
-  setSelectedArea(area);
-  setSelectedArea(area);
-  const handleEditClick = (area: AreaStatus) => setSelectedArea(area);
-};
-
+  const [showAbsolute, setShowAbsolute] = useState(true);
+  const [showPercentage, setShowPercentage] = useState(true)
+  const [showConfigurator, setShowConfigurator] = useState(false);
+  const [isHighlighted, setIsHighlighted] = useState(false);
+  const [hasUserSelectedArea, setHasUserSelectedArea] = useState(false);
 
   const [legendRows, setLegendRows] = useState<Partial<LegendRow>[]>([
-    { object: "", description_de: "", description_en: "" }
+    { object: "", object_en: "", description_de: "", description_en: "" }
   ])
 
   useEffect(() => {
-    const fetchInitialData = async () => {
+    // Fetch legend rows from the API
+    const fetchLegendRows = async () => {
       try {
-        const areaData = await getAreaSettings();
-        const legendData = await getLegend();
-        setLegendRows(legendData);
-        setAreas(areaData);
-        if (areaData.length > 0) {
-          setSelectedArea(areaData[0]);
-        }
+        const data = await getLegend();
+        setLegendRows(data);
       } catch (error) {
-        console.error('Error fetching initial data:', error);
+        console.error("Error fetching legend rows:", error);
         toast({
-          title: 'Fehler',
-          description: 'Die Einstellungen konnten nicht geladen werden.',
-          variant: 'destructive',
+          title: "Fehler",
+          description: "Die Legende konnte nicht geladen werden.",
+          variant: "destructive",
         });
       }
     };
-    
-    fetchInitialData();
+
+    fetchLegendRows();
   }, []);
 
   useEffect(() => {
-      const intervalId = setInterval(() => {
+    // Set up interval to toggle German title every 8 seconds
+    const intervalId = setInterval(() => {
       setShowGermanTitle((prev) => !prev);
     }, 8000);
     
     return () => clearInterval (intervalId);
   }, []);
+
+  useEffect(() => {
+    if (selectedArea && hasUserSelectedArea) {
+      setIsHighlighted(true);
+      const timer = setTimeout(() => {
+        setIsHighlighted(false);
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedArea, hasUserSelectedArea]);
+
+  const handleAreaSelect = (area: AreaStatus) => {
+    setHasUserSelectedArea(true);
+    setSelectedArea(area);
+  };
   
 
   const handleAreaUpdate = (updatedArea: AreaStatus) => {
-    setAreas(areas.map(area => 
-      area.id === updatedArea.id ? updatedArea : area
-    ));
-  };
-
-  const handleDataUpdate = (newAreaStatus: AreaStatus[]) => {
-    setAreas(newAreaStatus);
-  };
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-    toast({
-      title: "Abgemeldet",
-      description: "Sie wurden erfolgreich abgemeldet."
-    });
+    updateAreaStatus(updatedArea);
   };
 
   const handleLegendRefresh = async () => {
@@ -134,30 +122,30 @@ const Admin = () => {
               <ExhibitionMap 
                 autoRefresh={true}
                 refreshInterval={60000}
-                onDataUpdate={handleDataUpdate}
                 showGermanLabels={showGermanTitle}
-                selectedArea={selectedArea}
                 timeFilter={timeFilter}
-                showNumbers={!hideAbsolute}
-                showPercentage={!hidePercentage} setShowConfigurator={function (value: React.SetStateAction<boolean>): void {
-                  throw new Error('Function not implemented.');
-                } }              />
+                showNumbers={showAbsolute}
+                showPercentage={showPercentage}
+                onAreaSelect={handleAreaSelect}
+                currentPage='management'
+                setShowConfigurator={setShowConfigurator}
+              />
               <div className="flex gap-6 mb-2 mt-4">
                 <div className="flex items-center gap-2">
                   <Checkbox
                     id="master-absolute"
-                    checked={hideAbsolute}
-                    onCheckedChange={checked => setHideAbsolute(!!checked)}
+                    checked={showAbsolute}
+                    onCheckedChange={checked => setShowAbsolute(!!checked)}
                   />
-                  <Label htmlFor="master-absolute">Absolute Besucherzahl ausblenden</Label>
+                  <Label htmlFor="master-absolute">Absolute Besucherzahl anzeigen</Label>
                 </div>
                 <div className="flex items-center gap-2">
                   <Checkbox
                     id="master-percentage"
-                    checked={hidePercentage}
-                    onCheckedChange={checked => setHidePercentage(!!checked)}
+                    checked={showPercentage}
+                    onCheckedChange={checked => setShowPercentage(!!checked)}
                   />
-                  <Label htmlFor="master-percentage">Prozentuale Auslastung ausblenden</Label>
+                  <Label htmlFor="master-percentage">Prozentuale Auslastung anzeigen</Label>
                 </div>
               </div>
 
@@ -200,19 +188,21 @@ const Admin = () => {
             <div className="bg-white p-4 rounded-lg shadow-sm">
               {/* Legend editor */}
               <span>Legenden Einstellungen</span>
-              <p className="text-muted-foreground mb-4">Fügen Sie der Legende einen neuen Wert hinzu:</p>
+              <p className="text-muted-foreground mb-4">Fügen Sie der Legende einen neuen, eindeutigen Wert hinzu, um Unklarheiten zu vermeiden.</p>
 
-              <div className="grid grid-cols-[2.5fr,2.5fr,2.5fr,0.5fr] gap-4 items-center mb-4">
-                <Label className="col-span-1">Abkürzung</Label>
+              <div className="grid grid-cols-[2fr,2fr,0.5fr,2fr,2fr,0.5fr] gap-4 items-center mb-4">
+                <Label className="col-span-1">Abkürzung (Deutsch)</Label>
+                <Label className="col-span-1">Abkürzung (Englisch)</Label>
+                <Label className="col-span-1">Farbe</Label>
                 <Label className="col-span-1">Beschreibung (Deutsch)</Label>
                 <Label className="col-span-1">Beschreibung (Englisch)</Label>
               </div>
 
                <div className="space-y-6">
                 {legendRows.map((row, index) => (
-                  <div key={row.id} className="grid grid-cols-[2.5fr,2.5fr,2.5fr,0.5fr] gap-4 items-center">
-                    {/* Input for Object */}
-                    <div className="flex items-center gap-2">
+                  <div key={row.id} className="grid grid-cols-[2fr,2fr,0.5fr,2fr,2fr,0.5fr] gap-4 items-center">
+                    
+                    {/* Input for Object (DE) */}
                       <Input
                         type="text"
                         value={row.object}
@@ -222,10 +212,24 @@ const Admin = () => {
                           setLegendRows(updatedRows);
                         }}
                         className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="Abkürzung oder #RRGGBB"
+                        placeholder="Abkürzung / #RRGGBB"
                       />
+
+                    {/* Input for Object (EN) */}
+                      <Input
+                        type="text"
+                        value={row.object_en}
+                        onChange={(e) => {
+                          const updatedRows = [...legendRows];
+                          updatedRows[index].object_en = e.target.value;
+                          setLegendRows(updatedRows);
+                        }}
+                        className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                        placeholder="Abkürzung"
+                        disabled={/^#[0-9A-Fa-f]{6}$/.test(row.object)}
+                      />
+
                       {/* Color picker for hex color */}
-                      <div className="relative">
                         <input
                           type="color"
                           value={/^#[0-9A-Fa-f]{6}$/.test(row.object) ? row.object : "#000000"}
@@ -236,8 +240,6 @@ const Admin = () => {
                           }}
                           className="w-8 h-8 p-0 border rounded-md"
                         />
-                      </div>
-                    </div>
 
                     {/* Input field description_de */}
                     <Input
@@ -249,7 +251,7 @@ const Admin = () => {
                         setLegendRows(updatedRows);
                       }}
                       className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                      placeholder="Beschreibung (Deutsch)"
+                      placeholder="Beschreibung"
                     />
 
                     {/* Input field description_en */}
@@ -262,7 +264,7 @@ const Admin = () => {
                         setLegendRows(updatedRows);
                       }}
                       className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                      placeholder="Beschreibung (Englisch)"
+                      placeholder="Beschreibung"
                     />
 
                     <button
@@ -282,7 +284,7 @@ const Admin = () => {
               <div className="flex justify-end mt-6 gap-3">
                 <Button
                   variant="outline" onClick={() => setLegendRows([...legendRows,
-                      { id: Date.now(), object: "", description_de: "", description_en: "" },
+                      { id: Date.now(), object: "", object_en: "", description_de: "", description_en: "" },
                     ])
                   }
                 >
@@ -301,9 +303,11 @@ const Admin = () => {
           
           {/* Right column: Area settings */}
           <div className="lg:col-span-1">
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <div className="flex justify-between items-center mb-4">
-                <span>Bereichseinstellungen</span>
+            <div className={`bg-white p-4 rounded-lg shadow-sm transition-all duration-300 ease-in-out
+              ${isHighlighted ? 'ring-2 ring-primary-400 ring-opacity-50 shadow-lg shadow-primary-100' : ''}`}>
+              <div className="items-center mb-4">
+                <span>Bereichseinstellungen: {selectedArea?.area_name || ''}</span>
+                <p className="text-muted-foreground"> Konfigurieren Sie Ihre Besucherfüllstandsanzeige</p>
               </div>
               <Separator className="mb-4" />
               
@@ -312,16 +316,13 @@ const Admin = () => {
                 <AreaSettingsAccordion
                   area={selectedArea}
                   onUpdate={handleAreaUpdate}
-                  allAreas={areas}
-                  />
+                  showConfigurator={showConfigurator}
+                  onCloseConfigurator={() => setShowConfigurator(false)}
+                  currentPage='management'
+                />
                   <Separator className="my-4" />
-
-                < Areaconfigurator
-                  selectedArea={selectedArea}
-                  onSave={handleAreaUpdate}
-            />
-            </>
-              )}
+                  </>
+                  )}
           </div>                      
         </div>
       </div>
