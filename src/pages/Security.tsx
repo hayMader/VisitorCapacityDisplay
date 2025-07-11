@@ -1,14 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import ExhibitionMap from '@/components/ExhibitionMap';
-import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { toast } from '@/components/ui/use-toast';
-import { getAreaSettings } from '@/utils/api';
 import { AreaStatus } from '@/types';
 import AreaSettingsAccordion from '@/components/AreaSettingsAccordion';
-import { refreshLegend, getLegend } from "@/utils/api";
-import { LegendRow } from "@/types";
 import { Label } from '@/components/ui/label';
 import { Trash, Save, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -16,10 +11,11 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useAreaStatus } from "@/contexts/AreaStatusContext";
 
 const Security = () => {
-  const { selectedArea, legendRows, setLegendRows, setSelectedArea, updateAreaStatus, setTimeFilter, timeFilter, areaStatus } = useAreaStatus();
+  const { selectedArea, legendRows, setLegendRows, setSelectedArea, refreshAreaStatus, areaStatus } = useAreaStatus();
   const [showGermanTitle, setShowGermanTitle] = useState<boolean>(false);
   const [showAbsolute, setShowAbsolute] = useState(true);
   const [showPercentage, setShowPercentage] = useState(true);
+  const [timeFilter, setTimeFilter] = useState(1440); // Default to 24 hours
 
 
   // Filter states for warnings
@@ -28,28 +24,8 @@ const Security = () => {
   const [showHalls, setShowHalls] = useState(true);
 
   useEffect(() => {
-    const fetchInitialData = async () => {
-      try {
-        const areaData = await getAreaSettings();
-        console.log("Fetched area data:", areaData);
-        const legendData = await getLegend();
-        setLegendRows(legendData);
-        // setAreas(areaData);
-        if (areaData.length > 0) {
-          // setSelectedArea(areaData[0]);
-        }
-      } catch (error) {
-        console.error('Error fetching initial data:', error);
-        toast({
-          title: 'Fehler',
-          description: 'Die Einstellungen konnten nicht geladen werden.',
-          variant: 'destructive',
-        });
-      }
-    };
-    
-    fetchInitialData();
-  }, []);
+    refreshAreaStatus(timeFilter);
+  }, [timeFilter]);
 
   useEffect(() => {
       const intervalId = setInterval(() => {

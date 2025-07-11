@@ -228,12 +228,17 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                   });
                 }
 
-                const lineHeight = 18; // adjust as needed
+                const lineHeight = 22; // adjust as needed
                 const totalHeight = lines.length * lineHeight;
                 const availableHeight = maxY - minY;
 
                 // Determine if horizontal alignment is needed
                 const useHorizontalAlignment = totalHeight > availableHeight;
+
+                // Calculate horizontal alignment
+                const lineSpacing = 70; // Adjust spacing between lines
+                const totalWidth = lines.length * lineSpacing - lineSpacing; // Total width of all lines
+                const startX = cx - totalWidth / 2; // Start position for horizontal alignment
 
                 const startY = cy - totalHeight / 2 + lineHeight / 2;
 
@@ -257,7 +262,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                         .map((point: { x: number; y: number }) => `${point.x},${point.y}`)
                         .join(" ")}
                       fill={fillColor}
-                      fillOpacity={0.4}
+                      fillOpacity={1}
                       stroke={isSelected ? "#000" : "#667080"}
                       strokeWidth={isSelected ? 2 : 0}
                       strokeDasharray={strokeStyle}
@@ -279,11 +284,11 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                         inactive
                       </text>
                     ) : useHorizontalAlignment ? (
-                      // Render lines horizontally
+                      // Render lines horizontally with central alignment
                       lines.map((line, index) => (
                         <text
                           key={index}
-                          x={cx + index * 50} // Adjust spacing between lines
+                          x={startX + index * lineSpacing} // Adjust spacing between lines
                           y={cy}
                           textAnchor="middle"
                           dominantBaseline="middle"

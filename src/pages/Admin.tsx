@@ -4,11 +4,8 @@ import ExhibitionMap from '@/components/ExhibitionMap';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/components/ui/use-toast';
-import { getAreaSettings } from '@/utils/api';
 import { AreaStatus } from '@/types';
 import AreaSettingsAccordion from '@/components/AreaSettingsAccordion';
-import { refreshLegend, getLegend } from "@/utils/api";
-import { LegendRow } from "@/types";
 import { Label } from '@/components/ui/label';
 import { Trash, Save } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -16,7 +13,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useAreaStatus } from "@/contexts/AreaStatusContext";
 
 const Admin = () => {
-  const { selectedArea, legendRows, setLegendRows, setSelectedArea, setTimeFilter, timeFilter } = useAreaStatus();
+  const { selectedArea, legendRows, setLegendRows, setSelectedArea, refreshAreaStatus } = useAreaStatus();
 
   const [showGermanTitle, setShowGermanTitle] = useState<boolean>(false);
   const [showAbsolute, setShowAbsolute] = useState(true);
@@ -24,6 +21,7 @@ const Admin = () => {
   const [showConfigurator, setShowConfigurator] = useState(false);
   const [isHighlighted, setIsHighlighted] = useState(false);
   const [hasUserSelectedArea, setHasUserSelectedArea] = useState(false);
+  const [timeFilter, setTimeFilter] = useState(1440); // Default to 24 hours
 
   useEffect(() => {
     // Set up interval to toggle German title every 8 seconds
@@ -33,6 +31,11 @@ const Admin = () => {
     
     return () => clearInterval (intervalId);
   }, []);
+
+  // Fetch area settings on initial load and when time filter changes
+  useEffect(() => {
+    refreshAreaStatus(timeFilter);
+  }, [timeFilter]);
 
   useEffect(() => {
     if (selectedArea && hasUserSelectedArea) {
@@ -52,7 +55,7 @@ const Admin = () => {
 
   const handleLegendRefresh = async () => {
     try {
-      await refreshLegend(legendRows)
+      await setLegendRows(legendRows)
       toast({
         title: "Legende aktualisiert",
         description: "Die Schwellenwerte für die Legende wurden erfolgreich aktualisiert.",

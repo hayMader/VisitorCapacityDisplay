@@ -26,6 +26,7 @@ export const getAreaSettings = async (filter_minutes?: number): Promise<AreaStat
   try {
     const { data, error } = await supabase.rpc("get_area_status_filtered", { filter_minutes: filter_minutes || 0 });
 
+    console.log('Fetched area settings:', data);
     if (error) throw error;
     
     return data
@@ -189,7 +190,7 @@ export const getOccupancyColor = (threshold?: Threshold): string => {
 };
 
 
-export const refreshLegend = async (LegendRows: Partial<LegendRow>[]) => {
+export const updateLegend = async (LegendRows: Partial<LegendRow>[]) => {
   try {
     const { data, error } = await supabase.rpc('refresh_legend', { legend_rows: LegendRows });
     if (error) throw error;
