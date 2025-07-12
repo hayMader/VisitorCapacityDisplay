@@ -41,7 +41,7 @@ interface Props {
 const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, showConfigurator, onCloseConfigurator }) => {
 
 
-  const { updateAreaStatus } = useAreaStatus();
+  const { updateAreaStatus, setAreaStatus } = useAreaStatus();
   /* ---------------------------------------------------------------- */
   /*  State                                                           */
   /* ---------------------------------------------------------------- */
@@ -76,7 +76,9 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
     setHasChanges(hasUnsavedChanges);
     if (hasUnsavedChanges) {
       console.log("Changes detected:", formData);
-      handleSubmit();
+      setAreaStatus((prev) =>
+        prev.map((a) => (a.id === formData?.id ? formData : a))
+      );
     }
   }, [formData, originalData]);
 
@@ -116,7 +118,6 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
 
       setOriginalData(formData);
   
-      
       toast({
         title: 'Einstellungen aktualisiert',
         description: `Die Einstellungen für ${area.area_name} wurden erfolgreich aktualisiert.`,
@@ -246,19 +247,6 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
           />
         </div>
       )}
-
-        {/* Area Position Settings */}
-        {/* <AccordionItem value="position">
-          <AccordionTrigger className="py-4">
-            <div className="flex items-center">
-              <Move className="mr-2 h-5 w-5" />
-              <span className='text'>Anpassung Areal</span>
-            </div>
-          </AccordionTrigger>
-          <AccordionContent>
-            <AreaPositionSettings formData={formData} onChange={handleChange} />
-          </AccordionContent>
-        </AccordionItem> */}
 
       {/* ---------- Footer (Speichern) ---------- */}
       <div className="mt-6 flex justify-between">

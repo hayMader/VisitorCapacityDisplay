@@ -12,6 +12,7 @@ interface AreaStatusContextProps {
   setSelectedArea: React.Dispatch<React.SetStateAction<AreaStatus | null>>;
   legendRows: Partial<LegendRow>[];
   setLegendRows: React.Dispatch<React.SetStateAction<Partial<LegendRow>[]>>;
+  setAreaStatus: React.Dispatch<React.SetStateAction<AreaStatus[]>>;
 }
 
 const AreaStatusContext = createContext<AreaStatusContextProps | undefined>(undefined);
@@ -58,16 +59,16 @@ export const AreaStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   // Update a specific area in the state
-  const updateAreaStatus = (updatedArea: AreaStatus) => {
+  const updateAreaStatus = async (updatedArea: AreaStatus) => {
     setAreaStatus((prev) =>
       prev.map((area) => (area.id === updatedArea.id ? updatedArea : area))
     );
-    updateAreaSettings(updatedArea.id, updatedArea);
+    await updateAreaSettings(updatedArea.id, updatedArea);
     refreshAreaStatus(); // Optionally refresh the entire list after an update
   };
 
   return (
-    <AreaStatusContext.Provider value={{ areaStatus, selectedArea, legendRows, setLegendRows, setSelectedArea, refreshAreaStatus, isRefreshing, updateAreaStatus }}>
+    <AreaStatusContext.Provider value={{ areaStatus, selectedArea, legendRows, setLegendRows, setSelectedArea, refreshAreaStatus, isRefreshing, updateAreaStatus, setAreaStatus }}>
       {children}
     </AreaStatusContext.Provider>
   );

@@ -15,7 +15,7 @@ const Security = () => {
   const [showGermanTitle, setShowGermanTitle] = useState<boolean>(false);
   const [showAbsolute, setShowAbsolute] = useState(true);
   const [showPercentage, setShowPercentage] = useState(true);
-  const [timeFilter, setTimeFilter] = useState(1440); // Default to 24 hours
+  const [timeFilter, setTimeFilter] = useState(0); // Default to 0 hours
   const [isHighlighted, setIsHighlighted] = useState(false);
 
 
@@ -29,6 +29,9 @@ const Security = () => {
   }, [timeFilter]);
 
   useEffect(() => {
+    //inital load of area settings
+    refreshAreaStatus(timeFilter);
+
       const intervalId = setInterval(() => {
       setShowGermanTitle((prev) => !prev);
     }, 20000);
@@ -72,12 +75,6 @@ const Security = () => {
 
     return true;
   };
-
-  useEffect(() => {
-    if (areaStatus.length > 0) {
-      setSelectedArea(areaStatus[0]);
-    }
-  }, [areaStatus]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">

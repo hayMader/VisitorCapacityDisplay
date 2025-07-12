@@ -21,15 +21,19 @@ const Admin = () => {
   const [showConfigurator, setShowConfigurator] = useState(false);
   const [isHighlighted, setIsHighlighted] = useState(false);
   const [hasUserSelectedArea, setHasUserSelectedArea] = useState(false);
-  const [timeFilter, setTimeFilter] = useState(1440); // Default to 24 hours
+  const [timeFilter, setTimeFilter] = useState(0); // Default to 0 hours
 
   useEffect(() => {
+    //inital load of area settings
+    refreshAreaStatus(timeFilter);
+
     // Set up interval to toggle German title every 8 seconds
     const intervalId = setInterval(() => {
       setShowGermanTitle((prev) => !prev);
     }, 20000);
     
     return () => clearInterval (intervalId);
+
   }, []);
 
   // Fetch area settings on initial load and when time filter changes
