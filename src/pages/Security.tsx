@@ -5,17 +5,18 @@ import { Separator } from '@/components/ui/separator';
 import { AreaStatus } from '@/types';
 import AreaSettingsAccordion from '@/components/AreaSettingsAccordion';
 import { Label } from '@/components/ui/label';
-import { Trash, Save, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAreaStatus } from "@/contexts/AreaStatusContext";
 
 const Security = () => {
-  const { selectedArea, legendRows, setLegendRows, setSelectedArea, refreshAreaStatus, areaStatus } = useAreaStatus();
+  const { selectedArea, setSelectedArea, refreshAreaStatus, areaStatus } = useAreaStatus();
   const [showGermanTitle, setShowGermanTitle] = useState<boolean>(false);
   const [showAbsolute, setShowAbsolute] = useState(true);
   const [showPercentage, setShowPercentage] = useState(true);
   const [timeFilter, setTimeFilter] = useState(1440); // Default to 24 hours
+  const [isHighlighted, setIsHighlighted] = useState(false);
 
 
   // Filter states for warnings
@@ -30,10 +31,20 @@ const Security = () => {
   useEffect(() => {
       const intervalId = setInterval(() => {
       setShowGermanTitle((prev) => !prev);
-    }, 8000);
+    }, 20000);
     
     return () => clearInterval (intervalId);
   }, []);
+
+  useEffect(() => {
+    if (selectedArea) {
+      setIsHighlighted(true);
+      const timer = setTimeout(() => {
+        setIsHighlighted(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedArea]);
   
 
   // Filter function for warnings
@@ -224,7 +235,8 @@ const Security = () => {
           
           {/* Right column: Area settings */}
           <div className="lg:col-span-1">
-            <div className="bg-white p-4 rounded-lg shadow-sm">
+            <div className={`bg-white p-4 rounded-lg shadow-sm ${
+              isHighlighted ? 'ring-2 ring-primary-400 ring-opacity-50 shadow-lg shadow-primary-100' : ''}`}>
               <div className="flex justify-between items-center mb-4">
                 <span>Bereichseinstellungen</span>
               </div>

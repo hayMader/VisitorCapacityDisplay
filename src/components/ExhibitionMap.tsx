@@ -132,18 +132,19 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
               {currentPage === "management" && (
                 <button
                   onClick={() => {
-                    if (selectedArea) {
-                      setShowConfigurator?.(true);
-                    } else {
-                      toast({
-                        title: "Kein Bereich ausgewählt",
-                        description: "Bitte wählen Sie zuerst einen Bereich aus.",
-                        variant: "destructive",
-                      });
-                    }
+                  if (selectedArea) {
+                    setShowConfigurator?.(true);
+                  } else {
+                    toast({
+                    title: "Kein Bereich ausgewählt",
+                    description: "Bitte wählen Sie zuerst einen Bereich aus.",
+                    variant: "destructive",
+                    });
+                  }
                   }}
                   className="bg-white p-2 rounded-full shadow hover:bg-gray-50 transition-colors ml-2"
                   aria-label="Bereich bearbeiten"
+                  title="Klicke um Fläche zu bearbeiten"
                 >
                   <Pencil className="h-5 w-5 text-primary" />
                 </button>
@@ -256,20 +257,18 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                 const strokeStyle = area.status === "inactive" ? "4,4" : "none"; // Dashed border for inactive areas
 
                 return (
-                  <g key={area.id}>
+                    <g key={area.id} onClick={() => handleAreaClick(area)} className="cursor-pointer">
                     <polygon
                       points={area.coordinates
-                        .map((point: { x: number; y: number }) => `${point.x},${point.y}`)
-                        .join(" ")}
+                      .map((point: { x: number; y: number }) => `${point.x},${point.y}`)
+                      .join(" ")}
                       fill={fillColor}
                       fillOpacity={1}
                       stroke={isSelected ? "#000" : "#667080"}
-                      strokeWidth={isSelected ? 2 : 0}
-                      strokeDasharray={strokeStyle}
-                      className={`exhibition-hall cursor-pointer ${
-                        shouldBlink && area.status !== "inactive" ? "blink" : ""
-                      }`}
-                      onClick={() => handleAreaClick(area)}
+                      strokeWidth={isSelected ? 3 : 0} // Increased stroke width for selected areas
+                      strokeDasharray={isSelected ? "none" : strokeStyle} // Solid border for selected areas
+                      className={`exhibition-hall ${shouldBlink && area.status !== "inactive" ? "blink" : ""}`}
+                      style={isSelected ? { filter: "drop-shadow(0 0 10px #000)" } : {}} // Add shadow effect for selected areas
                     />
                     {area.status === "inactive" ? (
                       <text
@@ -283,38 +282,38 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                       >
                         inactive
                       </text>
-                    ) : useHorizontalAlignment ? (
-                      // Render lines horizontally with central alignment
-                      lines.map((line, index) => (
-                        <text
-                          key={index}
-                          x={startX + index * lineSpacing} // Adjust spacing between lines
-                          y={cy}
-                          textAnchor="middle"
-                          dominantBaseline="middle"
-                          fill="#1e293b"
-                          fontWeight={index === 0 ? "bold" : "normal"}
-                          fontSize={line.fontSize}
-                        >
-                          {line.text}
-                        </text>
-                      ))
                     ) : (
-                      // Render lines vertically
-                      lines.map((line, index) => (
-                        <text
-                          key={index}
-                          x={cx}
-                          y={startY + index * lineHeight}
-                          textAnchor="middle"
-                          dominantBaseline="middle"
-                          fill="#1e293b"
-                          fontWeight={index === 0 ? "bold" : "normal"}
-                          fontSize={line.fontSize}
-                        >
-                          {line.text}
-                        </text>
-                      ))
+                      <g>
+                        {useHorizontalAlignment
+                          ? lines.map((line, index) => (
+                              <text
+                                key={index}
+                                x={startX + index * lineSpacing} // Adjust spacing between lines
+                                y={cy}
+                                textAnchor="middle"
+                                dominantBaseline="middle"
+                                fill="#1e293b"
+                                fontWeight={index === 0 ? "bold" : "normal"}
+                                fontSize={line.fontSize}
+                              >
+                                {line.text}
+                              </text>
+                            ))
+                          : lines.map((line, index) => (
+                              <text
+                                key={index}
+                                x={cx}
+                                y={startY + index * lineHeight}
+                                textAnchor="middle"
+                                dominantBaseline="middle"
+                                fill="#1e293b"
+                                fontWeight={index === 0 ? "bold" : "normal"}
+                                fontSize={line.fontSize}
+                              >
+                                {line.text}
+                              </text>
+                            ))}
+                      </g>
                     )}
                   </g>
                 );

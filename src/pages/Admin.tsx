@@ -27,7 +27,7 @@ const Admin = () => {
     // Set up interval to toggle German title every 8 seconds
     const intervalId = setInterval(() => {
       setShowGermanTitle((prev) => !prev);
-    }, 8000);
+    }, 20000);
     
     return () => clearInterval (intervalId);
   }, []);
@@ -42,7 +42,7 @@ const Admin = () => {
       setIsHighlighted(true);
       const timer = setTimeout(() => {
         setIsHighlighted(false);
-      }, 1500);
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [selectedArea, hasUserSelectedArea]);

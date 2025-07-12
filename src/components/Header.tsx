@@ -39,7 +39,7 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle, isAdmin = false }) => 
             {subtitle && (
               <div className="items-center sm:ml-2 sm:border-l sm:border-gray-300 sm:pl-2 sm:flex hidden">
                 <Clock className="w-4 h-4 mr-1" />
-                <h3 className="inline-flex items-center font-light text-center sm:text-left">
+                <h3 className="inline-flex items-center font-bold text-center sm:text-left">
                   {subtitle}
                 </h3>
               </div>

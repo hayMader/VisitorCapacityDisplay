@@ -28,7 +28,7 @@ const Index = () => {
 
     const intervalId = setInterval(() => {
       setShowGermanTitle((prev) => !prev);
-    }, 8000);
+    }, 20000);
   
     return () => clearInterval(intervalId);
   }, []);

@@ -116,15 +116,6 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
       }));
     };
 
-  const updateAlertMessage = (id: number, message: string) => {
-    setFormData((p) => ({
-      ...p,
-      thresholds: p.thresholds.map((t) =>
-        t.id === id ? { ...t, alert_message: message } : t
-      ),
-    }));
-  };
-
   // Filter and sort thresholds of the specified type
   const thresholdsOfType = formData.thresholds
     .filter((t) => t.type === type)
@@ -232,7 +223,7 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
                     </div>
                     )}
                   </div>
-                  {                    isEditing && (
+                  {isEditing && type === "security" && (
                     <div className="p-2 bg-gray-50 border-t">
                       <Label className="text-sm">Warnhinweis Nachricht</Label>
                       <Input
