@@ -78,6 +78,7 @@ export type Database = {
           upper_threshold: number
           alert: boolean
           alert_message?: string | null
+          alert_message_control: boolean // Controls whether the alert message is shown in the UI
           type: "security" | "management"
         }
         Insert: {
@@ -87,6 +88,7 @@ export type Database = {
           upper_threshold?: number
           alert?: boolean
           alert_message?: string | null
+          alert_message_control?: boolean // Controls whether the alert message is shown in the UI
           type?: "security" | "management"
         }
         Update: {
@@ -96,6 +98,7 @@ export type Database = {
           upper_threshold?: number
           alert?: boolean
           alert_message?: string | null
+          alert_message_control?: boolean // Controls whether the alert message is shown in the UI
           type?: "security" | "management"
         }
         Relationships: [

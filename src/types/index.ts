@@ -28,6 +28,7 @@ export interface Threshold {
   type: 'security' | 'management';
   alert: boolean;
   alert_message?: string;
+  alert_message_control: boolean; // Controls whether the alert message is shown in the UI
 }
 
 export interface AreaStatus {

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
-import { Bell, Copy } from "lucide-react";
+import { Bell, Copy, Mail } from "lucide-react";
 import ThresholdItemActions from "@/components/ui/ThresholdItemActions";
 import NewThresholdForm from "@/components/ui/NewThresholdForm";
 import { Threshold, AreaStatus } from "@/types";
@@ -31,6 +31,7 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
     color: "#cccccc",
     alert: false,
     alert_message: "",
+    alert_message_control: false, // Default to false
   });
 
   const handleAddThreshold = () => {
@@ -69,6 +70,7 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
       color: newThreshold.color,
       alert: newThreshold.alert,
       type: type,
+      alert_message_control: newThreshold.alert_message_control,
       alert_message: newThreshold.alert_message,
     };
 
@@ -103,6 +105,15 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
       ...p,
       thresholds: p.thresholds.map((t) =>
         t.id === id ? { ...t, alert: !t.alert } : t
+      ),
+    }));
+  };
+
+    const toggleAlertMessage = (id: number) => {
+    setFormData((p) => ({
+      ...p,
+      thresholds: p.thresholds.map((t) =>
+        t.id === id ? { ...t, alert_message_control: !t.alert_message_control } : t
       ),
     }));
   };
@@ -146,7 +157,7 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
                   <>
                     <div
                       key={t.id}
-                      className="grid grid-cols-[24px_72px_24px_72px_auto] items-center gap-2 p-2 border-b last:border-0 relative"
+                      className="grid grid-cols-[24px_72px_24px_72px_auto_auto_auto_auto] items-center gap-2 p-2 border-b last:border-0"
                     >
                       {/* Color */}
                       {isEditing ? (
@@ -172,7 +183,7 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
                         readOnly
                         disabled
                         className="w-16 bg-transparent border-none p-0 text-right
-                   focus-visible:ring-0 cursor-default select-none"
+       focus-visible:ring-0 cursor-default select-none"
                       />
 
                       <span className="text-xs text-muted-foreground">bis</span>
@@ -197,7 +208,7 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
                           readOnly
                           disabled
                           className="w-16 bg-transparent border-none p-0 text-right
-                   focus-visible:ring-0 cursor-default"
+       focus-visible:ring-0 cursor-default"
                         />
                       )}
 
@@ -209,20 +220,33 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
                         onCancel={cancelEdit}
                         onDelete={() => deleteThreshold(t.id)}
                       />
+                      {/* Message Icon */}
+                      {type === "security" && (
+                      
+                      <button
+                        type="button"
+                        onClick={() => toggleAlertMessage(t.id)}
+                        className={`h-6 w-6 flex items-center justify-center rounded border ${
+                          t.alert_message_control ? "text-red-500" : "text-gray-400"
+                        }`}
+                        title={t.alert ? `Nachricht: ${t.alert_message || "Keine Nachricht definiert."}` : ""}
+                      >
+                        <Mail className="h-4 w-4" />
+                      </button>
+                      )}
+
                       {/* Alert Icon */}
                       {type === "security" && (
-
-                        <div
-                          className="absolute right-0 top-1/2 transform -translate-y-1/2 flex items-center gap-2 group"
-                          onClick={() => toggleAlert(t.id)}
-                        >
-                          <span
-                            className={`cursor-pointer ${t.alert ? "text-red-500" : "text-gray-400"}`}
-                            title={t.alert ? "Nachricht: " + (t.alert_message || "Keine Nachricht definiert.") : ""}
-                          >
-                            <Bell className="h-4 w-4" />
-                          </span>
-                        </div>
+                      <button
+                        type="button"
+                        onClick={() => toggleAlert(t.id)}
+                        className={`h-6 w-6 flex items-center justify-center rounded border ${
+                          t.alert ? "text-red-500" : "text-gray-400"
+                        }`}
+                        title={t.alert ? "Alarm aktiviert" : "Alarm deaktiviert"}
+                      >
+                        <Bell className="h-4 w-4" />
+                      </button>
                       )}
                     </div>
                     {isEditing && type === "security" && (
