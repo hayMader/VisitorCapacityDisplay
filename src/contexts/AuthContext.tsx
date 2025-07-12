@@ -4,6 +4,7 @@ interface AuthUser {
   isAuthenticated: boolean;
   username: string;
   name: string;
+  role: string;
 }
 
 interface AuthContextType {

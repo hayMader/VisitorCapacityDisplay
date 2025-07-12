@@ -31,6 +31,22 @@ const Login = () => {
         password: password,
       });
 
+      // get role from role table
+      if (data.user) {
+        const { data: userRoleData, error: roleError } = await supabase
+          .from('roles')
+          .select('role')
+          .eq('user_id', data.user.id)
+          .single();
+
+        if (roleError) {
+          throw roleError;
+        }
+
+        // Add role to user data
+        var role = userRoleData?.role || 'user'; // Default to 'user' if no role found
+      }
+
       if (error) {
         toast({
           title: "Anmeldung fehlgeschlagen",
@@ -42,8 +58,16 @@ const Login = () => {
           isAuthenticated: true,
           username: data.user.email,
           name: data.user.user_metadata?.name || 'Benutzer',
+          role: role || 'admin', // Use the fetched role or default to 'admin'
         }));
-        navigate('/admin');
+
+        // Route to Dashboard based on user role
+        if( role === 'security') {
+          navigate('/securityDashboard');
+        } else {
+          navigate('/admin');
+        }
+
         toast({
           title: "Erfolgreich angemeldet",
           description: "Willkommen im Management Dashboard.",

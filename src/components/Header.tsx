@@ -25,11 +25,11 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle, isAdmin = false }) => 
       <div className="flex-col w-full">
         <div className='flex flex-row items-center justify-between gap-4 sm:gap-0'>
           <div className="flex flex-row items-center gap-5">
-            <Link to="/" className="flex-shrink-0">
+            <Link to={user?.role === "security" ? "/securityDashboard" : "/"} className="flex-shrink-0">
               <img 
-                src="/messe-muenchen-logo.png" 
-                alt="Messe München Logo" 
-                className="h-20 w-auto"
+              src="/messe-muenchen-logo.png" 
+              alt="Messe München Logo" 
+              className="h-20 w-auto"
               />
             </Link>
             
@@ -49,18 +49,22 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle, isAdmin = false }) => 
           <div className="flex items-center gap-2 mt-4 sm:mt-0">
             {user?.isAuthenticated ? (
               window.location.pathname === '/' ? (
-                <Link to="/admin">
-                  <Settings className="h-4 w-4 mr-2" />
-                </Link>
+              <Link to="/admin">
+                <Settings className="h-4 w-4 mr-2" />
+              </Link>
+              ) : window.location.pathname === '/securityDashboard' ? (
+              <Link to="/security">
+                <Settings className="h-4 w-4 mr-2" />
+              </Link>
               ) : (
-                <Button variant="outline" size="sm" onClick={handleLogout}>
-                  <LogOut className="h-5 w-5 mr-2" />
-                  Abmelden
-                </Button>
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                <LogOut className="h-5 w-5 mr-2" />
+                Abmelden
+              </Button>
               )
             ) : (
               <Link to="/login">
-                  <LogIn className="h-5 w-5 mr-2" />
+              <LogIn className="h-5 w-5 mr-2" />
               </Link>
             )}
           </div>

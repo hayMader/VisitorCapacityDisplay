@@ -58,6 +58,7 @@ const SecurityDashboard = () => {
             showGermanLabels={showGermanTitle}
             currentPage='security'
             showNumbers={false}
+            dashboard={true}
             setShowConfigurator={function (value: React.SetStateAction<boolean>): void {
               throw new Error('Function not implemented.');
             }}

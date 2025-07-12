@@ -14,6 +14,7 @@ interface ExhibitionMapProps {
   showNumbers?: boolean;
   showPercentage?: boolean;
   currentPage?: "security" | "management";
+  dashboard?: boolean; // If true, the map is used in a dashboard context
   handleUpdate?: () => void; // Function to handle refresh, can be passed from parent
 }
 
@@ -26,6 +27,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
   showNumbers = false,
   showPercentage = false,
   currentPage,
+  dashboard = false, // If true, the map is used in a dashboard context
   handleUpdate = () => {}, // Function to handle refresh, can be passed from parent
 }) => {
   const { areaStatus,legendRows, refreshAreaStatus, isRefreshing, selectedArea } = useAreaStatus(); // Use the context
@@ -272,11 +274,11 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                       .join(" ")}
                       fill={fillColor}
                       fillOpacity={1}
-                      stroke={isSelected ? "#000" : "#667080"}
-                      strokeWidth={isSelected ? 3 : 0} // Increased stroke width for selected areas
-                      strokeDasharray={isSelected ? "none" : strokeStyle} // Solid border for selected areas
+                      stroke={isSelected && !dashboard ? "#000" : "#667080"}
+                      strokeWidth={isSelected && !dashboard ? 3 : 0} // Increased stroke width for selected areas
+                      strokeDasharray={isSelected && !dashboard ? "none" : strokeStyle} // Solid border for selected areas
                       className={`exhibition-hall ${shouldBlink && area.status !== "inactive" ? "blink" : ""}`}
-                      style={isSelected ? { filter: "drop-shadow(0 0 10px #000)" } : {}} // Add shadow effect for selected areas
+                      style={isSelected && !dashboard ? { filter: "drop-shadow(0 0 10px #000)" } : {}} // Add shadow effect for selected areas
                     />
                     {area.status === "inactive" ? (
                       <text

@@ -13,7 +13,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useAreaStatus } from "@/contexts/AreaStatusContext";
 
 const Admin = () => {
-  const { selectedArea, legendRows, setLegendRows, setSelectedArea, refreshAreaStatus } = useAreaStatus();
+  const { selectedArea, legendRows, setLegendRows, setSelectedArea, refreshAreaStatus, updateLegendRows } = useAreaStatus();
 
   const [showGermanTitle, setShowGermanTitle] = useState<boolean>(false);
   const [showAbsolute, setShowAbsolute] = useState(true);
@@ -59,7 +59,7 @@ const Admin = () => {
 
   const handleLegendRefresh = async () => {
     try {
-      await setLegendRows(legendRows)
+      await updateLegendRows(legendRows)
       toast({
         title: "Legende aktualisiert",
         description: "Die Schwellenwerte für die Legende wurden erfolgreich aktualisiert.",

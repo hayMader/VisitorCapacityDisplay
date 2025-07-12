@@ -68,6 +68,8 @@ const Index = () => {
           refreshInterval={60000} // 60 seconds
           handleUpdate={handleDataUpdate}
           showGermanLabels={showGermanTitle}
+          dashboard={true}
+          currentPage='management'
           showNumbers={false} setShowConfigurator={function (value: React.SetStateAction<boolean>): void {
             throw new Error('Function not implemented.');
           } }        />

@@ -13,6 +13,7 @@ interface AreaStatusContextProps {
   legendRows: Partial<LegendRow>[];
   setLegendRows: React.Dispatch<React.SetStateAction<Partial<LegendRow>[]>>;
   setAreaStatus: React.Dispatch<React.SetStateAction<AreaStatus[]>>;
+  updateLegendRows: (updatedLegend: Partial<LegendRow>[]) => Promise<void>;
 }
 
 const AreaStatusContext = createContext<AreaStatusContextProps | undefined>(undefined);
@@ -21,7 +22,7 @@ export const AreaStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [areaStatus, setAreaStatus] = useState<AreaStatus[]>([]);
   const [isRefreshing, setRefreshing] = useState(false);
   const [selectedArea, setSelectedArea] = useState<AreaStatus | null>(null);
-  const [legendRows, setLegendRowsState] = useState<Partial<LegendRow>[]>([{ object: "", object_en: "", description_de: "", description_en: "" }]);
+  const [legendRows, setLegendRows] = useState<Partial<LegendRow>[]>([{ object: "", object_en: "", description_de: "", description_en: "" }]);
 
   // Fetch initial data
   const refreshAreaStatus = async (timefilter?: number) => {
@@ -29,7 +30,7 @@ export const AreaStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       setRefreshing(true);
       const data = await getAreaSettings(timefilter);
       const data2 = await getLegend();
-      setLegendRowsState(data2)
+      setLegendRows(data2)
       setAreaStatus(data);
         setRefreshing(false);
     } catch (error) {
@@ -43,9 +44,9 @@ export const AreaStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   // Refresh the legend rows
-  const setLegendRows = async (updatedLegend: Partial<LegendRow>[]) => {
+  const updateLegendRows = async (updatedLegend: Partial<LegendRow>[]) => {
     try {
-      setLegendRowsState(updatedLegend);
+      setLegendRows(updatedLegend);
       const data = await updateLegend(updatedLegend);
     } catch (error) {
       console.error("Error refreshing legend rows:", error);
@@ -67,7 +68,7 @@ export const AreaStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   return (
-    <AreaStatusContext.Provider value={{ areaStatus, selectedArea, legendRows, setLegendRows, setSelectedArea, refreshAreaStatus, isRefreshing, updateAreaStatus, setAreaStatus }}>
+    <AreaStatusContext.Provider value={{ areaStatus, selectedArea, legendRows, setLegendRows, updateLegendRows, setSelectedArea, refreshAreaStatus, isRefreshing, updateAreaStatus, setAreaStatus }}>
       {children}
     </AreaStatusContext.Provider>
   );

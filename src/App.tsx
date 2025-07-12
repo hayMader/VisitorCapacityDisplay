@@ -1,10 +1,9 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
@@ -13,8 +12,44 @@ import Security from "./pages/Security";
 import NotFound from "./pages/NotFound";
 import SecurityDashboard from "./pages/SecurityDashboard";
 import { AreaStatusProvider } from "./contexts/AreaStatusContext";
+import { useEffect } from "react";
 
 const queryClient = new QueryClient();
+
+const AppRoutes = () => {
+  const { user } = useAuth(); // Get the logged-in user details
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    console.log("User role:", user?.role);
+    if (user?.role === "security") {
+      navigate("/securityDashboard"); // Redirect to /securityDashboard if the user's role is "security"
+    }
+  }, [user]);
+
+  return (
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/admin" element={
+        <ProtectedRoute>
+          <Admin />
+        </ProtectedRoute>
+      } />
+      <Route path="/security" element={
+        <ProtectedRoute>
+          <Security />
+        </ProtectedRoute>
+      } />
+      <Route path="/securityDashboard" element={
+        <ProtectedRoute>
+          <SecurityDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -24,27 +59,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/admin" element={
-                <ProtectedRoute> {/* Check if the user is authenticated. If not -> login page */}
-                  <Admin />
-                </ProtectedRoute>
-              } />
-              <Route path="/security" element={
-                <ProtectedRoute> {/* Check if the user is authenticated. If not -> login page */}
-                  <Security />
-                </ProtectedRoute>
-              } />
-              <Route path="/securityDashboard" element={
-                <ProtectedRoute> {/* Check if the user is authenticated. If not -> login page */}
-                  <SecurityDashboard />
-                </ProtectedRoute>
-              } />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <AppRoutes />
           </BrowserRouter>
         </AuthProvider>
       </AreaStatusProvider>

@@ -118,6 +118,33 @@ export type Database = {
           },
         ]
       }
+      roles: {
+        Row: {
+          id: number
+          user_id: string
+          role: "admin" | "security"
+          created_at: string
+        }
+        Insert: {
+          user_id: string
+          role: "admin" | "security"
+          created_at: string
+        }
+        Update: {
+          user_id?: string
+          role?: "admin" | "security"
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       visitor_data: {
         Row: {
           amount_visitors: number
