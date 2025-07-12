@@ -45,8 +45,8 @@ const WarningList = ({ areaStatus }: { areaStatus: AreaStatus[] }) => {
     // Filter areas based on search term and checkbox states
     const filteredAreas = (area) => {
         const matchesSearch = area.area_name.toLowerCase().includes(warningSearchTerm.toLowerCase());
-        const isEntrance = area.area_name.toLowerCase().includes("eingang");
-        const isHall = !area.area_name.toLowerCase().includes("eingang");
+        const isEntrance = area.area_name.toLowerCase().includes("e");
+        const isHall = !area.area_name.toLowerCase().includes("e");
 
         return (
             (showEntrances && isEntrance) ||
@@ -109,7 +109,7 @@ const WarningList = ({ areaStatus }: { areaStatus: AreaStatus[] }) => {
                 .filter(area => getActiveMessage(area.amount_visitors, area.thresholds) !== null)
                 .filter(area => filteredAreas(area))
                 .map(area => {
-                    const isEntrance = area.area_name.toLowerCase().includes("eingang");
+                    const isEntrance = area.area_name.toLowerCase().includes("e");
                     return (
                         <div key={area.id} className="border p-4 rounded-lg mb-4 bg-red-50 flex items-center gap-4">
                             {/* Icon */}
