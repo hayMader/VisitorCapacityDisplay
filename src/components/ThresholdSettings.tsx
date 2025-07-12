@@ -14,7 +14,6 @@ interface ThresholdSettingsProps {
   newThreshold: Partial<Threshold>;
   setNewThreshold: React.Dispatch<React.SetStateAction<Partial<Threshold>>>;
   type: "security" | "management";
-  MAX_LEVELS: number;
   onCopyThresholds: () => void;
 }
 
@@ -24,37 +23,36 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
   newThreshold,
   setNewThreshold,
   type,
-  MAX_LEVELS,
   onCopyThresholds,
 }) => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [edited, setEdited] = useState<Partial<Threshold>>({
-    upper_threshold: 0,
+    upper_threshold: -1,
     color: "#cccccc",
     alert: false,
     alert_message: "",
   });
 
   const handleAddThreshold = () => {
-    if (newThreshold.upper_threshold <= 0) {
-      toast({
-        title: "Ungültiger Schwellenwert",
-        description: "Der Schwellenwert muss größer als 0 sein.",
-        variant: "destructive",
-      });
-      return;
-    }
-    if (formData.thresholds.filter((t) => t.type === type).length >= MAX_LEVELS) {
-      toast({
-        title: "Limit erreicht",
-        description: `Maximal ${MAX_LEVELS} Schwellenwerte erlaubt.`,
-        variant: "destructive",
-      });
-      return;
+
+    //If infinity treshhold check if it is already set
+    if (newThreshold.upper_threshold === -1 || newThreshold.upper_threshold === 0) {
+      const existing = formData.thresholds.find((t) => t.type === type && t.upper_threshold === -1);
+      if (existing) {
+        toast({
+          title: "Höchster Schwellenwert bereits gesetzt",
+          description: `Der Schwellenwert für ${type} ist bereits auf unendlich gesetzt.`,
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
+    console.log("Adding new threshold:", newThreshold);
+
     const maxSoFar = Math.max(0, ...formData.thresholds.filter((t) => t.type === type).map((t) => t.upper_threshold));
-    if (newThreshold.upper_threshold <= maxSoFar) {
+
+    if (newThreshold.upper_threshold <= maxSoFar && newThreshold.upper_threshold !== -1 && newThreshold.upper_threshold !== 0) {
       toast({
         title: "Schwellenwert zu niedrig",
         description: `Er muss größer sein als ${maxSoFar}.`,
@@ -67,7 +65,7 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
     const threshold: Threshold = {
       id: tempId,
       setting_id: formData.id,
-      upper_threshold: newThreshold.upper_threshold,
+      upper_threshold: newThreshold.upper_threshold ? newThreshold.upper_threshold : -1,
       color: newThreshold.color,
       alert: newThreshold.alert,
       type: type,
@@ -75,7 +73,7 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
     };
 
     setFormData((p) => ({ ...p, thresholds: [...p.thresholds, threshold] }));
-    setNewThreshold({ upper_threshold: 0, color: "#cccccc", alert: false, alert_message: "" });
+    setNewThreshold({ upper_threshold: -1, color: "#cccccc", alert: false, alert_message: "" });
   };
 
   const beginEdit = (t: Threshold) => {
@@ -101,20 +99,20 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
   };
 
   const toggleAlert = (id: number) => {
-      setFormData((p) => ({
-        ...p,
-        thresholds: p.thresholds.map((t) =>
-          t.id === id ? { ...t, alert: !t.alert } : t
-        ),
-      }));
-    };
-  
+    setFormData((p) => ({
+      ...p,
+      thresholds: p.thresholds.map((t) =>
+        t.id === id ? { ...t, alert: !t.alert } : t
+      ),
+    }));
+  };
+
   const deleteThreshold = (id: number) => {
-      setFormData((p) => ({
-        ...p,
-        thresholds: p.thresholds.filter((t) => t.id !== id),
-      }));
-    };
+    setFormData((p) => ({
+      ...p,
+      thresholds: p.thresholds.filter((t) => t.id !== id),
+    }));
+  };
 
   // Filter and sort thresholds of the specified type
   const thresholdsOfType = formData.thresholds
@@ -135,108 +133,112 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
           <div className="border rounded-md">
             {formData.thresholds
               .filter((t) => t.type === type)
-              .sort((a, b) => a.upper_threshold - b.upper_threshold)
+              .sort((a, b) => {
+                const upperA = a.upper_threshold === -1 ? Infinity : a.upper_threshold;
+                const upperB = b.upper_threshold === -1 ? Infinity : b.upper_threshold;
+                return upperA - upperB;
+              })
               .map((t, idx, arr) => {
-                const lower = idx === 0 ? 0 : arr[idx - 1].upper_threshold + 1;
+                const lower = idx === 0 ? 0 : (arr[idx - 1].upper_threshold === -1 ? Infinity : arr[idx - 1].upper_threshold) + 1;
                 const isEditing = editingId === t.id;
 
                 return (
-                <>
-                  <div
-                    key={t.id}
-                    className="grid grid-cols-[24px_72px_24px_72px_auto] items-center gap-2 p-2 border-b last:border-0 relative"
-                  >
-                    {/* Color */}
-                    {isEditing ? (
-                      <input
-                        type="color"
-                        value={edited.color}
-                        onChange={(e) =>
-                          setEdited((p) => ({ ...p, color: e.target.value }))
-                        }
-                        className="h-6 w-6 p-0 border rounded"
-                      />
-                    ) : (
-                      <div
-                        className="h-4 w-4 rounded-full border"
-                        style={{ background: t.color }}
-                      />
-                    )}
+                  <>
+                    <div
+                      key={t.id}
+                      className="grid grid-cols-[24px_72px_24px_72px_auto] items-center gap-2 p-2 border-b last:border-0 relative"
+                    >
+                      {/* Color */}
+                      {isEditing ? (
+                        <input
+                          type="color"
+                          value={edited.color}
+                          onChange={(e) =>
+                            setEdited((p) => ({ ...p, color: e.target.value }))
+                          }
+                          className="h-6 w-6 p-0 border rounded"
+                        />
+                      ) : (
+                        <div
+                          className="h-4 w-4 rounded-full border"
+                          style={{ background: t.color }}
+                        />
+                      )}
 
-                    {/* From */}
-                    <Input
-                      type="number"
-                      value={lower}
-                      readOnly
-                      disabled
-                      className="w-16 bg-transparent border-none p-0 text-right
-                                 focus-visible:ring-0 cursor-default select-none"
-                    />
-
-                    <span className="text-xs text-muted-foreground">bis</span>
-
-                    {/* To */}
-                    {isEditing ? (
+                      {/* From */}
                       <Input
                         type="number"
-                        value={edited.upper_threshold}
-                        onChange={(e) =>
-                          setEdited((p) => ({
-                            ...p,
-                            upper_threshold: parseInt(e.target.value, 10) || 0,
-                          }))
-                        }
-                        className="w-16"
-                      />
-                    ) : (
-                      <Input
-                        type="number"
-                        value={t.upper_threshold}
+                        value={lower === Infinity ? "∞" : lower}
                         readOnly
                         disabled
                         className="w-16 bg-transparent border-none p-0 text-right
-                                   focus-visible:ring-0 cursor-default"
+                   focus-visible:ring-0 cursor-default select-none"
                       />
-                    )}
 
-                    {/* Action Icons */}
-                    <ThresholdItemActions
-                      isEditing={isEditing}
-                      onEdit={() => beginEdit(t)}
-                      onSave={() => saveEdit(t.id)}
-                      onCancel={cancelEdit}
-                      onDelete={() => deleteThreshold(t.id)}
-                    />
-                    {/* Alert Icon */}
-                    {type === "security" && (
-                    
-                    <div
-                      className="absolute right-0 top-1/2 transform -translate-y-1/2 flex items-center gap-2 group"
-                      onClick={() => toggleAlert(t.id)}
-                    >
-                      <span
-                        className={`cursor-pointer ${t.alert ? "text-red-500" : "text-gray-400"}`}
-                        title={t.alert ? "Nachricht: " + (t.alert_message || "Keine Nachricht definiert.") : ""}
-                      >
-                        <Bell className="h-4 w-4" />
-                      </span>
-                    </div>
-                    )}
-                  </div>
-                  {isEditing && type === "security" && (
-                    <div className="p-2 bg-gray-50 border-t">
-                      <Label className="text-sm">Warnhinweis Nachricht</Label>
-                      <Input
-                        type="text"
-                        value={edited.alert_message}
-                        onChange={(e) =>
-                          setEdited((p) => ({ ...p, alert_message: e.target.value }))
-                        }
-                        className="w-full"
+                      <span className="text-xs text-muted-foreground">bis</span>
+
+                      {/* To */}
+                      {isEditing ? (
+                        <Input
+                          type="number"
+                          value={edited.upper_threshold === -1 ? "" : edited.upper_threshold}
+                          onChange={(e) =>
+                            setEdited((p) => ({
+                              ...p,
+                              upper_threshold: e.target.value === "" ? -1 : parseInt(e.target.value, 10) || 0,
+                            }))
+                          }
+                          className="w-16"
+                        />
+                      ) : (
+                        <Input
+                          type="text"
+                          value={t.upper_threshold === -1 ? "∞" : t.upper_threshold}
+                          readOnly
+                          disabled
+                          className="w-16 bg-transparent border-none p-0 text-right
+                   focus-visible:ring-0 cursor-default"
+                        />
+                      )}
+
+                      {/* Action Icons */}
+                      <ThresholdItemActions
+                        isEditing={isEditing}
+                        onEdit={() => beginEdit(t)}
+                        onSave={() => saveEdit(t.id)}
+                        onCancel={cancelEdit}
+                        onDelete={() => deleteThreshold(t.id)}
                       />
-                    </div>
+                      {/* Alert Icon */}
+                      {type === "security" && (
 
-                  )}
+                        <div
+                          className="absolute right-0 top-1/2 transform -translate-y-1/2 flex items-center gap-2 group"
+                          onClick={() => toggleAlert(t.id)}
+                        >
+                          <span
+                            className={`cursor-pointer ${t.alert ? "text-red-500" : "text-gray-400"}`}
+                            title={t.alert ? "Nachricht: " + (t.alert_message || "Keine Nachricht definiert.") : ""}
+                          >
+                            <Bell className="h-4 w-4" />
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    {isEditing && type === "security" && (
+                      <div className="p-2 bg-gray-50 border-t">
+                        <Label className="text-sm">Warnhinweis Nachricht</Label>
+                        <Input
+                          type="text"
+                          value={edited.alert_message}
+                          onChange={(e) =>
+                            setEdited((p) => ({ ...p, alert_message: e.target.value }))
+                          }
+                          className="w-full"
+                        />
+                      </div>
+
+                    )}
                   </>
                 );
               })}
@@ -260,7 +262,6 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
         newThreshold={newThreshold}
         onChange={(c) => setNewThreshold((p) => ({ ...p, ...c }))}
         onAdd={handleAddThreshold}
-        disabled={formData.thresholds.filter((t) => t.type === type).length >= MAX_LEVELS}
         type={type}
         lowerBound={lowerBound}
       />

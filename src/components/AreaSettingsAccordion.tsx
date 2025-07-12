@@ -53,7 +53,7 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
   const [hasChanges, setHasChanges] = useState(false);
 
   const [newThreshold, setNewThreshold] = useState({
-    upper_threshold: 0,
+    upper_threshold: -1,
     color: "#cccccc",
   });
 
@@ -223,7 +223,6 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
               newThreshold={newThreshold}
               setNewThreshold={setNewThreshold}
               type={currentPage}
-              MAX_LEVELS={MAX_LEVELS}
               onCopyThresholds={() => setIsCopyModalOpen(true)}
             />
           </AccordionContent>
@@ -243,7 +242,6 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
             newThreshold={newThreshold}
             setNewThreshold={setNewThreshold}
             type={currentPage}
-            MAX_LEVELS={MAX_LEVELS}
             onCopyThresholds={() => setIsCopyModalOpen(true)}
           />
         </div>

@@ -72,20 +72,24 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
 
   const getOccupancyLevel = (visitorCount: number, thresholds: Threshold[]) => {
     return thresholds.reduce(
-      (min, t) =>
-        visitorCount <= t.upper_threshold && t.upper_threshold < min.upper_threshold
-          ? t
-          : min,
+      (min, t) => {
+      const upperThreshold = t.upper_threshold === -1 ? Infinity : t.upper_threshold;
+      return visitorCount <= upperThreshold && upperThreshold <= min.upper_threshold
+        ? { ...t, upper_threshold: upperThreshold }
+        : min;
+      },
       { upper_threshold: Infinity } as Threshold
     );
   };
 
   const getPreviousThreshold = (visitorCount: number, thresholds: Threshold[]) => {
     return thresholds.reduce(
-      (max, t) =>
-        visitorCount > t.upper_threshold && t.upper_threshold > max.upper_threshold
-          ? t
-          : max,
+      (max, t) => {
+      const upperThreshold = t.upper_threshold === -1 ? Infinity : t.upper_threshold;
+      return visitorCount > upperThreshold && upperThreshold >= max.upper_threshold
+        ? { ...t, upper_threshold: upperThreshold }
+        : max;
+      },
       { upper_threshold: -Infinity } as Threshold
     );
   };
@@ -166,6 +170,9 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                   (t) => t.type === (currentPage || "management")
                 ); // Default to 'management' if currentPage is empty
                 const activeTreshold = getOccupancyLevel(visitorCount, thresholds);
+                if (area.area_name === "B6") {
+                  console.log("Active Threshold:", activeTreshold);
+                }
                 const previousThreshold = getPreviousThreshold(visitorCount, thresholds);
                 const isSelected = selectedArea?.id === area.id;
                 const pct = area.capacity_usage
