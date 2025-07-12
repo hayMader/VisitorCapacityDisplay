@@ -75,7 +75,6 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
     const hasUnsavedChanges = !isEqual(formData, originalData);
     setHasChanges(hasUnsavedChanges);
     if (hasUnsavedChanges) {
-      console.log("Changes detected:", formData);
       setAreaStatus((prev) =>
         prev.map((a) => (a.id === formData?.id ? formData : a))
       );

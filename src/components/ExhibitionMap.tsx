@@ -38,10 +38,14 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
     await refreshAreaStatus();
   };
 
+  useEffect(() => {
+    // Initial fetch of area status
+    refreshAreaStatus();
+  }, []);
+
   const handleAreaClick = (area: AreaStatus) => {
 
       onAreaSelect(area);
-    
   };
 
   const checkContainerSize = () => {
@@ -170,9 +174,6 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                   (t) => t.type === (currentPage || "management")
                 ); // Default to 'management' if currentPage is empty
                 const activeTreshold = getOccupancyLevel(visitorCount, thresholds);
-                if (area.area_name === "B6") {
-                  console.log("Active Threshold:", activeTreshold);
-                }
                 const previousThreshold = getPreviousThreshold(visitorCount, thresholds);
                 const isSelected = selectedArea?.id === area.id;
                 const pct = area.capacity_usage
@@ -328,6 +329,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
             </svg>
           </div>
         </div>
+        {currentPage === "management" && (
         <div 
           className={`flex ${isMediumSize ? 'absolute' : ''} bottom-4 right-4 z-10 bg-white p-4 rounded sm:shadow-xl items-right mr-4`}
           style={{minWidth: "20%", flexGrow: 1 }}
@@ -370,6 +372,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
             ))}
           </div>
         </div>
+        )}
       </div>
     </>
   );

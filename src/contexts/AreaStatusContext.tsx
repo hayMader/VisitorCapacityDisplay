@@ -47,7 +47,6 @@ export const AreaStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     try {
       setLegendRowsState(updatedLegend);
       const data = await updateLegend(updatedLegend);
-      console.log("Legend rows refreshed:", data);
     } catch (error) {
       console.error("Error refreshing legend rows:", error);
       toast({

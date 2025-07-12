@@ -49,8 +49,6 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
       }
     }
 
-    console.log("Adding new threshold:", newThreshold);
-
     const maxSoFar = Math.max(0, ...formData.thresholds.filter((t) => t.type === type).map((t) => t.upper_threshold));
 
     if (newThreshold.upper_threshold <= maxSoFar && newThreshold.upper_threshold !== -1 && newThreshold.upper_threshold !== 0) {

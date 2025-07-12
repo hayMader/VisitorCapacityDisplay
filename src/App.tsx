@@ -11,6 +11,7 @@ import Admin from "./pages/Admin";
 import Login from "./pages/Login";
 import Security from "./pages/Security";
 import NotFound from "./pages/NotFound";
+import SecurityDashboard from "./pages/SecurityDashboard";
 import { AreaStatusProvider } from "./contexts/AreaStatusContext";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,11 @@ const App = () => (
               <Route path="/security" element={
                 <ProtectedRoute> {/* Check if the user is authenticated. If not -> login page */}
                   <Security />
+                </ProtectedRoute>
+              } />
+              <Route path="/securityDashboard" element={
+                <ProtectedRoute> {/* Check if the user is authenticated. If not -> login page */}
+                  <SecurityDashboard />
                 </ProtectedRoute>
               } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
