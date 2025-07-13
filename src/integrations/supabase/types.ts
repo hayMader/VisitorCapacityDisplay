@@ -236,6 +236,10 @@ export type Database = {
       update_legend: {
         Args: { legend_rows: Partial<LegendRow>[] }
         Returns: null
+      },
+      copy_thresholds_to_areas_by_type: {
+        Args: {source_area_id: number, target_area_ids: number[], threshold_type: "management" | "security"}
+        Returns: null
       }
     }
     Enums: {

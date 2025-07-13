@@ -21,7 +21,7 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle, isAdmin = false }) => 
   };
 
   return (
-    <header className="bg-white shadow-sm border-b px-4 py-3" style={{ maxHeight: '190px' }}>
+    <header className="bg-white shadow-sm border-b px-4" style={{ maxHeight: '130px' }}>
       <div className="flex-col w-full">
         <div className='flex flex-row items-center justify-between gap-4 sm:gap-0'>
           <div className="flex flex-row items-center gap-5">

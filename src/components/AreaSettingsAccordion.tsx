@@ -139,7 +139,7 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
 
   const handleCopyThresholds = async (targetAreaIds: number[]) => {
     try {
-      await copyThresholdsToAreas(area.id, targetAreaIds);
+      await copyThresholdsToAreas(area.id, targetAreaIds, currentPage || "management");
       toast({
         title: "Erfolgreich kopiert",
         description: "Die Schwellenwerte wurden erfolgreich auf die ausgewählten Areale übertragen.",

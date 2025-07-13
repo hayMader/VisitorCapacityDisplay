@@ -39,7 +39,7 @@ const WarningList = ({ areaStatus, hideControls }: { areaStatus: AreaStatus[]; h
         }
     }, [areaStatus]);
 
-    const getActiveMessage = (visitorCount: number, thresholds: Threshold[]): string | null => {
+    const getActiveThreshold = (visitorCount: number, thresholds: Threshold[]): Threshold | null => {
         const sortedThresholds = thresholds
             .filter(threshold => threshold.type === "security")
             .sort((a, b) =>
@@ -53,7 +53,7 @@ const WarningList = ({ areaStatus, hideControls }: { areaStatus: AreaStatus[]; h
             const lowerBound = nextLowerThreshold ? nextLowerThreshold.upper_threshold : -Infinity;
 
             if (visitorCount >= lowerBound && currentThreshold.alert_message_control) {
-                return currentThreshold.alert_message || `Warnung: Besucheranzahl ${visitorCount} überschreitet den Schwellenwert von ${lowerBound}.`;
+                return currentThreshold;
             }
         }
 
@@ -119,12 +119,17 @@ const WarningList = ({ areaStatus, hideControls }: { areaStatus: AreaStatus[]; h
             <div ref={listRef} className="overflow-hidden relative" style={{height: 'inherit'}}>
                 {areaStatus
                     .sort((a, b) => a.area_name.localeCompare(b.area_name, 'de-DE', { numeric: true, sensitivity: 'base' }))
-                    .filter(area => getActiveMessage(area.amount_visitors, area.thresholds) !== null)
+                    .filter(area => getActiveThreshold(area.amount_visitors, area.thresholds) !== null)
                     .filter(area => filteredAreas(area))
                     .map(area => {
+                        const activeThreshold = getActiveThreshold(area.amount_visitors, area.thresholds);
                         const isEntrance = area.area_name.toLowerCase().includes("e");
                         return (
-                            <div key={area.id} className="border p-4 rounded-lg mb-4 bg-red-50 flex items-center gap-4">
+                            <div
+                                key={area.id}
+                                className="border p-4 rounded-lg mb-4 flex items-center gap-4"
+                                style={{ backgroundColor: `${activeThreshold.color}40` }} // Adding opacity
+                            >
                                 {/* Icon */}
                                 {isEntrance ? (
                                     <DoorOpen className="text-blue-500 w-6 h-6" /> // Icon for entrances
@@ -135,13 +140,13 @@ const WarningList = ({ areaStatus, hideControls }: { areaStatus: AreaStatus[]; h
                                 <div>
                                     <h4 className="font-bold text-red-600">{area.area_name}</h4>
                                     <p className="text-sm text-red-700">
-                                        {getActiveMessage(area.amount_visitors, area.thresholds)}
+                                        {activeThreshold.alert_message}
                                     </p>
                                 </div>
                             </div>
                         );
                     })}
-                {areaStatus.filter(area => getActiveMessage(area.amount_visitors, area.thresholds) !== null).length === 0 && (
+                {areaStatus.filter(area => getActiveThreshold(area.amount_visitors, area.thresholds) !== null).length === 0 && (
                     <p className="text-sm text-gray-500">
                         {warningSearchTerm || !showEntrances || !showHalls
                             ? "Keine Warnungen gefunden mit den aktuellen Filtereinstellungen."

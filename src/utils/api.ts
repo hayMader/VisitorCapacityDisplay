@@ -118,38 +118,12 @@ export const deleteThreshold = async (thresholdId: number): Promise<boolean> => 
 };
 
 //Function to copy thresholds from one area to multiple target areas
-export const copyThresholdsToAreas = async (sourceAreaId: number, targetAreaIds: number[]) => {
+export const copyThresholdsToAreas = async (sourceAreaId: number, targetAreaIds: number[], thresholdtype: "management"| "security") => {
   try {
-    // Fetch thresholds from the source area
-    const { data: sourceThresholds, error: fetchError } = await supabase
-      .from('thresholds')
-      .select('*')
-      .eq('setting_id', sourceAreaId);
+    
+    const { error } = await supabase.rpc('copy_thresholds_to_areas_by_type', {source_area_id: sourceAreaId, target_area_ids: targetAreaIds, threshold_type: thresholdtype});
 
-    if (fetchError) throw fetchError;
-
-    // Create new thresholds for each target area
-    const newThresholds = targetAreaIds.flatMap((targetId) =>
-      (sourceThresholds || []).map((t) => {
-        const { id, ...rest } = t;
-        return { ...rest, setting_id: targetId };
-      })
-    );
-
-    // Delete existing thresholds for target areas
-    const { error: deleteError } = await supabase
-      .from('thresholds')
-      .delete()
-      .in('setting_id', targetAreaIds);
-
-    if (deleteError) throw deleteError;
-
-    // Insert new thresholds for target areas
-    const { error: insertError } = await supabase
-      .from('thresholds')
-      .insert(newThresholds);
-
-    if (insertError) throw insertError;
+    if (error) throw error;
 
   } catch (error) {
     console.error('Error copying thresholds:', error);
