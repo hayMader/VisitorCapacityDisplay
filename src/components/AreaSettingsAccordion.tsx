@@ -277,6 +277,12 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
               <Eye className="mr-2 h-4 w-4" />
               Aktivieren
             </Button>
+            <Button type="submit" disabled={isSubmitting || !hasChanges}
+              onClick={handleSubmit}
+            >
+              <Save className="mr-2 h-4 w-4" />
+              {isSubmitting ? "Speichern …" : "Speichern"}
+            </Button>
           </>
         )}
         

@@ -5,6 +5,7 @@ import { toast } from "@/components/ui/use-toast";
 
 interface AreaStatusContextProps {
   areaStatus: AreaStatus[];
+  refreshAreaStatusAndLegend: (timefilter?: number) => Promise<void>;
   refreshAreaStatus: (timefilter?: number) => Promise<void>;
   updateAreaStatus: (updatedArea: AreaStatus) => void;
   isRefreshing: boolean;
@@ -14,6 +15,7 @@ interface AreaStatusContextProps {
   setLegendRows: React.Dispatch<React.SetStateAction<Partial<LegendRow>[]>>;
   setAreaStatus: React.Dispatch<React.SetStateAction<AreaStatus[]>>;
   updateLegendRows: (updatedLegend: Partial<LegendRow>[]) => Promise<void>;
+  refreshLegends: () => Promise<void>;
 }
 
 const AreaStatusContext = createContext<AreaStatusContextProps | undefined>(undefined);
@@ -25,7 +27,7 @@ export const AreaStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [legendRows, setLegendRows] = useState<Partial<LegendRow>[]>([{ object: "", object_en: "", description_de: "", description_en: "" }]);
 
   // Fetch initial data
-  const refreshAreaStatus = async (timefilter?: number) => {
+  const refreshAreaStatusAndLegend = async (timefilter?: number) => {
     try {
       setRefreshing(true);
       const data = await getAreaSettings(timefilter);
@@ -38,6 +40,37 @@ export const AreaStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       toast({
         title: "Fehler",
         description: "Die Bereichsdaten konnten nicht aktualisiert werden.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Refresh area status
+  const refreshAreaStatus = async (timefilter?: number) => {
+    try {
+      setRefreshing(true);
+      const data = await getAreaSettings(timefilter);
+      setAreaStatus(data);
+      setRefreshing(false);
+    } catch (error) {
+      console.error("Error refreshing area status:", error);
+      toast({
+        title: "Fehler",
+        description: "Die Bereichsdaten konnten nicht aktualisiert werden.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const refreshLegends = async () => {
+    try {
+      const data = await getLegend();
+      setLegendRows(data);
+    } catch (error) {
+      console.error("Error refreshing legend rows:", error);
+      toast({
+        title: "Fehler",
+        description: "Die Legende konnte nicht aktualisiert werden.",
         variant: "destructive",
       });
     }
@@ -68,7 +101,7 @@ export const AreaStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   return (
-    <AreaStatusContext.Provider value={{ areaStatus, selectedArea, legendRows, setLegendRows, updateLegendRows, setSelectedArea, refreshAreaStatus, isRefreshing, updateAreaStatus, setAreaStatus }}>
+    <AreaStatusContext.Provider value={{ areaStatus, selectedArea, legendRows, setLegendRows, updateLegendRows, refreshLegends, setSelectedArea, refreshAreaStatus, refreshAreaStatusAndLegend, isRefreshing, updateAreaStatus, setAreaStatus }}>
       {children}
     </AreaStatusContext.Provider>
   );

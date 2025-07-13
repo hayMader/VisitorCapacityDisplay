@@ -170,7 +170,9 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
               viewBox="0 0 2050 1248"
               preserveAspectRatio="xMidYMid meet"
             >
-              {areaStatus.map((area) => {
+              {areaStatus
+                .filter(area => (dashboard ? area.status !== "inactive" : true)) // Show only active areas in dashboard, otherwise show all
+                .map((area) => {
                 const visitorCount = area.amount_visitors;
                 const thresholds = area.thresholds.filter(
                   (t) => t.type === (currentPage || "management")
