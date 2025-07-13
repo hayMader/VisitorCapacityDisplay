@@ -233,7 +233,7 @@ export type Database = {
         Args: {filter_minutes: Json}
         Returns: AreaStatus[]
       }
-      refresh_legend: {
+      update_legend: {
         Args: { legend_rows: Partial<LegendRow>[] }
         Returns: null
       }

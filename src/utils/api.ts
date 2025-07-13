@@ -192,11 +192,11 @@ export const getOccupancyColor = (threshold?: Threshold): string => {
 
 export const updateLegend = async (LegendRows: Partial<LegendRow>[]) => {
   try {
-    const { data, error } = await supabase.rpc('refresh_legend', { legend_rows: LegendRows });
+    const { data, error } = await supabase.rpc('update_legend', { legend_rows: LegendRows });
     if (error) throw error;
     return data;
   } catch (error) {
-    console.error('Error refreshing legend:', error);
+    console.error('Error updating legend:', error);
     return null;
   }
 }
