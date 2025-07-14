@@ -355,7 +355,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
           </div>
         </div>
         <div 
-          className={`flex ${isMediumSize ? 'absolute' : ''} bottom-4 right-4 z-10 bg-white p-4 rounded sm:shadow-xl items-right mr-4`}
+          className={`flex absolute bottom-4 right-4 z-10 bg-white p-4 rounded shadow-xl items-right mr-4`}
           style={{minWidth: "20%", flexGrow: 1 }}
         >
           <div className="space-y-1">

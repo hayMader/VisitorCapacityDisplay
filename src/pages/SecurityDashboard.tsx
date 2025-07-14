@@ -49,6 +49,11 @@ const SecurityDashboard = () => {
       />
       
       <main className="flex-1 flex overflow-hidden" style={{ height: 'calc(100vh - 10vh)' }}>
+        {/* Warning List Section */}
+        <div className="flex-grow bg-white p-4 rounded-lg shadow-sm" style={{ height: 'inherit' }}>
+          <WarningList areaStatus={areaStatus} hideControls={true} />
+        </div>
+        
         {/* Map Section */}
         <div >
           <ExhibitionMap 
@@ -65,10 +70,7 @@ const SecurityDashboard = () => {
           />
         </div>
 
-        {/* Warning List Section */}
-        <div className="flex-grow bg-white p-4 rounded-lg shadow-sm" style={{ height: 'inherit' }}>
-          <WarningList areaStatus={areaStatus} hideControls={true} />
-        </div>
+        
       </main>
       
       <footer className="bg-white border-t py-2 text-center text-sm text-muted-foreground" style={{ height: '5vh' }}>
