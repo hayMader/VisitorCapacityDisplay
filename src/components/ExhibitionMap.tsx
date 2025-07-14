@@ -235,7 +235,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                 const cx = bboxCenterX;
 
                 // We'll still use centroidY for vertical alignment (optionally adjust lower)
-                let cy = centroidY;
+                let cy = bboxCenterY;
 
                 // Prepare lines of text to render
                 const lines: { text: string; fontSize: number }[] = [];
@@ -365,7 +365,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
               <div key={row.id} className={`grid grid-cols-[auto,1fr] gap-2 items-center `} style={{ width: 'fit-content' }}>
                 {/^#[0-9A-Fa-f]{6}$/.test(row.object) ? (
                   <div
-                    className={`w-9 h-9 rounded-full `}
+                    className={`w-5 h-5 rounded-full `}
                     style={{ backgroundColor: row.object }}
                   />
                   
