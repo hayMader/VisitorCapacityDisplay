@@ -251,15 +251,17 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
       <div className="mt-6 flex justify-between">
         { formData.status === "active" ? (
           <>
-            <Button type="submit" disabled={isSubmitting}
-              variant="destructive"
-              onClick={() => {
-                setFormData((prev) => ({ ...prev, status: "inactive" }));
-              }}
-            >
-              <EyeOff className="mr-2 h-4 w-4" />
-              {isSubmitting ? "Deaktiviere …" : "Deaktivieren"}
-            </Button>
+            {currentPage === "management" && (
+              <Button type="submit" disabled={isSubmitting}
+                variant="destructive"
+                onClick={() => {
+                  setFormData((prev) => ({ ...prev, status: "inactive" }));
+                }}
+              >
+                <EyeOff className="mr-2 h-4 w-4" />
+                {isSubmitting ? "Deaktiviere …" : "Deaktivieren"}
+              </Button>
+            )}
             <Button type="submit" disabled={isSubmitting || !hasChanges}
               onClick={handleSubmit}
             >
@@ -269,14 +271,16 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
           </>
         ) : (
           <>
-            <Button type="submit" disabled={isSubmitting}
-              onClick={() => {
-                setFormData((prev) => ({ ...prev, status: "active" }));
-              }}
-            >
-              <Eye className="mr-2 h-4 w-4" />
-              Aktivieren
-            </Button>
+            {currentPage === "management" && (
+              <Button type="submit" disabled={isSubmitting}
+                onClick={() => {
+                  setFormData((prev) => ({ ...prev, status: "active" }));
+                }}
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                Aktivieren
+              </Button>
+            )}
             <Button type="submit" disabled={isSubmitting || !hasChanges}
               onClick={handleSubmit}
             >

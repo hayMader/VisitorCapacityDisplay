@@ -63,8 +63,8 @@ const WarningList = ({ areaStatus, hideControls }: { areaStatus: AreaStatus[]; h
 
     const filteredAreas = (area: AreaStatus) => {
         const matchesSearch = area.area_name.toLowerCase().includes(warningSearchTerm.toLowerCase());
-        const isEntrance = area.area_name.toLowerCase().includes("e");
-        const isHall = !area.area_name.toLowerCase().includes("e");
+        const isEntrance = area.type == "entrance";
+        const isHall = area.type != "entrance";
 
         return (
             (showEntrances && isEntrance) ||
