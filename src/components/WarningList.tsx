@@ -17,6 +17,7 @@ const WarningList = ({ areaStatus, hideControls }: { areaStatus: AreaStatus[]; h
         const listElement = listRef.current;
         if (!listElement) return;
 
+        // Smooth scrolling effect
         const scrollHeight = listElement.scrollHeight;
         const clientHeight = listElement.clientHeight;
 

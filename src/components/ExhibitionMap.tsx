@@ -97,15 +97,23 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
   };
 
   const getPreviousThreshold = (visitorCount: number, thresholds: Threshold[]) => {
-    return thresholds.reduce(
-      (max, t) => {
-      const upperThreshold = t.upper_threshold === -1 ? Infinity : t.upper_threshold;
-      return visitorCount > upperThreshold && upperThreshold >= max.upper_threshold
-        ? { ...t, upper_threshold: upperThreshold }
-        : max;
-      },
-      { upper_threshold: -Infinity } as Threshold
-    );
+    const sortedThresholds = thresholds
+            .sort((a, b) =>
+                (b.upper_threshold === -1 ? Infinity : b.upper_threshold) -
+                (a.upper_threshold === -1 ? Infinity : a.upper_threshold)
+            );
+
+        for (let i = 0; i < sortedThresholds.length; i++) {
+            const currentThreshold = sortedThresholds[i];
+            const nextLowerThreshold = sortedThresholds[i + 1];
+            const lowerBound = nextLowerThreshold ? nextLowerThreshold.upper_threshold : -Infinity;
+
+            if (visitorCount >= lowerBound && currentThreshold.alert) {
+                return currentThreshold;
+            }
+        }
+
+        return null;
   };
 
   return (
@@ -191,7 +199,12 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                 const pct = area.capacity_usage
                   ? Math.round((area.amount_visitors / area.capacity_usage) * 100)
                   : 0;
-                const shouldBlink = previousThreshold.alert;
+
+                let shouldBlink = false;
+                if(previousThreshold){
+                  shouldBlink = previousThreshold.alert;
+                }
+                
 
                 // Calculate the centroid and bounding box center
                 const pts = area.coordinates;
