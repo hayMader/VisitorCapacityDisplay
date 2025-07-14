@@ -30,19 +30,19 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
   dashboard = false, // If true, the map is used in a dashboard context
   handleUpdate = () => {}, // Function to handle refresh, can be passed from parent
 }) => {
-  const { areaStatus,legendRows, refreshAreaStatus, isRefreshing, selectedArea } = useAreaStatus(); // Use the context
+  const { areaStatus,legendRows, refreshAreaStatusAndLegend, isRefreshing, selectedArea } = useAreaStatus(); // Use the context
   const [isMediumSize, setIsMediumSize] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleRefresh = async () => {
     handleUpdate();
-    await refreshAreaStatus();
+    await refreshAreaStatusAndLegend();
   };
 
   useEffect(() => {
     // Initial fetch of area status
-    refreshAreaStatus();
+    refreshAreaStatusAndLegend();
   }, []);
 
   const handleAreaClick = (area: AreaStatus) => {
@@ -70,7 +70,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
     if (!autoRefresh) return;
 
     const interval = setInterval(() => {
-      refreshAreaStatus();
+      refreshAreaStatusAndLegend();
     }, refreshInterval);
 
     return () => clearInterval(interval);
@@ -139,7 +139,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                 <RefreshCw className={`h-5 w-5 text-primary ${isRefreshing ? "animate-spin" : ""}`} />
               </button>
               {/* Edit Area Button */}
-              {currentPage === "management" && (
+              {currentPage === "management" && !dashboard && (
                 <button
                   onClick={() => {
                   if (selectedArea) {
@@ -333,13 +333,14 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
             </svg>
           </div>
         </div>
-        {currentPage === "management" && (
         <div 
           className={`flex ${isMediumSize ? 'absolute' : ''} bottom-4 right-4 z-10 bg-white p-4 rounded sm:shadow-xl items-right mr-4`}
           style={{minWidth: "20%", flexGrow: 1 }}
         >
           <div className="space-y-1">
-            {legendRows.map((row) => (
+            {legendRows
+            .filter(row => row.type === currentPage) // Filter rows based on the current page type
+            .map((row) => (
               <div key={row.id} className={`grid grid-cols-[auto,1fr] gap-2 items-center `} style={{ width: 'fit-content' }}>
                 {/^#[0-9A-Fa-f]{6}$/.test(row.object) ? (
                   <div
@@ -376,7 +377,6 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
             ))}
           </div>
         </div>
-        )}
       </div>
     </>
   );

@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 import ExhibitionMap from '@/components/ExhibitionMap';
 import { formatDateTime } from '@/utils/formatDatetime';
-import { set } from 'date-fns';
-import { get } from 'http';
 import { getLegend } from '@/utils/api';
 
 const getLocalizedTimeSuffix = (isUSFormat: boolean): string => {
