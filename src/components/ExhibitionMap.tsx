@@ -30,14 +30,18 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
   dashboard = false, // If true, the map is used in a dashboard context
   handleUpdate = () => {}, // Function to handle refresh, can be passed from parent
 }) => {
-  const { areaStatus,legendRows, refreshAreaStatusAndLegend, isRefreshing, selectedArea } = useAreaStatus(); // Use the context
+  const { areaStatus,legendRows, refreshAreaStatusAndLegend, refreshAreaStatus, isRefreshing, selectedArea } = useAreaStatus(); // Use the context
   const [isMediumSize, setIsMediumSize] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleRefresh = async () => {
     handleUpdate();
-    await refreshAreaStatusAndLegend();
+    if( dashboard ) {
+      refreshAreaStatusAndLegend(); // Refresh both area status and legend
+    } else {
+      refreshAreaStatus(); // Refresh only area status, because else legendeditor would be reset
+    }
   };
 
   useEffect(() => {
@@ -70,7 +74,11 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
     if (!autoRefresh) return;
 
     const interval = setInterval(() => {
-      refreshAreaStatusAndLegend();
+      if( dashboard ) {
+        refreshAreaStatusAndLegend(); // Refresh both area status and legend
+      } else {
+       refreshAreaStatus(); // Refresh only area status, because else legendeditor would be reset
+     }
     }, refreshInterval);
 
     return () => clearInterval(interval);

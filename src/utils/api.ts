@@ -1,5 +1,6 @@
 import { VisitorData, AreaSettings, OccupancyLevel, AreaStatus, Threshold, LegendRow } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/use-toast";
 
 // Function to get the latest visitor data
 export const getVisitorData = async (): Promise<VisitorData[]> => {
@@ -166,12 +167,23 @@ export const getOccupancyColor = (threshold?: Threshold): string => {
 
 export const updateLegend = async (LegendRows: Partial<LegendRow>[]) => {
   try {
+    console.log('Updating legend rows:', LegendRows); 
     const { data, error } = await supabase.rpc('update_legend', { legend_rows: LegendRows });
     if (error) throw error;
+
+     toast({
+        title: "Erfolg",
+        description: "Die Legende wurde erfolgreich aktualisiert.",
+        variant: "default",
+      });
     return data;
   } catch (error) {
     console.error('Error updating legend:', error);
-    return null;
+    toast({
+        title: "Fehler",
+        description: "Die Legende konnte nicht aktualisiert werden.",
+        variant: "destructive",
+      });
   }
 }
 

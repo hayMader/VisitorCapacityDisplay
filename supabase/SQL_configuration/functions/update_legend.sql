@@ -1,6 +1,7 @@
 
 -- This function updates the legend table by first deleting all existing rows and then inserting new rows based on the provided JSONB array.
 
+DROP function update_legend(legend_rows jsonb);
 create or replace function update_legend(legend_rows jsonb)
 returns void
 language plpgsql
@@ -10,12 +11,13 @@ begin
   DELETE FROM legend WHERE true;
 
   -- Insert new rows from the passed JSONB array
-  insert into legend("object", "object_en", "description_de", "description_en")
+  insert into legend("object", "object_en", "description_de", "description_en", "type")
   select 
     value->>'object',
     value->>'object_en',
     value->>'description_de',
-    value->>'description_en'
+    value->>'description_en',
+    value->>'type'::text
   from jsonb_array_elements(legend_rows) as value;
 end;
 $$;

@@ -78,17 +78,8 @@ export const AreaStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   // Refresh the legend rows
   const updateLegendRows = async (updatedLegend: Partial<LegendRow>[]) => {
-    try {
       setLegendRows(updatedLegend);
-      const data = await updateLegend(updatedLegend);
-    } catch (error) {
-      console.error("Error refreshing legend rows:", error);
-      toast({
-        title: "Fehler",
-        description: "Die Legende konnte nicht aktualisiert werden.",
-        variant: "destructive",
-      });
-    }
+      await updateLegend(updatedLegend);
   };
 
   // Update a specific area in the state

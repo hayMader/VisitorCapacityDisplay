@@ -2,18 +2,16 @@ import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import ExhibitionMap from '@/components/ExhibitionMap';
 import { Separator } from '@/components/ui/separator';
-import { AreaStatus } from '@/types';
 import AreaSettingsAccordion from '@/components/AreaSettingsAccordion';
 import { Label } from '@/components/ui/label';
-import { Search } from 'lucide-react';
-import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAreaStatus } from "@/contexts/AreaStatusContext";
 import TimeSlider from '@/components/TimeSlider';
 import WarningList from '@/components/WarningList';
+import LegendEditor from '@/components/LegendEditor';
 
 const Security = () => {
-  const { selectedArea, setSelectedArea, refreshAreaStatus, areaStatus } = useAreaStatus();
+  const { selectedArea, setSelectedArea, refreshAreaStatus, refreshAreaStatusAndLegend, areaStatus } = useAreaStatus();
   const [showGermanTitle, setShowGermanTitle] = useState<boolean>(false);
   const [showAbsolute, setShowAbsolute] = useState(true);
   const [showPercentage, setShowPercentage] = useState(true);
@@ -26,7 +24,7 @@ const Security = () => {
 
   useEffect(() => {
     //inital load of area settings
-    refreshAreaStatus(timeFilter);
+    refreshAreaStatusAndLegend(timeFilter);
 
       const intervalId = setInterval(() => {
       setShowGermanTitle((prev) => !prev);
@@ -111,6 +109,10 @@ const Security = () => {
                 timeFilter={timeFilter}
                 setTimeFilter={setTimeFilter}
               />
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg shadow-sm">
+              <LegendEditor currentPage='security' />
             </div>
 
             <div className="bg-white p-4 rounded-lg shadow-sm">

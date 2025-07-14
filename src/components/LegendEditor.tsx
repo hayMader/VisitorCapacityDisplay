@@ -3,33 +3,24 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Trash, Save } from 'lucide-react';
-import { LegendRow } from '@/types';
 import { useAreaStatus } from '@/contexts/AreaStatusContext';
 import { toast } from '@/components/ui/use-toast';
+import { error } from 'console';
 
+interface LegendEditorProps {
+  currentPage: "security" | "management";
+}
 
-const LegendEditor = () => {
+const LegendEditor: React.FC<LegendEditorProps> = ({ currentPage }) => {
 
     const { updateLegendRows, refreshLegends, setLegendRows, legendRows} = useAreaStatus();
 
     const handleLegendUpdate = async () => {
-    try {
-        await updateLegendRows(legendRows)
-        toast({
-        title: "Legende aktualisiert",
-        description: "Die Schwellenwerte für die Legende wurden erfolgreich aktualisiert.",
-        })
-    } catch (error) {
-        toast({
-        title: "Fehler",
-        description: "Aktualisierung der Legende fehlgeschlagen.",
-        variant: "destructive",
-        })
-    }
+      await updateLegendRows(legendRows)
     }
 
     const handleReset = () => {
-    refreshLegends();
+      refreshLegends();
     };
 
   return (
@@ -49,85 +40,92 @@ const LegendEditor = () => {
 
       <div className="space-y-6">
         {legendRows.map((row, index) => (
-          <div
-            key={row.id}
-            className="grid grid-cols-[2fr,2fr,0.5fr,2fr,2fr,0.5fr] gap-4 items-center"
-          >
-            {/* Input for Object (DE) */}
-            <Input
-              type="text"
-              value={row.object}
-              onChange={(e) => {
-                const updatedRows = [...legendRows];
-                updatedRows[index].object = e.target.value;
-                setLegendRows(updatedRows);
-              }}
-              className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="Abkürzung / #RRGGBB"
-            />
+          <>
+          {row.type == currentPage && ( // Ensure the row type matches the current page
+            <>
+              <div
+                key={row.id}
+                className="grid grid-cols-[2fr,2fr,0.5fr,2fr,2fr,0.5fr] gap-4 items-center"
+              >
+                {/* Input for Object (DE) */}
+                <Input
+                  type="text"
+                  value={row.object}
+                  onChange={(e) => {
+                    const updatedRows = [...legendRows];
+                    updatedRows[index].object = e.target.value;
+                    setLegendRows((updatedRows));
+                  }}
+                  className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="Abkürzung / #RRGGBB"
+                />
 
-            {/* Input for Object (EN) */}
-            <Input
-              type="text"
-              value={row.object_en}
-              onChange={(e) => {
-                const updatedRows = [...legendRows];
-                updatedRows[index].object_en = e.target.value;
-                setLegendRows(updatedRows);
-              }}
-              className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="Abkürzung"
-              disabled={/^#[0-9A-Fa-f]{6}$/.test(row.object)}
-            />
+                {/* Input for Object (EN) */}
+                <Input
+                  type="text"
+                  value={row.object_en}
+                  onChange={(e) => {
+                    const updatedRows = [...legendRows];
+                    updatedRows[index].object_en = e.target.value;
+                    setLegendRows(updatedRows);
+                  }}
+                  className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="Abkürzung"
+                  disabled={/^#[0-9A-Fa-f]{6}$/.test(row.object)}
+                />
 
-            {/* Color picker for hex color */}
-            <input
-              type="color"
-              value={/^#[0-9A-Fa-f]{6}$/.test(row.object) ? row.object : '#000000'}
-              onChange={(e) => {
-                const updatedRows = [...legendRows];
-                updatedRows[index].object = e.target.value;
-                setLegendRows(updatedRows);
-              }}
-              className="w-8 h-8 p-0 border rounded-md"
-            />
+                {/* Color picker for hex color */}
+                <input
+                  type="color"
+                  value={/^#[0-9A-Fa-f]{6}$/.test(row.object) ? row.object : '#000000'}
+                  onChange={(e) => {
+                    const updatedRows = [...legendRows];
+                    updatedRows[index].object = e.target.value;
+                    console.log('Updated color:', updatedRows[index], e.target.value);
+                    setLegendRows(updatedRows);
+                  }}
+                  className="w-8 h-8 p-0 border rounded-md"
+                />
 
-            {/* Input field description_de */}
-            <Input
-              type="text"
-              value={row.description_de}
-              onChange={(e) => {
-                const updatedRows = [...legendRows];
-                updatedRows[index].description_de = e.target.value;
-                setLegendRows(updatedRows);
-              }}
-              className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="Beschreibung"
-            />
+                {/* Input field description_de */}
+                <Input
+                  type="text"
+                  value={row.description_de}
+                  onChange={(e) => {
+                    const updatedRows = [...legendRows];
+                    updatedRows[index].description_de = e.target.value;
+                    setLegendRows(updatedRows);
+                  }}
+                  className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="Beschreibung"
+                />
 
-            {/* Input field description_en */}
-            <Input
-              type="text"
-              value={row.description_en}
-              onChange={(e) => {
-                const updatedRows = [...legendRows];
-                updatedRows[index].description_en = e.target.value;
-                setLegendRows(updatedRows);
-              }}
-              className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="Beschreibung"
-            />
+                {/* Input field description_en */}
+                <Input
+                  type="text"
+                  value={row.description_en}
+                  onChange={(e) => {
+                    const updatedRows = [...legendRows];
+                    updatedRows[index].description_en = e.target.value;
+                    setLegendRows(updatedRows);
+                  }}
+                  className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="Beschreibung"
+                />
 
-            <button
-              onClick={() => {
-                const updatedRows = legendRows.filter((_, i) => i !== index);
-                setLegendRows(updatedRows);
-              }}
-              className="text-destructive"
-            >
-              <Trash className="h-4 w-4" />
-            </button>
-          </div>
+                <button
+                  onClick={() => {
+                    const updatedRows = legendRows.filter((_, i) => i !== index);
+                    setLegendRows(updatedRows);
+                  }}
+                  className="text-destructive"
+                >
+                  <Trash className="h-4 w-4" />
+                </button>
+              </div>
+            </>
+          )}
+          </>
         ))}
       </div>
 
@@ -144,7 +142,7 @@ const LegendEditor = () => {
           onClick={() =>
             setLegendRows([
               ...legendRows,
-              { id: Date.now(), object: '', object_en: '', description_de: '', description_en: '' },
+              { id: Date.now(), object: '', object_en: '', description_de: '', description_en: '', type: currentPage},
             ])
           }
         >

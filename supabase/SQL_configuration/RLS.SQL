@@ -27,8 +27,9 @@ USING (true); -- Everyone can read
 CREATE POLICY alter_legend ON legend
 FOR ALL
 USING (
+  
   EXISTS (
-    SELECT 1 FROM roles WHERE roles.user_id = auth.uid() AND roles.role = 'admin' -- Only admins can alter
+    SELECT 1 FROM roles WHERE roles.user_id = auth.uid()
   )
 );
 

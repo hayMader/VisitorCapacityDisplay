@@ -20,6 +20,7 @@ export type Database = {
           object_en: string
           description_de: string
           description_en: string
+          type: "security" | "management"
         }
         Insert: {
           id?: number
@@ -27,6 +28,7 @@ export type Database = {
           object_en: string
           description_de: string
           description_en: string
+          type: "security" | "management"
         }
         Update: {
           id?: number
@@ -34,6 +36,7 @@ export type Database = {
           object_en?: string
           description_de?: string
           description_en?: string
+          type?: "security" | "management"
         }
         Relationships: []
       }

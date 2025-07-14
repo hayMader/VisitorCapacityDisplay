@@ -52,6 +52,7 @@ export interface LegendRow {
   object_en: string;
   description_de: string;
   description_en: string;
+  type: 'security' | 'management';
 }
 
 export type OccupancyLevel = 'low' | 'medium' | 'high';

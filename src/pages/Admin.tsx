@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import ExhibitionMap from '@/components/ExhibitionMap';
-import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { toast } from '@/components/ui/use-toast';
 import { AreaStatus } from '@/types';
 import AreaSettingsAccordion from '@/components/AreaSettingsAccordion';
 import { Label } from '@/components/ui/label';
-import { Trash, Save } from 'lucide-react';
-import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAreaStatus } from "@/contexts/AreaStatusContext";
 import LegendEditor from '@/components/LegendEditor';
@@ -153,7 +149,7 @@ const Admin = () => {
             
             <div className="bg-white p-4 rounded-lg shadow-sm">
               {/* Legend editor */}
-              <LegendEditor />
+              <LegendEditor currentPage="management" />
             </div>
             
             
