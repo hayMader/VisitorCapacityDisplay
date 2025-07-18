@@ -125,7 +125,7 @@ const Security = () => {
             <div className={`bg-white p-4 rounded-lg shadow-sm ${
               isHighlighted ? 'ring-2 ring-primary-400 ring-opacity-50 shadow-lg shadow-primary-100' : ''}`}>
               <div className="flex justify-between items-center mb-4">
-                <span>Bereichseinstellungen</span>
+                <span>Bereichseinstellungen {selectedArea.area_name}</span>
               </div>
               <Separator className="mb-4" />
               

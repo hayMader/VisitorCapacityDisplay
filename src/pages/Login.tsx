@@ -64,14 +64,17 @@ const Login = () => {
         // Route to Dashboard based on user role
         if( role === 'security') {
           navigate('/securityDashboard');
+          toast({
+            title: "Erfolgreich angemeldet",
+            description: "Willkommen im Security Dashboard.",
+          });
         } else {
           navigate('/admin');
+          toast({
+            title: "Erfolgreich angemeldet",
+            description: "Willkommen im Management Dashboard.",
+          });
         }
-
-        toast({
-          title: "Erfolgreich angemeldet",
-          description: "Willkommen im Management Dashboard.",
-        });
       }
     } catch (err) {
       toast({
@@ -96,9 +99,9 @@ const Login = () => {
           
           <Card className="w-full">
             <CardHeader>
-              <CardTitle>Management Login</CardTitle>
+              <CardTitle>Login</CardTitle>
               <CardDescription>
-                Geben Sie Ihre Anmeldedaten ein, um auf das Management Dashboard zuzugreifen.
+                Melden Sie sich mit Ihren Zugangsdaten an, um fortzufahren.
               </CardDescription>
             </CardHeader>
             <form onSubmit={handleSubmit}>

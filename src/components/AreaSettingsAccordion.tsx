@@ -10,7 +10,6 @@ import {
 import {
   Settings,
   SlidersHorizontal,
-  Copy,
   Save,
   Eye,
   EyeOff,
@@ -20,8 +19,8 @@ import AreaGeneralSettings from "@/components/ui/AreaGeneralSettings";
 import CopyThresholdsModal from "@/components/ui/CopyThresholdsModal";
 import ThresholdSettings from "@/components/ThresholdSettings";
 import AreaConfigurator from "./AreaConfigurator";
-import { AreaStatus, Threshold } from "@/types";
-import { updateAreaSettings, copyThresholdsToAreas } from "@/utils/api";
+import { AreaStatus } from "@/types";
+import { copyThresholdsToAreas } from "@/utils/api";
 import { useAreaStatus } from "@/contexts/AreaStatusContext";
 
 import { isEqual } from "lodash";
@@ -231,11 +230,10 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
       ) : (
         <div className="w-full">
           {/* ---------------- Schwellenwert Management ---------------- */}
-          <h2 className="py-4 flex items-center text-lg font-semibold">
+          <div className="flex items-center mb-1">
           <SlidersHorizontal className="mr-2 h-5 w-5" />
-            Schwellenwerte Besucherzahl
-          </h2>
-          <h4>Bereich: {formData.area_name}</h4>
+          <span className="text">Schwellenwerte Besucherzahl</span>
+          </div>
           <ThresholdSettings
             formData={formData}
             setFormData={setFormData}
@@ -252,7 +250,7 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
         { formData.status === "active" ? (
           <>
             {currentPage === "management" && (
-              <Button type="submit" disabled={isSubmitting}
+              <Button disabled={isSubmitting}
                 variant="destructive"
                 onClick={() => {
                   setFormData((prev) => ({ ...prev, status: "inactive" }));
@@ -272,7 +270,7 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
         ) : (
           <>
             {currentPage === "management" && (
-              <Button type="submit" disabled={isSubmitting}
+              <Button disabled={isSubmitting}
                 onClick={() => {
                   setFormData((prev) => ({ ...prev, status: "active" }));
                 }}

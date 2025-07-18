@@ -7,7 +7,7 @@ import { AreaStatus } from '@/types';
 import { Threshold } from '@/types';
 import { DoorOpen, Warehouse } from 'lucide-react';
 
-const WarningList = ({ areaStatus, hideControls }: { areaStatus: AreaStatus[]; hideControls?: boolean }) => {
+const WarningList = ({ areaStatus, hideControls, dashboard=true }: { areaStatus: AreaStatus[]; hideControls?: boolean; dashboard?: boolean }) => {
     const [warningSearchTerm, setWarningSearchTerm] = useState("");
     const [showEntrances, setShowEntrances] = useState(true);
     const [showHalls, setShowHalls] = useState(true);
@@ -17,10 +17,10 @@ const WarningList = ({ areaStatus, hideControls }: { areaStatus: AreaStatus[]; h
         const listElement = listRef.current;
         if (!listElement) return;
 
-        // Smooth scrolling effect
         const scrollHeight = listElement.scrollHeight;
         const clientHeight = listElement.clientHeight;
 
+        // Ensure scrolling only starts if the content exceeds the container height
         if (scrollHeight > clientHeight) {
             let scrollDirection = 1; // 1 for down, -1 for up
             let scrollPosition = 0;
@@ -29,7 +29,8 @@ const WarningList = ({ areaStatus, hideControls }: { areaStatus: AreaStatus[]; h
                 scrollPosition += scrollDirection;
                 listElement.scrollTop = scrollPosition;
 
-                if (scrollPosition + clientHeight >= scrollHeight) {
+                // Adjust logic to ensure the last element is fully visible
+                if (scrollPosition + clientHeight >= scrollHeight+50) {
                     scrollDirection = -1; // Reverse to scroll up
                 } else if (scrollPosition <= 0) {
                     scrollDirection = 1; // Reverse to scroll down
@@ -122,14 +123,29 @@ const WarningList = ({ areaStatus, hideControls }: { areaStatus: AreaStatus[]; h
                     .sort((a, b) => a.area_name.localeCompare(b.area_name, 'de-DE', { numeric: true, sensitivity: 'base' }))
                     .filter(area => getActiveThreshold(area.amount_visitors, area.thresholds) !== null)
                     .filter(area => filteredAreas(area))
+                    .concat([
+                        // Adding a default "Empty Area" to ensure its scrolled down completly
+                        { 
+                            id: -1, 
+                            area_name: "Empty Area", 
+                            amount_visitors: 0, 
+                            thresholds: [], 
+                            capacity_usage: 0, 
+                            coordinates: null, 
+                            highlight: "", // Ensure this matches the expected string type
+                            hidden_name: false, // Ensure this matches the expected boolean type
+                            type: "hall" ,
+                            status: "active", // Ensure this matches the expected string type
+                        } // Fully defined AreaStatus
+                    ]).filter(area => (area.id !== -1 || !dashboard)) // Exclude the default "Empty Area"
                     .map(area => {
                         const activeThreshold = getActiveThreshold(area.amount_visitors, area.thresholds);
-                        const isEntrance = area.area_name.toLowerCase().includes("e");
+                        const isEntrance = area.area_name?.toLowerCase().includes("e");
                         return (
                             <div
                                 key={area.id}
                                 className="border p-4 rounded-lg mb-4 flex items-center gap-4"
-                                style={{ backgroundColor: `${activeThreshold.color}40` }} // Adding opacity
+                                style={{ backgroundColor: `${activeThreshold?.color || '#ffffff'}40` }} // Adding opacity
                             >
                                 {/* Icon */}
                                 {isEntrance ? (
@@ -139,9 +155,9 @@ const WarningList = ({ areaStatus, hideControls }: { areaStatus: AreaStatus[]; h
                                 )}
                                 {/* Warning Details */}
                                 <div>
-                                    <h4 className="font-bold text-red-600">{area.area_name}</h4>
+                                    <h4 className="font-bold text-red-600">{area.area_name || "Unbekannter Bereich"}</h4>
                                     <p className="text-sm text-red-700">
-                                        {activeThreshold.alert_message}
+                                        {activeThreshold?.alert_message || "Keine Warnung verfügbar."}
                                     </p>
                                 </div>
                             </div>

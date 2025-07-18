@@ -11,11 +11,11 @@ const getLocalizedTimeSuffix = (isUSFormat: boolean): string => {
 
 const SecurityDashboard = () => {
 
-  const { areaStatus, legendRows, refreshAreaStatus, isRefreshing, selectedArea } = useAreaStatus(); // Use the context
+  const { areaStatus } = useAreaStatus(); // Use the context
 
   const [latestTimestamp, setLatestTimestamp] = useState<string>('');
   const [latestTimestampISO, setLatestTimestampISO] = useState<string>('');
-  const [showGermanTitle, setShowGermanTitle] = useState<boolean>(false);
+  const [showGermanTitle, setShowGermanTitle] = useState<boolean>(true);
   const isUSFormat = !showGermanTitle;
 
 
@@ -51,7 +51,7 @@ const SecurityDashboard = () => {
       <main className="flex-1 flex overflow-hidden" style={{ height: 'calc(100vh - 10vh)' }}>
         {/* Warning List Section */}
         <div className="flex-grow bg-white p-4 rounded-lg shadow-sm" style={{ height: 'inherit' }}>
-          <WarningList areaStatus={areaStatus} hideControls={true} />
+          <WarningList areaStatus={areaStatus} hideControls={true} dashboard={false} />
         </div>
         
         {/* Map Section */}
