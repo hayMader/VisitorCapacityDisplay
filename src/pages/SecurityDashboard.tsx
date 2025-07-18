@@ -4,6 +4,7 @@ import ExhibitionMap from '@/components/ExhibitionMap';
 import { formatDateTime } from '@/utils/formatDatetime';
 import { useAreaStatus } from '@/contexts/AreaStatusContext';
 import WarningList from '@/components/WarningList'; // Import the WarningList component
+import Footer from '@/components/Footer';
 
 const getLocalizedTimeSuffix = (isUSFormat: boolean): string => {
   return isUSFormat ? '' : 'Uhr';
@@ -73,9 +74,7 @@ const SecurityDashboard = () => {
         
       </main>
       
-      <footer className="bg-white border-t py-2 text-center text-sm text-muted-foreground" style={{ height: '5vh' }}>
-        <p>© {new Date().getFullYear()} MMG-Messegelände München Riem</p>
-      </footer>
+      <Footer />
     </div>
   );
 };

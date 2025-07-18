@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAreaStatus } from "@/contexts/AreaStatusContext";
 import LegendEditor from '@/components/LegendEditor';
+import Footer from '@/components/Footer';
 
 const Admin = () => {
   const { selectedArea, setSelectedArea, refreshAreaStatus, refreshAreaStatusAndLegend } = useAreaStatus();
@@ -185,11 +186,7 @@ const Admin = () => {
       </div>
     </main>
       
-      <footer className="bg-white border-t py-4">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} MMG-Messegelände München Riem - Management System</p>
-        </div>
-      </footer>
+    <Footer />
     </div>
   );
 };

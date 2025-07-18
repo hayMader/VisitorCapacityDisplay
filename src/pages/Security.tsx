@@ -9,6 +9,7 @@ import { useAreaStatus } from "@/contexts/AreaStatusContext";
 import TimeSlider from '@/components/TimeSlider';
 import WarningList from '@/components/WarningList';
 import LegendEditor from '@/components/LegendEditor';
+import Footer from '@/components/Footer';
 
 const Security = () => {
   const { selectedArea, setSelectedArea, refreshAreaStatus, refreshAreaStatusAndLegend, areaStatus } = useAreaStatus();
@@ -144,11 +145,7 @@ const Security = () => {
         </div>
       </main>
       
-      <footer className="bg-white border-t py-4">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} MMG-Messegelände München Riem - Management System</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

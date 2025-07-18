@@ -3,6 +3,7 @@ import Header from '@/components/Header';
 import ExhibitionMap from '@/components/ExhibitionMap';
 import { formatDateTime } from '@/utils/formatDatetime';
 import { getLegend } from '@/utils/api';
+import Footer from '@/components/Footer';
 
 const getLocalizedTimeSuffix = (isUSFormat: boolean): string => {
   return isUSFormat ? '' : 'Uhr';
@@ -73,9 +74,7 @@ const Index = () => {
           } }        />
       </main>
       
-      <footer className="bg-white border-t py-2 text-center text-sm text-muted-foreground" style={{ maxHeight: '5vh' }}>
-        <p>© {new Date().getFullYear()} MMG-Messegelände München Riem</p>
-      </footer>
+      <Footer />
     </div>
   );
 };

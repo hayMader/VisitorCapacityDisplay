@@ -148,7 +148,7 @@ const Login = () => {
           </Card>
           
           <p className="mt-8 text-center text-sm text-gray-500">
-            © {new Date().getFullYear()} MMG-Messegelände München Riem
+            © {new Date().getFullYear()} Messe München GmbH
           </p>
         </div>
       </div>
