@@ -1,4 +1,4 @@
-import type { LegendRow } from "@/types/index"
+import type { AreaType, LegendRow } from "@/types/index"
 
 import { AreaStatus } from "@/types"
 
@@ -243,6 +243,10 @@ export type Database = {
       copy_thresholds_to_areas_by_type: {
         Args: {source_area_id: number, target_area_ids: number[], threshold_type: "management" | "security"}
         Returns: null
+      },
+      create_new_area: {
+        Args: {type_input: AreaType}
+        Returns: AreaStatus 
       }
     }
     Enums: {

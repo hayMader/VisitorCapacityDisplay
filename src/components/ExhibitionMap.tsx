@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { toast } from "@/components/ui/use-toast";
-import { AreaStatus, Threshold } from "@/types";
-import { RefreshCw, Pencil } from "lucide-react";
+import { AreaStatus, AreaType, Threshold } from "@/types";
+import { RefreshCw, Pencil, SquarePlus } from "lucide-react";
 import { useAreaStatus } from "@/contexts/AreaStatusContext";
+import { createNewArea } from "@/utils/api"; // Import the function to create a new area
 
 interface ExhibitionMapProps {
   autoRefresh?: boolean;
@@ -30,10 +31,25 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
   dashboard = false, // If true, the map is used in a dashboard context
   handleUpdate = () => {}, // Function to handle refresh, can be passed from parent
 }) => {
-  const { areaStatus,legendRows, refreshAreaStatusAndLegend, refreshAreaStatus, isRefreshing, selectedArea } = useAreaStatus(); // Use the context
+  const { areaStatus, legendRows, refreshAreaStatusAndLegend, refreshAreaStatus, isRefreshing, selectedArea } = useAreaStatus(); // Use the context
   const [isMediumSize, setIsMediumSize] = useState(false);
+  const [showAreaTypeSelector, setShowAreaTypeSelector] = useState(false); // State to toggle the selector
+  const [typeList] = useState<{ id: AreaType; name: string }[]>([
+    { id: "entrance", name: "Eingang" },
+    { id: "hall", name: "Halle" },
+    { id: "other", name: "Sonstiges" },
+  ]); // Example area types
 
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleCreateNewArea = async (type: AreaType) => {
+    const newArea = await createNewArea(type); // Pass the selected type to the API
+    refreshAreaStatus(); // Refresh area status after creating a new area
+    if (newArea) {
+      onAreaSelect(newArea);
+    }
+    setShowAreaTypeSelector(false); // Close the selector after creating the area
+  };
 
   const handleRefresh = async () => {
     handleUpdate();
@@ -61,6 +77,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
     }
   };
 
+  //scale container size on change
   useEffect(() => {
     checkContainerSize();
     window.addEventListener("resize", checkContainerSize);
@@ -70,6 +87,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
     };
   }, [containerRef.current]);
 
+  //autorefresh data every interval
   useEffect(() => {
     if (!autoRefresh) return;
 
@@ -156,36 +174,72 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
               </button>
               {/* Edit Area Button */}
               {currentPage === "management" && !dashboard && (
-                <button
-                  onClick={() => {
-                  if (selectedArea) {
-                    setShowConfigurator?.(true);
-                  } else {
-                    toast({
-                    title: "Kein Bereich ausgewählt",
-                    description: "Bitte wählen Sie zuerst einen Bereich aus.",
-                    variant: "destructive",
-                    });
-                  }
-                  }}
-                  className="bg-white p-2 rounded-full shadow hover:bg-gray-50 transition-colors ml-2"
-                  aria-label="Bereich bearbeiten"
-                  title="Klicke um Fläche zu bearbeiten"
-                >
-                  <Pencil className="h-5 w-5 text-primary" />
-                </button>
+                <>
+                  {selectedArea != null ? (
+                    <button
+                      onClick={() => {
+                        setShowConfigurator?.(true);
+                      }}
+                      className="bg-white p-2 rounded-full shadow hover:bg-gray-50 transition-colors ml-2"
+                      aria-label="Bereich bearbeiten"
+                      title="Klicke um Fläche zu bearbeiten"
+                    >
+                      <Pencil className="h-5 w-5 text-primary" />
+                    </button>
+                  ) : (
+                    <>
+
+                      <button
+                        onClick={() => setShowAreaTypeSelector(!showAreaTypeSelector)} // Toggle the selector
+                        className="bg-white p-2 rounded-full shadow hover:bg-gray-50 transition-colors ml-2"
+                        aria-label="Bereich erstellen"
+                        title="Klicke um eine Neue Fläche zu erstellen"
+                      >
+                        <SquarePlus className="h-5 w-5 text-primary" />
+                      </button>
+                      <div className="relative">
+                      {showAreaTypeSelector && (
+                        <div className="absolute top-full mt-2 right-0 bg-white shadow-lg rounded p-2 z-20">
+      
+                          {typeList.map((typeitem) => (
+                            <button
+                              key={typeitem.id}
+                              onClick={() => handleCreateNewArea(typeitem.id)} // Pass the selected type
+                              className="block w-full text-left px-4 py-2 hover:bg-gray-100 rounded"
+                            >
+                              {typeitem.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    </>
+                  )}
+                </>
               )}
             </div>
             <img
               src="/plan-exhibtion-area.jpg"
               alt="MMG Messegelände"
-              className="max-h-[85vh] w-auto object-contain"
+              className="max-h-[85vh] w-auto object-contain cursor-pointer"
+              
             />
             <svg
               className="absolute inset-0 w-full h-full"
               viewBox="0 0 2050 1248"
               preserveAspectRatio="xMidYMid meet"
+
             >
+              <rect
+                x="0"
+                y="0"
+                width="100%"
+                height="100%"
+                fill="transparent" // Transparent background
+                pointerEvents="all" // Ensure it captures click events
+                onClick={() => onAreaSelect(null)}
+              />
+              
               {areaStatus
                 .filter(area => (dashboard ? area.status !== "inactive" : true)) // Show only active areas in dashboard, otherwise show all
                 .map((area) => {
@@ -263,7 +317,7 @@ const ExhibitionMap: React.FC<ExhibitionMapProps> = ({
                 }
 
                 const lineHeight = 22; // adjust as needed
-                const totalHeight = lines.length * lineHeight;
+                const totalHeight = lines.length ? lines.length * lineHeight : 0;
                 const availableHeight = maxY - minY;
 
                 // Determine if horizontal alignment is needed

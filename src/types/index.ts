@@ -44,7 +44,7 @@ export interface AreaStatus {
   status: "active" | "inactive";
   hidden_absolute?: boolean;    // Controls display of absolute visitor count
   hidden_percentage?: boolean; 
-  type: "entrance" | "hall" | "other"; // Type of area, e.g., entrance, hall, etc.
+  type: AreaType; // Type of area, e.g., entrance, hall, etc.
 }
 
 export interface LegendRow {
@@ -57,3 +57,5 @@ export interface LegendRow {
 }
 
 export type OccupancyLevel = 'low' | 'medium' | 'high';
+
+export type AreaType = 'entrance' | 'hall' | 'other';

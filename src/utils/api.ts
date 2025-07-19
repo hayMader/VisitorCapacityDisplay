@@ -1,4 +1,4 @@
-import { VisitorData, AreaSettings, OccupancyLevel, AreaStatus, Threshold, LegendRow } from "@/types";
+import { VisitorData, AreaSettings, OccupancyLevel, AreaStatus, Threshold, LegendRow, AreaType } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 
@@ -36,6 +36,52 @@ export const getAreaSettings = async (filter_minutes?: number): Promise<AreaStat
     return [];
   }
 };
+
+// function to create new Area
+
+export const createNewArea = async (type: AreaType = "hall") => {
+  try {
+    const { data, error } = await supabase.rpc("create_new_area", { type_input: type });
+    if (error) throw error;
+    toast({
+      title: "Erfolg",
+      description: "Ein neuer Bereich wurde erfolgreich angelegt",
+      variant: "default",
+    });
+    return data;
+  } catch (error) {
+    toast({
+      title: "Fehler",
+      description: "Ein neuer Bereich konnte nicht angelegt werden",
+      variant: "destructive",
+    });
+  }
+};
+
+export const deleteArea = async (areaId: number): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('area_settings')
+      .delete()
+      .eq('id', areaId);
+    
+    if (error) throw error;
+    toast({
+      title: "Erfolg",
+      description: "Der Bereich wurde erfolgreich gelöscht.",
+      variant: "default",
+    });
+    return true;
+  } catch (error) {
+    console.error('Error deleting area:', error);
+    toast({
+      title: "Fehler",
+      description: "Der Bereich konnte nicht gelöscht werden.",
+      variant: "destructive",
+    });
+    return false;
+  }
+}
 
 // Function to get thresholds for a specific area
 export const getThresholds = async (areaId: number): Promise<Threshold[]> => {

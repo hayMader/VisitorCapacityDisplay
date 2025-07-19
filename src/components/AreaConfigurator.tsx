@@ -12,11 +12,13 @@ import { toast } from "@/components/ui/use-toast";
 import { Plus, Save, MapPin, Trash, X } from "lucide-react";
 import { AreaStatus } from "@/types";
 import { updateAreaSettings } from "@/utils/api";
+import { on } from "events";
 
 /* ─────────────────────   props   ───────────────────── */
 export interface AreaConfiguratorProps {
   selectedArea?: AreaStatus;
-  onSave: (updated: AreaStatus) => void;
+  setFormData: (data: AreaStatus) => void;
+  onSave: () => void;
   onClose?: () => void;
 }
 
@@ -30,72 +32,18 @@ const emptyCoords = [
 
 const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
   selectedArea,
+  setFormData,
   onSave,
   onClose,
 }) => {
 
-  const [nameDe, setNameDe] = useState("");
-  const [nameEn, setNameEn] = useState("");
-  const [coords, setCoords] = useState<{ x: number; y: number }[]>([]);
-
-  // Whenever selectedArea changes, update local state:
-  useEffect(() => {
-    setNameDe(selectedArea?.area_name ?? "");
-    setNameEn(selectedArea?.area_name_en ?? "");
-    setCoords(
-      selectedArea?.coordinates?.length
-        ? selectedArea.coordinates
-        : [
-          { x: 0, y: 0 },
-          { x: 0, y: 0 },
-          { x: 0, y: 0 },
-          { x: 0, y: 0 },
-        ]
-    );
-  }, [selectedArea]);
-
-
-  const updateCoord = (idx: number, axis: "x" | "y", value: string) => {
-    const c = [...coords];
-    c[idx][axis] = Number(value) || 0;
-    setCoords(c);
-  };
-
-  const addPoint = () => setCoords([...coords, { x: 0, y: 0 }]);
-
   const handleSave = async () => {
-    if (!nameDe.trim() || !nameEn.trim() || !selectedArea) return;
-
-    try {
-      const updated: AreaStatus = {
-        ...selectedArea,
-        area_name: nameDe,
-        area_name_en: nameEn,
-        coordinates: coords,
-    };
-
-    await updateAreaSettings(updated.id, updated);
-
-    toast({
-      title: "Erfolgreich gespeichert",
-      description: `Die Änderungen für ${updated.area_name} wurden übernommen.`,
-    });
-
-    onSave(updated);
-  
-    } catch (error) {
-      console.error("Fehler beim Speichern:", error);
-      toast({
-        title: "Fehler beim Speichern",
-        description: "Bitte versuche es erneut.",
-        variant: "destructive",
-      });
-    }
+    onSave()
   };
 
 
   return (
-    <Accordion type="single" collapsible defaultValue="config" className="w-full">
+    <Accordion type="single" defaultValue="config" className="w-full">
       <AccordionItem value="config">
         <AccordionTrigger className="py-4">
           <div className="flex items-center">
@@ -113,9 +61,9 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
                 Bereichsname (Deutsch)
               </label>
               <Input
-                value={nameDe}
+                value={selectedArea?.area_name || ""}
                 placeholder="Bereichsname (DE)"
-                onChange={(e) => setNameDe(e.target.value)}
+                onChange={(e) => setFormData({ ...selectedArea, area_name: e.target.value })} // Update form data directly
               />
             </div>
 
@@ -124,9 +72,9 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
                 Bereichsname (Englisch)
               </label>
               <Input
-                value={nameEn}
+                value={selectedArea?.area_name_en || ""}
                 placeholder="Bereichsname (EN)"
-                onChange={(e) => setNameEn(e.target.value)}
+                onChange={(e) => setFormData({ ...selectedArea, area_name_en: e.target.value })} // Update form data directly
               />
             </div>
           </div>
@@ -135,7 +83,7 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
 
 
           <p className="font-medium mb-2">Koordinaten</p>
-          {coords.map((c, i) => (
+          {selectedArea?.coordinates.map((c, i) => (
             <div
               key={i}
               className="grid grid-cols-[32px_1fr_32px_1fr_auto] items-center gap-2 mb-2"
@@ -147,7 +95,7 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
               <Input
                 type="number"
                 value={c.x}
-                onChange={(e) => updateCoord(i, "x", e.target.value)}
+                onChange={(e) => setFormData({ ...selectedArea, coordinates: selectedArea?.coordinates.map((coord, idx) => idx === i ? { ...coord, x: Number(e.target.value) || 0 } : coord) })}	
                 placeholder={`X${i + 1}`}
               />
 
@@ -158,7 +106,7 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
               <Input
                 type="number"
                 value={c.y}
-                onChange={(e) => updateCoord(i, "y", e.target.value)}
+                onChange={(e) => setFormData({ ...selectedArea, coordinates: selectedArea?.coordinates.map((coord, idy) => idy === i ? { ...coord, y: Number(e.target.value) || 0 } : coord) })}
                 placeholder={`Y${i + 1}`}
               />
 
@@ -168,9 +116,9 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
                 variant="ghost"
                 size="icon"
                 onClick={() => {
-                  const updated = [...coords];
+                  const updated = [...selectedArea?.coordinates];
                   updated.splice(i, 1);
-                  setCoords(updated);
+                  setFormData({ ...selectedArea, coordinates: updated });
                 }}
                 className="text-destructive"
               >
@@ -183,7 +131,7 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
             variant="outline"
             size="sm"
             className="mt-2"
-            onClick={addPoint}
+            onClick={() => setFormData({ ...selectedArea, coordinates: [...(selectedArea?.coordinates || emptyCoords), { x: 0, y: 0 }] })} // Add a new coordinate
           >
             <Plus className="mr-1 h-4 w-4" />
             Koordinate&nbsp;hinzufügen
@@ -203,7 +151,6 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
             <Button
               type="button"
               onClick={handleSave}
-              disabled={!nameDe.trim() || !nameEn.trim()}
             >
               <Save className="mr-1 h-4 w-4" />
               Speichern

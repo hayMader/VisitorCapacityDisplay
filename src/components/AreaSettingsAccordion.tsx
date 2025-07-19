@@ -13,6 +13,7 @@ import {
   Save,
   Eye,
   EyeOff,
+  Trash,
 } from "lucide-react";
 
 import AreaGeneralSettings from "@/components/ui/AreaGeneralSettings";
@@ -20,10 +21,12 @@ import CopyThresholdsModal from "@/components/ui/CopyThresholdsModal";
 import ThresholdSettings from "@/components/ThresholdSettings";
 import AreaConfigurator from "./AreaConfigurator";
 import { AreaStatus } from "@/types";
-import { copyThresholdsToAreas } from "@/utils/api";
+import { copyThresholdsToAreas, deleteArea } from "@/utils/api";
 import { useAreaStatus } from "@/contexts/AreaStatusContext";
+import ConfirmationDialog from "@/components/ConfirmationDialog";
 
 import { isEqual } from "lodash";
+import { set } from "date-fns";
 
 export const MAX_LEVELS = 4; // ab jetzt 4 Stufen möglich
 
@@ -38,14 +41,13 @@ interface Props {
 }
 
 const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, showConfigurator, onCloseConfigurator }) => {
+  const { updateAreaStatus, setAreaStatus, setSelectedArea, refreshAreaStatus } = useAreaStatus();
 
-
-  const { updateAreaStatus, setAreaStatus } = useAreaStatus();
   /* ---------------------------------------------------------------- */
   /*  State                                                           */
   /* ---------------------------------------------------------------- */
   const [originalData, setOriginalData] = useState<AreaStatus | null>(area);
-  const [formData,  setFormData] = useState<AreaStatus | null>(area);
+  const [formData, setFormData] = useState<AreaStatus | null>(area);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,6 +59,7 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
   });
 
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false); // Modal for copying thresholds
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false); // State for confirmation dialog
 
   const [accordionValue, setAccordionValue] = useState<string | null>("general");
   /* ---------------------------------------------------------------- */
@@ -103,6 +106,21 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
     }
 
     setFormData((p) => ({ ...p, [field]: parsed }));
+  };
+
+
+
+  const handleDeleteArea = async () => {
+    if (!formData) return;
+
+    try {
+      // Call API to delete area
+      await deleteArea(formData.id);
+      setSelectedArea(null); // Clear selected area
+      refreshAreaStatus(); // Refresh area status context
+    } catch (error) {
+      console.error("Error deleting area:", error);
+    }
   };
 
   /* ---------------------------------------------------------------- */
@@ -176,9 +194,8 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
     return (
       <AreaConfigurator
         selectedArea={formData}
-        onSave={(updated) => {
-          updateAreaStatus(updated);
-        }}
+        setFormData={setFormData}
+        onSave={handleSubmit}
         onClose={onCloseConfigurator}
       />
     );
@@ -191,12 +208,12 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
         {/* ---------------- allgemeine Einstellungen ---------------- */}
         <AccordionItem value="general">
         <AccordionTrigger className="py-4">
-          <div className="flex items-start flex-col">
-          <div className="flex items-center mb-1">
-          <Settings className="mr-2 h-5 w-5" />
-          <span className="text">Allgemeine Einstellungen</span>
-          </div>
-          <p className="text-muted-foreground">Setzen Sie einen Namen und maximale Kapazität</p>
+          <div className="flex items-start flex-col" style={{textAlign: "left"}}>
+            <div className="flex items-center mb-1">
+            <Settings className="mr-2 h-5 w-5" />
+            <span className="text">Allgemeine Einstellungen</span>
+            </div>
+            <p className="text-muted-foreground">Setzen Sie einen Namen und maximale Kapazität</p>
           </div>
         </AccordionTrigger>
         <AccordionContent>
@@ -207,12 +224,12 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
         {/* ---------------- Schwellenwert Management ---------------- */}
         <AccordionItem value="thresholds">
           <AccordionTrigger className="py-4">
-            <div className="flex items-start flex-col">
-            <div className="flex items-center mb-1">
-            <SlidersHorizontal className="mr-2 h-5 w-5" />
-            <span className="text">Schwellenwerte Besucherzahl</span>
-            </div>
-            <p className="text-muted-foreground">Definieren Sie bis zu 4 Schwellenwerte</p>
+            <div className="flex items-start flex-col" style={{textAlign: "left"}}>
+              <div className="flex items-center mb-1">
+              <SlidersHorizontal className="mr-2 h-5 w-5" />
+              <span className="text">Schwellenwerte Besucherzahl</span>
+              </div>
+              <p className="text-muted-foreground">Definieren Sie bis zu 4 Schwellenwerte</p>
             </div>
           </AccordionTrigger>
           <AccordionContent>
@@ -250,6 +267,7 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
         { formData.status === "active" ? (
           <>
             {currentPage === "management" && (
+              <>
               <Button disabled={isSubmitting}
                 variant="destructive"
                 onClick={() => {
@@ -259,6 +277,12 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
                 <EyeOff className="mr-2 h-4 w-4" />
                 {isSubmitting ? "Deaktiviere …" : "Deaktivieren"}
               </Button>
+              <button className="text-destructive"
+                onClick={() => setIsConfirmDialogOpen(true)}
+              >
+                <Trash className="mr-2 h-4 w-4"/>
+              </button>
+              </>
             )}
             <Button type="submit" disabled={isSubmitting || !hasChanges}
               onClick={handleSubmit}
@@ -270,6 +294,7 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
         ) : (
           <>
             {currentPage === "management" && (
+              <>
               <Button disabled={isSubmitting}
                 onClick={() => {
                   setFormData((prev) => ({ ...prev, status: "active" }));
@@ -278,6 +303,12 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
                 <Eye className="mr-2 h-4 w-4" />
                 Aktivieren
               </Button>
+              <button className="text-destructive"
+                onClick={() => setIsConfirmDialogOpen(true)}
+              >
+                <Trash className="mr-2 h-4 w-4"/>
+              </button>
+              </>
             )}
             <Button type="submit" disabled={isSubmitting || !hasChanges}
               onClick={handleSubmit}
@@ -296,6 +327,18 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
       onClose={() => setIsCopyModalOpen(false)}
       sourceArea={formData}
       onApply={handleCopyThresholds}
+    />
+
+    {/* Confirmation Dialog */}
+    <ConfirmationDialog
+      open={isConfirmDialogOpen}
+      title="Bereich löschen"
+      description={`Sind Sie sicher, dass Sie den Bereich "${formData?.area_name}" löschen möchten?`}
+      onConfirm={() => {
+        handleDeleteArea();
+        setIsConfirmDialogOpen(false); // Close dialog after confirming
+      }}
+      onCancel={() => setIsConfirmDialogOpen(false)} // Close dialog on cancel
     />
   </div>
   );
