@@ -11,8 +11,9 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/use-toast";
 import { Plus, Save, MapPin, Trash, X } from "lucide-react";
 import { AreaStatus } from "@/types";
-import { updateAreaSettings } from "@/utils/api";
-import { on } from "events";
+import ConfirmationDialog from "@/components/ConfirmationDialog";
+import { deleteArea } from "@/utils/api";
+import { useAreaStatus } from "@/contexts/AreaStatusContext";
 
 /* ─────────────────────   props   ───────────────────── */
 export interface AreaConfiguratorProps {
@@ -37,12 +38,30 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
   onClose,
 }) => {
 
+  const { refreshAreaStatus } = useAreaStatus();
+
   const handleSave = async () => {
     onSave()
   };
 
+  const handleDeleteArea = async () => {
+    if (!selectedArea) return;
+
+    try {
+      // Call API to delete area
+      await deleteArea(selectedArea.id);
+      setFormData(null); // Clear selected area
+      refreshAreaStatus(); // Refresh area status context
+    } catch (error) {
+      console.error("Error deleting area:", error);
+    }
+  };
+
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+
 
   return (
+    <>
     <Accordion type="single" defaultValue="config" className="w-full">
       <AccordionItem value="config">
         <AccordionTrigger className="py-4">
@@ -139,6 +158,11 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
 
 
           <div className="mt-6 flex justify-end gap-3">
+            <button className="text-destructive"
+              onClick={() => setIsConfirmDialogOpen(true)}
+            >
+              <Trash className="mr-2 h-4 w-4"/>
+            </button>
             <Button
               type="button"
               variant="outline"
@@ -159,6 +183,18 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
         </AccordionContent>
       </AccordionItem>
     </Accordion>
+    {/* Confirmation Dialog */}
+    <ConfirmationDialog
+      open={isConfirmDialogOpen}
+      title="Bereich löschen"
+      description={`Sind Sie sicher, dass Sie den Bereich "${selectedArea?.area_name}" löschen möchten?`}
+      onConfirm={() => {
+        handleDeleteArea();
+        setIsConfirmDialogOpen(false); // Close dialog after confirming
+      }}
+      onCancel={() => setIsConfirmDialogOpen(false)} // Close dialog on cancel
+    />
+    </>
   );
 };
 

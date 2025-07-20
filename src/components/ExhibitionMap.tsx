@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import { toast } from "@/components/ui/use-toast";
 import { AreaStatus, AreaType, Threshold } from "@/types";
 import { RefreshCw, Pencil, SquarePlus } from "lucide-react";
 import { useAreaStatus } from "@/contexts/AreaStatusContext";

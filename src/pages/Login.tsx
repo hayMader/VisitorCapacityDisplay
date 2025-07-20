@@ -64,12 +64,14 @@ const Login = () => {
         // Route to Dashboard based on user role
         if( role === 'security') {
           navigate('/securityDashboard');
+          window.location.reload();
           toast({
             title: "Erfolgreich angemeldet",
             description: "Willkommen im Security Dashboard.",
           });
         } else {
           navigate('/admin');
+          window.location.reload();
           toast({
             title: "Erfolgreich angemeldet",
             description: "Willkommen im Management Dashboard.",

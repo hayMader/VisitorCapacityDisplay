@@ -13,7 +13,6 @@ import {
   Save,
   Eye,
   EyeOff,
-  Trash,
 } from "lucide-react";
 
 import AreaGeneralSettings from "@/components/ui/AreaGeneralSettings";
@@ -23,10 +22,8 @@ import AreaConfigurator from "./AreaConfigurator";
 import { AreaStatus } from "@/types";
 import { copyThresholdsToAreas, deleteArea } from "@/utils/api";
 import { useAreaStatus } from "@/contexts/AreaStatusContext";
-import ConfirmationDialog from "@/components/ConfirmationDialog";
 
 import { isEqual } from "lodash";
-import { set } from "date-fns";
 
 export const MAX_LEVELS = 4; // ab jetzt 4 Stufen möglich
 
@@ -59,7 +56,6 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
   });
 
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false); // Modal for copying thresholds
-  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false); // State for confirmation dialog
 
   const [accordionValue, setAccordionValue] = useState<string | null>("general");
   /* ---------------------------------------------------------------- */
@@ -108,20 +104,6 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
     setFormData((p) => ({ ...p, [field]: parsed }));
   };
 
-
-
-  const handleDeleteArea = async () => {
-    if (!formData) return;
-
-    try {
-      // Call API to delete area
-      await deleteArea(formData.id);
-      setSelectedArea(null); // Clear selected area
-      refreshAreaStatus(); // Refresh area status context
-    } catch (error) {
-      console.error("Error deleting area:", error);
-    }
-  };
 
   /* ---------------------------------------------------------------- */
   /*  Submit                                                          */
@@ -277,11 +259,6 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
                 <EyeOff className="mr-2 h-4 w-4" />
                 {isSubmitting ? "Deaktiviere …" : "Deaktivieren"}
               </Button>
-              <button className="text-destructive"
-                onClick={() => setIsConfirmDialogOpen(true)}
-              >
-                <Trash className="mr-2 h-4 w-4"/>
-              </button>
               </>
             )}
             <Button type="submit" disabled={isSubmitting || !hasChanges}
@@ -303,11 +280,6 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
                 <Eye className="mr-2 h-4 w-4" />
                 Aktivieren
               </Button>
-              <button className="text-destructive"
-                onClick={() => setIsConfirmDialogOpen(true)}
-              >
-                <Trash className="mr-2 h-4 w-4"/>
-              </button>
               </>
             )}
             <Button type="submit" disabled={isSubmitting || !hasChanges}
@@ -327,18 +299,6 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
       onClose={() => setIsCopyModalOpen(false)}
       sourceArea={formData}
       onApply={handleCopyThresholds}
-    />
-
-    {/* Confirmation Dialog */}
-    <ConfirmationDialog
-      open={isConfirmDialogOpen}
-      title="Bereich löschen"
-      description={`Sind Sie sicher, dass Sie den Bereich "${formData?.area_name}" löschen möchten?`}
-      onConfirm={() => {
-        handleDeleteArea();
-        setIsConfirmDialogOpen(false); // Close dialog after confirming
-      }}
-      onCancel={() => setIsConfirmDialogOpen(false)} // Close dialog on cancel
     />
   </div>
   );

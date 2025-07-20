@@ -13,7 +13,7 @@ import Footer from '@/components/Footer';
 
 const Security = () => {
   const { selectedArea, setSelectedArea, refreshAreaStatus, refreshAreaStatusAndLegend, areaStatus } = useAreaStatus();
-  const [showGermanTitle, setShowGermanTitle] = useState<boolean>(false);
+  const [showGermanTitle, setShowGermanTitle] = useState<boolean>(true);
   const [showAbsolute, setShowAbsolute] = useState(true);
   const [showPercentage, setShowPercentage] = useState(true);
   const [timeFilter, setTimeFilter] = useState(0); // Default to 0 hours
@@ -28,7 +28,6 @@ const Security = () => {
     refreshAreaStatusAndLegend(timeFilter);
 
       const intervalId = setInterval(() => {
-      setShowGermanTitle((prev) => !prev);
     }, 20000);
     
     return () => clearInterval (intervalId);

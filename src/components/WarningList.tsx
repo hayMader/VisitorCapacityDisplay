@@ -142,6 +142,14 @@ const WarningList = ({ areaStatus, hideControls, dashboard=true }: { areaStatus:
                         const activeThreshold = getActiveThreshold(area.amount_visitors, area.thresholds);
                         const isEntrance = area.area_name?.toLowerCase().includes("e");
                         return (
+                            <>
+                            {area.id == -1 ? (
+                                <div>
+                                    {/* Placeholder for the empty area */}
+                                    <div className="h-20"></div>
+                                </div>
+
+                            ):(
                             <div
                                 key={area.id}
                                 className="border p-4 rounded-lg mb-4 flex items-center gap-4"
@@ -161,6 +169,8 @@ const WarningList = ({ areaStatus, hideControls, dashboard=true }: { areaStatus:
                                     </p>
                                 </div>
                             </div>
+                            )}
+                            </>
                         );
                     })}
                 {areaStatus.filter(area => getActiveThreshold(area.amount_visitors, area.thresholds) !== null).length === 0 && (
