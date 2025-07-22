@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { LogIn, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Clock } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 
 interface HeaderProps {
   title: string;
@@ -14,7 +15,9 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ title, subtitle, isAdmin = false }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  
+
+  const location = useLocation();
+
   const handleLogout = () => {
     logout();
     navigate('/');
@@ -48,11 +51,11 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle, isAdmin = false }) => 
           
           <div className="flex items-center gap-2 mt-4 sm:mt-0">
             {user?.isAuthenticated ? (
-              window.location.pathname === '/' ? (
-              <Link to="/admin">
+              location.pathname === '/' ? (
+                <Link to="/admin">
                 <Settings className="h-4 w-4 mr-2" />
-              </Link>
-              ) : window.location.pathname === '/securityDashboard' ? (
+                </Link>
+                ) : location.pathname === '/securityDashboard' ? (
               <Link to="/security">
                 <Settings className="h-4 w-4 mr-2" />
               </Link>
