@@ -60,7 +60,7 @@ const Admin = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header 
-        title="Willkommen im Management Dashboard"
+        title="Willkommen in der Management Console"
         isAdmin={true} 
       />
       

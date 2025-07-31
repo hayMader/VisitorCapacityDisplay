@@ -67,14 +67,14 @@ const Login = () => {
           window.location.reload();
           toast({
             title: "Erfolgreich angemeldet",
-            description: "Willkommen im Security Dashboard.",
+            description: "Willkommen in der Security Console.",
           });
         } else {
           navigate('/admin');
           window.location.reload();
           toast({
             title: "Erfolgreich angemeldet",
-            description: "Willkommen im Management Dashboard.",
+            description: "Willkommen in der Management Console.",
           });
         }
       }

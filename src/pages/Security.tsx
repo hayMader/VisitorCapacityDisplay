@@ -49,7 +49,7 @@ const Security = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header 
-        title="Willkommen im Security Dashboard"
+        title="Willkommen in der Security Console"
         isAdmin={true} 
       />
       
