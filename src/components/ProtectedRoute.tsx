@@ -6,6 +6,7 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
+// This component is used to protect routes that require authentication and wraps the children components.
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { getCurrentUser } = useAuth();
 

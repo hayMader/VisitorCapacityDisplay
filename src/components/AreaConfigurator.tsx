@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Accordion,
   AccordionItem,
@@ -8,7 +8,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { toast } from "@/components/ui/use-toast";
 import { Plus, Save, MapPin, Trash, X } from "lucide-react";
 import { AreaStatus } from "@/types";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
@@ -17,13 +16,13 @@ import { useAreaStatus } from "@/contexts/AreaStatusContext";
 
 /* ─────────────────────   props   ───────────────────── */
 export interface AreaConfiguratorProps {
-  selectedArea?: AreaStatus;
-  setFormData: (data: AreaStatus) => void;
-  onSave: () => void;
+  selectedArea?: AreaStatus; // The currently selected area to configure
+  setFormData: (data: AreaStatus) => void; // Function to update the form data with the selected area
+  onSave: () => void; 
   onClose?: () => void;
 }
 
-
+// Default coordinates for an new empty area
 const emptyCoords = [
   { x: 0, y: 0 },
   { x: 0, y: 0 },
@@ -31,6 +30,10 @@ const emptyCoords = [
   { x: 0, y: 0 },
 ];
 
+/**
+ * AreaConfigurator component allows users to configure area settings including name and coordinates.
+ * It provides options to save changes or delete the area.
+ */
 const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
   selectedArea,
   setFormData,
@@ -38,12 +41,12 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
   onClose,
 }) => {
 
-  const { refreshAreaStatus } = useAreaStatus();
+  const { refreshAreaStatus } = useAreaStatus(); // Access area status context
 
-  const handleSave = async () => {
-    onSave()
-  };
+  // State to manage confirmation dialog for deletion
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
 
+  // Function to handle deletion of the selected area
   const handleDeleteArea = async () => {
     if (!selectedArea) return;
 
@@ -57,7 +60,6 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
     }
   };
 
-  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
 
 
   return (
@@ -73,7 +75,7 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
 
         <AccordionContent>
 
-
+          {/* Areaname control */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block mb-1 text-sm font-medium">
@@ -100,7 +102,7 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
 
           <Separator className="my-4" />
 
-
+          {/* Coordinates section */}
           <p className="font-medium mb-2">Koordinaten</p>
           {selectedArea?.coordinates.map((c, i) => (
             <div
@@ -156,7 +158,7 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
             Koordinate&nbsp;hinzufügen
           </Button>
 
-
+          {/* Buttons */}
           <div className="mt-6 flex justify-end gap-3">
             <button className="text-destructive"
               onClick={() => setIsConfirmDialogOpen(true)}
@@ -174,7 +176,7 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
 
             <Button
               type="button"
-              onClick={handleSave}
+              onClick={onSave}
             >
               <Save className="mr-1 h-4 w-4" />
               Speichern
@@ -183,7 +185,7 @@ const AreaConfigurator: React.FC<AreaConfiguratorProps> = ({
         </AccordionContent>
       </AccordionItem>
     </Accordion>
-    {/* Confirmation Dialog */}
+    {/* Confirmation Dialog displayed when deleting an area */}
     <ConfirmationDialog
       open={isConfirmDialogOpen}
       title="Bereich löschen"

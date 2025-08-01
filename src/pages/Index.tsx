@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 import ExhibitionMap from '@/components/ExhibitionMap';
 import { formatDateTime } from '@/utils/formatDatetime';
-import { getLegend } from '@/utils/api';
 import Footer from '@/components/Footer';
 
 const getLocalizedTimeSuffix = (isUSFormat: boolean): string => {
@@ -12,18 +11,11 @@ const getLocalizedTimeSuffix = (isUSFormat: boolean): string => {
 const Index = () => {
   const [latestTimestamp, setLatestTimestamp] = useState<string>('');
   const [latestTimestampISO, setLatestTimestampISO] = useState<string>('');
-  const [showGermanTitle, setShowGermanTitle] = useState<boolean>(false);
-  const [legendRows, setLegendRows] = useState<any[]>([]);
-  const isUSFormat = !showGermanTitle;
+  const [showGermanTitle, setShowGermanTitle] = useState<boolean>(false); // Toggle for German title
+  const isUSFormat = !showGermanTitle; // Determine format based on title language
  
+  // Toggle German title every 20 seconds
   useEffect(() => {
-    // get legend data
-    const fetchLegend = async () => {
-      const data = await getLegend();
-      setLegendRows(data);
-    };
-
-    fetchLegend();
 
     const intervalId = setInterval(() => {
       setShowGermanTitle((prev) => !prev);
@@ -32,11 +24,13 @@ const Index = () => {
     return () => clearInterval(intervalId);
   }, []);
 
+  // Update latest timestamp when the component mounts or when the format changes
   useEffect(() => {
     if (!latestTimestampISO) return;
     setLatestTimestamp(formatDateTime(latestTimestampISO, isUSFormat));
   }, [isUSFormat, latestTimestampISO]);
 
+  // Set the latest timestamp every second
   useEffect(() => {
     const tick = setInterval(() => {
       const now = new Date().toISOString();
@@ -46,6 +40,7 @@ const Index = () => {
     return () => clearInterval(tick);
   }, []);
 
+  // Function to handle data updates and set the latest timestamp
   const handleDataUpdate = () => {
     const iso = new Date().toISOString();
     setLatestTimestampISO(iso);

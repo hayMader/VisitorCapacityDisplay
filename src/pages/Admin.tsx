@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import ExhibitionMap from '@/components/ExhibitionMap';
 import { Separator } from '@/components/ui/separator';
@@ -10,17 +10,20 @@ import { useAreaStatus } from "@/contexts/AreaStatusContext";
 import LegendEditor from '@/components/LegendEditor';
 import Footer from '@/components/Footer';
 
+
+// Admin page for managing area settings and visitor capacity display
 const Admin = () => {
   const { selectedArea, setSelectedArea, refreshAreaStatus, refreshAreaStatusAndLegend } = useAreaStatus();
 
-  const [showGermanTitle, setShowGermanTitle] = useState<boolean>(false);
-  const [showAbsolute, setShowAbsolute] = useState(true);
-  const [showPercentage, setShowPercentage] = useState(true)
-  const [showConfigurator, setShowConfigurator] = useState(false);
-  const [isHighlighted, setIsHighlighted] = useState(false);
-  const [hasUserSelectedArea, setHasUserSelectedArea] = useState(false);
+  const [showGermanTitle, setShowGermanTitle] = useState<boolean>(false); // Toggle for German title
+  const [showAbsolute, setShowAbsolute] = useState(true); // Toggle for absolute visitor count
+  const [showPercentage, setShowPercentage] = useState(true); // Toggle for percentage display
+  const [showConfigurator, setShowConfigurator] = useState(false); // Toggle for showing configurator
+  const [isHighlighted, setIsHighlighted] = useState(false); // Highlight selected area
+  const [hasUserSelectedArea, setHasUserSelectedArea] = useState(false); // Track if user has selected an area
   const [timeFilter, setTimeFilter] = useState(0); // Default to 0 hours
 
+  // Effect to handle initial load and interval for toggling German title
   useEffect(() => {
     //inital load of area settings
     refreshAreaStatusAndLegend(timeFilter);
@@ -39,6 +42,7 @@ const Admin = () => {
     refreshAreaStatus(timeFilter);
   }, [timeFilter]);
 
+  // Highlight selected area for 3 seconds after selection
   useEffect(() => {
     if (selectedArea && hasUserSelectedArea) {
       setIsHighlighted(true);
@@ -49,6 +53,7 @@ const Admin = () => {
     }
   }, [selectedArea, hasUserSelectedArea]);
 
+  // Handle area selection from the map
   const handleAreaSelect = (area: AreaStatus) => {
     setHasUserSelectedArea(true);
     setSelectedArea(area);
@@ -66,12 +71,13 @@ const Admin = () => {
       
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left column: Map + Areas list */}
+          {/* Left column: Map + Timeslider + Legend editor */}
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white p-4 rounded-lg shadow-sm">
               <div className="flex justify-between items-center mb-4">
                 <h3>Besucherfüllstand</h3>
                 <div className="text-muted-foreground">
+                  {/* Show date and time in German format */}
                   {new Date().toLocaleDateString('de-DE', {
                     day: '2-digit', 
                     month: '2-digit', 
@@ -93,6 +99,7 @@ const Admin = () => {
                 currentPage='management'
                 setShowConfigurator={setShowConfigurator}
               />
+              {/* Control of showing numbers and percentage */}
               <div className="flex gap-6 mb-2 mt-4">
                 <div className="flex items-center gap-2">
                   <Checkbox
@@ -165,7 +172,7 @@ const Admin = () => {
                 <p className="text-muted-foreground"> Konfigurieren Sie Ihre Besucherfüllstandsanzeige</p>
               </div>
               <Separator className="mb-4" />
-              
+              {/* Show a message when no area is selected */}
               {selectedArea !== null ? (
                 <>
                 <AreaSettingsAccordion

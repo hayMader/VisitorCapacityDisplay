@@ -16,13 +16,17 @@ import { toast } from '@/components/ui/use-toast';
 import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
+  // State variables for username, password, loading state
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Use useNavigate hook from react-router-dom for navigation
 
+
+  // Handle form submission
+  // Sign in with Supabase and fetch user role
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent default form submission behavior and not refresh the page
     setIsLoading(true);
 
     try {
@@ -106,6 +110,7 @@ const Login = () => {
                 Melden Sie sich mit Ihren Zugangsdaten an, um fortzufahren.
               </CardDescription>
             </CardHeader>
+            {/* Login form */}
             <form onSubmit={handleSubmit}>
               <CardContent className="space-y-4">
                 <div className="space-y-2">

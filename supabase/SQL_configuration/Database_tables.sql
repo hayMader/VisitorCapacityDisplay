@@ -1,27 +1,35 @@
 -- Create table: legend
 CREATE TABLE legend (
   id SERIAL PRIMARY KEY,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   object TEXT NOT NULL,
   object_en TEXT NOT NULL,
   description_de TEXT NOT NULL,
-  description_en TEXT NOT NULL
+  description_en TEXT NOT NULL,
+  type TEXT
 );
 
 -- Create table: area_settings
 CREATE TABLE area_settings (
   id SERIAL PRIMARY KEY,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  type TEXT NOT NULL,
   area_name TEXT NOT NULL,
+  area_name_en TEXT NOT NULL,
   capacity_usage INT DEFAULT 0,
   coordinates JSONB NOT NULL, -- Storing coordinates as JSON
   highlight TEXT DEFAULT NULL,
   last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   hidden_name BOOLEAN DEFAULT FALSE,
+  hidden_absolute BOOLEAN DEFAULT FALSE,
+  hidden_percentage BOOLEAN DEFAULT FALSE,
   status TEXT CHECK (status IN ('active', 'inactive')) NOT NULL
 );
 
 -- Create table: thresholds
 CREATE TABLE thresholds (
   id SERIAL PRIMARY KEY,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   setting_id INT NOT NULL REFERENCES area_settings(id) ON DELETE CASCADE,
   color TEXT NOT NULL,
   upper_threshold INT NOT NULL,
@@ -34,9 +42,9 @@ CREATE TABLE thresholds (
 -- Create table: roles
 CREATE TABLE roles (
   id SERIAL PRIMARY KEY,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE, -- Assuming users table exists
-  role TEXT CHECK (role IN ('admin', 'security')) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  role TEXT CHECK (role IN ('admin', 'security')) NOT NULL
 );
 
 -- Create table: visitor_data
@@ -46,21 +54,3 @@ CREATE TABLE visitor_data (
   amount_visitors INT DEFAULT 0,
   timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
--- Create view: area_status
-CREATE VIEW area_status AS
-SELECT
-  a.id AS area_number,
-  a.area_name,
-  a.capacity_usage,
-  a.coordinates,
-  a.highlight,
-  a.hidden_name,
-  a.status,
-  v.amount_visitors,
-  json_agg(t.*) AS thresholds
-FROM
-  area_settings a
-LEFT JOIN visitor_data v ON a.id = v.area_id
-LEFT JOIN thresholds t ON a.id = t.setting_id
-GROUP BY a.id, v.amount_visitors;

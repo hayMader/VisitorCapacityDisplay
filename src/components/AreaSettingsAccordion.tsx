@@ -61,17 +61,20 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
   /* ---------------------------------------------------------------- */
   /*  Sync incoming area → local state                                 */
   /* ---------------------------------------------------------------- */
+  // Sync incoming area data with local state
   useEffect(() => {
     setOriginalData(area);
     setFormData(area);
     setAccordionValue("general");
   }, [area]);
 
+  //
   useEffect(() => {
     setIsLoading(!originalData);
-    if (!formData) setFormData(originalData);
-    const hasUnsavedChanges = !isEqual(formData, originalData);
-    setHasChanges(hasUnsavedChanges);
+    if (!formData) setFormData(originalData); // when no area is selected, use original data
+    const hasUnsavedChanges = !isEqual(formData, originalData); // Check if form data has unsaved changes, which controlls whether the save button is enabled
+    setHasChanges(hasUnsavedChanges); 
+    // If there are unsaved changes, update the area status in context
     if (hasUnsavedChanges) {
       setAreaStatus((prev) =>
         prev.map((a) => (a.id === formData?.id ? formData : a))
@@ -106,7 +109,7 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
 
 
   /* ---------------------------------------------------------------- */
-  /*  Submit                                                          */
+  /*  Submit when form is saved and update changes in backend                                                         */
   /* ---------------------------------------------------------------- */
   const handleSubmit = async () => {
     setIsSubmitting(true);
@@ -133,7 +136,7 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
   };
 
   /* ---------------------------------------------------------------- */
-  /*  Copy Thresholds                                                 */
+  /*  Copy Thresholds                                                  */
   /* ---------------------------------------------------------------- */
 
   const handleCopyThresholds = async (targetAreaIds: number[]) => {
@@ -156,6 +159,7 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
   /* ---------------------------------------------------------------- */
   /*  Render                                                          */
   /* ---------------------------------------------------------------- */
+  // if area is loading, show a loading message
   if (isLoading) {
     return (
       <div className="p-4 text-center">
@@ -164,6 +168,7 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
     );
   }
 
+  // if no area is selected, show a message
   if (!area) {
     return (
       <div className="p-4 text-center">
@@ -172,6 +177,7 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
     );
   }
 
+  // if configurator is shown, render AreaConfigurator
   if (showConfigurator) {
     return (
       <AreaConfigurator
@@ -183,11 +189,12 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
     );
   }
 
+  // else render the accordion with settings
   return (
     <div>
-      {currentPage !== "security" ? (
+      {currentPage !== "security" ? ( // if currentPage is management, render accordion with general settings and thresholds
       <Accordion type="single" collapsible value={accordionValue} onValueChange={setAccordionValue} className="w-full">
-        {/* ---------------- allgemeine Einstellungen ---------------- */}
+        {/* ---------------- general settings ---------------- */}
         <AccordionItem value="general">
         <AccordionTrigger className="py-4">
           <div className="flex items-start flex-col" style={{textAlign: "left"}}>
@@ -203,7 +210,7 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
         </AccordionContent>
         </AccordionItem>
 
-        {/* ---------------- Schwellenwert Management ---------------- */}
+        {/* ---------------- Threshold Management ---------------- */}
         <AccordionItem value="thresholds">
           <AccordionTrigger className="py-4">
             <div className="flex items-start flex-col" style={{textAlign: "left"}}>
@@ -226,9 +233,9 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-      ) : (
+      ) : ( // if currentPage is security, render only ThresholdSettings
         <div className="w-full">
-          {/* ---------------- Schwellenwert Management ---------------- */}
+          {/* ---------------- Threshold Management ---------------- */}
           <div className="flex items-center mb-1">
           <SlidersHorizontal className="mr-2 h-5 w-5" />
           <span className="text">Schwellenwerte Besucherzahl</span>
@@ -246,9 +253,9 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
 
       {/* ---------- Footer (Speichern) ---------- */}
       <div className="mt-6 flex justify-between">
-        { formData.status === "active" ? (
+        { formData.status === "active" ? ( // if area is active, show deactivate button
           <>
-            {currentPage === "management" && (
+            {currentPage === "management" && ( // if currentPage is management, show deactivate button, hide when currentPage is security
               <>
               <Button disabled={isSubmitting}
                 variant="destructive"
@@ -268,9 +275,9 @@ const AreaSettingsAccordion: React.FC<Props> = ({ area = null, currentPage, show
               {isSubmitting ? "Speichern …" : "Speichern"}
             </Button>
           </>
-        ) : (
+        ) : ( // if area is inactive, show activate button
           <>
-            {currentPage === "management" && (
+            {currentPage === "management" && ( // if currentPage is management, show activate button, hide when currentPage is security
               <>
               <Button disabled={isSubmitting}
                 onClick={() => {

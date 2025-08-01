@@ -21,3 +21,4 @@ begin
   from jsonb_array_elements(legend_rows) as value;
 end;
 $$;
+

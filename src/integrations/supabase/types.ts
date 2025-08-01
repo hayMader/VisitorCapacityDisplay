@@ -2,6 +2,9 @@ import type { AreaType, LegendRow } from "@/types/index"
 
 import { AreaStatus } from "@/types"
 
+
+// types for database, describes allowed columns and functions and interaction with backend
+
 export type Json =
   | string
   | number

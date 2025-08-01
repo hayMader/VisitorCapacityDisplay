@@ -4,8 +4,6 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Trash, Save } from 'lucide-react';
 import { useAreaStatus } from '@/contexts/AreaStatusContext';
-import { toast } from '@/components/ui/use-toast';
-import { error } from 'console';
 
 interface LegendEditorProps {
   currentPage: "security" | "management";
@@ -13,15 +11,12 @@ interface LegendEditorProps {
 
 const LegendEditor: React.FC<LegendEditorProps> = ({ currentPage }) => {
 
-    const { updateLegendRows, refreshLegends, setLegendRows, legendRows} = useAreaStatus();
+    const { updateLegendRows, refreshLegends, setLegendRows, legendRows} = useAreaStatus(); // Access legend rows and update function from context
 
+    // Function to handle updating legend rows
     const handleLegendUpdate = async () => {
       await updateLegendRows(legendRows)
     }
-
-    const handleReset = () => {
-      refreshLegends();
-    };
 
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm">
@@ -39,7 +34,7 @@ const LegendEditor: React.FC<LegendEditorProps> = ({ currentPage }) => {
       </div>
 
       <div className="space-y-6">
-        {legendRows.map((row, index) => (
+        {legendRows.map((row, index) => ( // Map through legend rows and render input controls
           <>
           {row.type == currentPage && ( // Ensure the row type matches the current page
             <>
@@ -129,10 +124,10 @@ const LegendEditor: React.FC<LegendEditorProps> = ({ currentPage }) => {
         ))}
       </div>
 
-      {/* Buttons */}
+      {/* Control Buttons */}
       <div className="flex justify-end mt-6 gap-3">
         <button
-          onClick={handleReset}
+          onClick={refreshLegends}
           className="text-sm text-accent-foreground focus:outline-none"
         >
           Zurücksetzen
@@ -140,6 +135,7 @@ const LegendEditor: React.FC<LegendEditorProps> = ({ currentPage }) => {
         <Button
           variant="outline"
           onClick={() =>
+            // Add a new legend row with default values
             setLegendRows([
               ...legendRows,
               { id: Date.now(), object: '', object_en: '', description_de: '', description_en: '', type: currentPage},

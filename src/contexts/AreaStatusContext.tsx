@@ -18,6 +18,11 @@ interface AreaStatusContextProps {
   refreshLegends: () => Promise<void>;
 }
 
+/*---- 
+  Context to provide all data and interaction functions surrounding area_status and legend data 
+  used in different parts of the project where interaction with this data is necessary
+----*/
+
 const AreaStatusContext = createContext<AreaStatusContextProps | undefined>(undefined);
 
 export const AreaStatusProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -26,7 +31,7 @@ export const AreaStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [selectedArea, setSelectedArea] = useState<AreaStatus | null>(null);
   const [legendRows, setLegendRows] = useState<Partial<LegendRow>[]>([{ object: "", object_en: "", description_de: "", description_en: "" }]);
 
-  // Fetch initial data
+  // Fetch initial data area status and legend
   const refreshAreaStatusAndLegend = async (timefilter?: number) => {
     try {
       setRefreshing(true);
@@ -34,7 +39,7 @@ export const AreaStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       const data2 = await getLegend();
       setLegendRows(data2)
       setAreaStatus(data);
-        setRefreshing(false);
+      setRefreshing(false);
     } catch (error) {
       console.error("Error refreshing area status:", error);
       toast({
@@ -45,7 +50,7 @@ export const AreaStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   };
 
-  // Refresh area status
+  // Refresh only area status
   const refreshAreaStatus = async (timefilter?: number) => {
     try {
       setRefreshing(true);
@@ -62,6 +67,7 @@ export const AreaStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   };
 
+  //refresh only legends
   const refreshLegends = async () => {
     try {
       const data = await getLegend();
@@ -76,7 +82,7 @@ export const AreaStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   };
 
-  // Refresh the legend rows
+  // update the legend rows
   const updateLegendRows = async (updatedLegend: Partial<LegendRow>[]) => {
       setLegendRows(updatedLegend);
       await updateLegend(updatedLegend);
@@ -92,6 +98,7 @@ export const AreaStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   return (
+    // wraps children with attributes as context
     <AreaStatusContext.Provider value={{ areaStatus, selectedArea, legendRows, setLegendRows, updateLegendRows, refreshLegends, setSelectedArea, refreshAreaStatus, refreshAreaStatusAndLegend, isRefreshing, updateAreaStatus, setAreaStatus }}>
       {children}
     </AreaStatusContext.Provider>

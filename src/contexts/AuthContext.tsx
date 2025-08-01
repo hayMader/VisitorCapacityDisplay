@@ -1,19 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import {AuthContextType, AuthUser} from '@/types/index'
 
-interface AuthUser {
-  isAuthenticated: boolean;
-  username: string;
-  name: string;
-  role: string;
-}
-
-interface AuthContextType {
-  user: AuthUser | null;
-  login: (user: AuthUser) => void;
-  logout: () => void;
-  getCurrentUser: () => AuthUser | null;
-  isLoading: boolean; // Add loading state
-}
 
 const defaultAuthContext: AuthContextType = {
   user: null,
@@ -23,19 +10,27 @@ const defaultAuthContext: AuthContextType = {
   isLoading: true, // Default to loading
 };
 
+/*---- 
+  Context to provide all data and interaction functions authentification 
+  used in different parts of the project where interaction with this data is necessary
+----*/
+
 const AuthContext = createContext<AuthContextType>(defaultAuthContext);
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // states
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true); // Add loading state
 
+  // Fetch current user on load
   useEffect(() => {
     const currentUser = getCurrentUser();
     setUser(currentUser)
   }, []);
 
+  //function to load current user information from browser cookie
   const getCurrentUser = () => {
     // Check if user is already logged in
     const storedAuth = localStorage.getItem('auth');
@@ -52,11 +47,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  //save authentificated user info to browser cookie
   const login = (userData: AuthUser) => {
     setUser(userData);
     localStorage.setItem('auth', JSON.stringify(userData));
   };
 
+  //remove authentificated user info from browser cookie
   const logout = () => {
     setUser(null);
     localStorage.removeItem('auth');

@@ -59,3 +59,19 @@ export interface LegendRow {
 export type OccupancyLevel = 'low' | 'medium' | 'high';
 
 export type AreaType = 'entrance' | 'hall' | 'other';
+
+
+export interface AuthUser {
+  isAuthenticated: boolean;
+  username: string;
+  name: string;
+  role: string;
+}
+
+export interface AuthContextType {
+  user: AuthUser | null;
+  login: (user: AuthUser) => void;
+  logout: () => void;
+  getCurrentUser: () => AuthUser | null;
+  isLoading: boolean; // Add loading state
+}

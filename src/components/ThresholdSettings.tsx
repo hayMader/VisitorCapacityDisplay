@@ -25,7 +25,9 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
   type,
   onCopyThresholds,
 }) => {
+  // State to manage editing of thresholds
   const [editingId, setEditingId] = useState<number | null>(null);
+  // State to manage the edited threshold values, defaulting to a new empty threshold structure
   const [edited, setEdited] = useState<Partial<Threshold>>({
     upper_threshold: -1,
     color: "#cccccc",
@@ -34,9 +36,10 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
     alert_message_control: false, // Default to false
   });
 
+  // Function to handle adding a new threshold
   const handleAddThreshold = () => {
 
-    //If infinity treshhold check if it is already set
+    //If infinity treshhold check if it is already set (should only be one infinity threshold per area)
     if (newThreshold.upper_threshold === -1 || newThreshold.upper_threshold === 0) {
       const existing = formData.thresholds.find((t) => t.type === type && t.upper_threshold === -1);
       if (existing) {
@@ -48,9 +51,8 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
         return;
       }
     }
-
+    // Check if the new threshold is valid and greater than the maximum threshold of the same type
     const maxSoFar = Math.max(0, ...formData.thresholds.filter((t) => t.type === type).map((t) => t.upper_threshold));
-
     if (newThreshold.upper_threshold <= maxSoFar && newThreshold.upper_threshold !== -1 && newThreshold.upper_threshold !== 0) {
       toast({
         title: "Schwellenwert zu niedrig",
@@ -60,7 +62,7 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
       return;
     }
 
-    const tempId = -Date.now();
+    const tempId = -Date.now(); // Temporary ID for the new threshold, using negative timestamp to ensure uniqueness
     const threshold: Threshold = {
       id: tempId,
       setting_id: formData.id,
@@ -72,10 +74,12 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
       alert_message: newThreshold.alert_message,
     };
 
+    // Add the new threshold to the form data
     setFormData((p) => ({ ...p, thresholds: [...p.thresholds, threshold] }));
     setNewThreshold({ upper_threshold: -1, color: "#cccccc", alert: false, alert_message: "" });
   };
 
+  // Function to begin editing a threshold
   const beginEdit = (t: Threshold) => {
     setEditingId(t.id);
     setEdited({
@@ -86,8 +90,7 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
     });
   };
 
-  const cancelEdit = () => setEditingId(null);
-
+  // Function to save the edited threshold
   const saveEdit = (id: number) => {
     setFormData((p) => ({
       ...p,
@@ -98,6 +101,7 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
     setEditingId(null);
   };
 
+  // Function to toggle the alert state of a threshold
   const toggleAlert = (id: number) => {
     setFormData((p) => ({
       ...p,
@@ -107,7 +111,8 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
     }));
   };
 
-    const toggleAlertMessage = (id: number) => {
+  // Function to toggle the alert message control of a threshold
+  const toggleAlertMessage = (id: number) => {
     setFormData((p) => ({
       ...p,
       thresholds: p.thresholds.map((t) =>
@@ -116,6 +121,7 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
     }));
   };
 
+  // Function to delete a threshold by its ID
   const deleteThreshold = (id: number) => {
     setFormData((p) => ({
       ...p,
@@ -141,13 +147,13 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
           <Label>Aktuelle Schwellenwerte</Label>
           <div className="border rounded-md">
             {formData.thresholds
-              .filter((t) => t.type === type)
+              .filter((t) => t.type === type) // Filter thresholds by type and only show relevant ones e.g. security or management
               .sort((a, b) => {
                 const upperA = a.upper_threshold === -1 ? Infinity : a.upper_threshold;
                 const upperB = b.upper_threshold === -1 ? Infinity : b.upper_threshold;
                 return upperA - upperB;
               })
-              .map((t, idx, arr) => {
+              .map((t, idx, arr) => { // Map through thresholds and render each one as setting
                 const lower = idx === 0 ? 0 : (arr[idx - 1].upper_threshold === -1 ? Infinity : arr[idx - 1].upper_threshold) + 1;
                 const isEditing = editingId === t.id;
 
@@ -187,7 +193,7 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
                       <span className="text-xs text-muted-foreground">bis</span>
 
                       {/* To */}
-                      {isEditing ? (
+                      {isEditing ? ( // when editing, allow input for upper threshold
                         <Input
                           type="number"
                           value={edited.upper_threshold === -1 ? "" : edited.upper_threshold}
@@ -199,7 +205,7 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
                           }
                           className="w-16"
                         />
-                      ) : (
+                      ) : ( // when not editing, show the upper threshold as read-only
                         <Input
                           type="text"
                           value={t.upper_threshold === -1 ? "∞" : t.upper_threshold}
@@ -215,22 +221,21 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
                         isEditing={isEditing}
                         onEdit={() => beginEdit(t)}
                         onSave={() => saveEdit(t.id)}
-                        onCancel={cancelEdit}
+                        onCancel={() => setEditingId(null)} // Cancel editing
                         onDelete={() => deleteThreshold(t.id)}
                       />
                       {/* Message Icon */}
                       {type === "security" && (
-                      
-                      <button
-                        type="button"
-                        onClick={() => toggleAlertMessage(t.id)}
-                        className={`h-6 w-6 flex items-center justify-center rounded border ${
-                          t.alert_message_control ? "text-red-500" : "text-gray-400"
-                        }`}
-                        title={t.alert ? `Nachricht: ${t.alert_message || "Keine Nachricht definiert."}` : ""}
-                      >
-                        <Mail className="h-4 w-4" />
-                      </button>
+                        <button
+                          type="button"
+                          onClick={() => toggleAlertMessage(t.id)}
+                          className={`h-6 w-6 flex items-center justify-center rounded border ${
+                            t.alert_message_control ? "text-red-500" : "text-gray-400"
+                          }`}
+                          title={t.alert ? `Nachricht: ${t.alert_message || "Keine Nachricht definiert."}` : ""}
+                        >
+                          <Mail className="h-4 w-4" />
+                        </button>
                       )}
 
                       {/* Alert Icon */}
@@ -247,7 +252,7 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
                       </button>
                       )}
                     </div>
-                    {isEditing && type === "security" && (
+                    {isEditing && type === "security" && ( // Show alert message input only when editing a security threshold
                       <div className="p-2 bg-gray-50 border-t">
                         <Label className="text-sm">Warnhinweis Nachricht</Label>
                         <Input
@@ -272,10 +277,10 @@ const ThresholdSettings: React.FC<ThresholdSettingsProps> = ({
             className="flex items-center"
           >
             <Copy className="h-4 w-4" />
-            Schwellenwerte kopieren
+              Schwellenwerte kopieren
           </Button>
         </div>
-      ) : (
+      ) : ( // If no thresholds are defined, show message
         <p className="text-muted-foreground">Aktuell keine Schwellenwerte definiert.</p>
       )}
 

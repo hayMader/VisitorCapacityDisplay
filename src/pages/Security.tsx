@@ -12,20 +12,23 @@ import LegendEditor from '@/components/LegendEditor';
 import Footer from '@/components/Footer';
 
 const Security = () => {
-  const { selectedArea, setSelectedArea, refreshAreaStatus, refreshAreaStatusAndLegend, areaStatus } = useAreaStatus();
-  const [showGermanTitle, setShowGermanTitle] = useState<boolean>(true);
+  const { selectedArea, setSelectedArea, refreshAreaStatus, refreshAreaStatusAndLegend, areaStatus } = useAreaStatus(); // Access area status and functions from context
+
+  // State variables for toggling display options and managing selected area
   const [showAbsolute, setShowAbsolute] = useState(true);
   const [showPercentage, setShowPercentage] = useState(true);
   const [timeFilter, setTimeFilter] = useState(0); // Default to 0 hours
   const [isHighlighted, setIsHighlighted] = useState(false);
 
+  // Effect to handle application of time filter
   useEffect(() => {
     refreshAreaStatus(timeFilter);
   }, [timeFilter]);
 
+  // Effect to handle initial load and interval for toggling German title
   useEffect(() => {
     //inital load of area settings
-    refreshAreaStatusAndLegend(timeFilter);
+    refreshAreaStatusAndLegend(0); // Load initial area status without time filter
 
       const intervalId = setInterval(() => {
     }, 20000);
@@ -33,6 +36,7 @@ const Security = () => {
     return () => clearInterval (intervalId);
   }, []);
 
+  // Effect to highlight selected area for 3 seconds after selection
   useEffect(() => {
     if (selectedArea) {
       setIsHighlighted(true);
@@ -55,7 +59,7 @@ const Security = () => {
       
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left column: Map + Areas list */}
+          {/* Left column: Map + Timeslider + legend editor + Alert list */}
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white p-4 rounded-lg shadow-sm">
               <div className="flex justify-between items-center mb-4">
@@ -76,7 +80,7 @@ const Security = () => {
                 autoRefresh={true} 
                 refreshInterval={60000}
                 onAreaSelect={setSelectedArea}
-                showGermanLabels={showGermanTitle}
+                showGermanLabels={true} // German labels are preferred in the security console
                 timeFilter={timeFilter}
                 showNumbers={showAbsolute}
                 showPercentage={showPercentage}
@@ -128,7 +132,7 @@ const Security = () => {
                 <span>Bereichseinstellungen {selectedArea ? selectedArea.area_name : ''}</span>
               </div>
               <Separator className="mb-4" />
-              
+              {/* Show a message when no area is selected */}
               {selectedArea !== null ? (
                 <AreaSettingsAccordion
                   area={selectedArea}

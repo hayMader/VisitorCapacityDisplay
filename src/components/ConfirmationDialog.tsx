@@ -23,6 +23,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   if (!open) return null;
 
   return (
+    // overlay which covers the entire screen and prompts the user for confirmation
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
         <h2 className="text-lg font-bold mb-4">{title}</h2>

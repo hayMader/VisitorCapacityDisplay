@@ -12,40 +12,29 @@ const getLocalizedTimeSuffix = (isUSFormat: boolean): string => {
 
 const SecurityDashboard = () => {
 
-  const { areaStatus } = useAreaStatus(); // Use the context
+  const { areaStatus } = useAreaStatus(); // Use the status from context
 
+  // State variables for managing timestamps and display options
   const [latestTimestamp, setLatestTimestamp] = useState<string>('');
-  const [latestTimestampISO, setLatestTimestampISO] = useState<string>('');
-  const [showGermanTitle, setShowGermanTitle] = useState<boolean>(true);
-  const isUSFormat = !showGermanTitle;
-
 
   useEffect(() => {
-    if (!latestTimestampISO) return;
-    setLatestTimestamp(formatDateTime(latestTimestampISO, isUSFormat));
-  }, [isUSFormat, latestTimestampISO]);
-
-  useEffect(() => {
-    const tick = setInterval(() => {
-      const now = new Date().toISOString();
-      setLatestTimestampISO(now);
-    }, 1000);
-
-    return () => clearInterval(tick);
+    // Set the latest timestamp when the component mounts
+    const now = new Date().toISOString();
+    setLatestTimestamp(formatDateTime(now, false)); // Use false for German format
   }, []);
 
+  // Update the time display when data is refreshed
   const handleDataUpdate = () => {
     const iso = new Date().toISOString();
-    setLatestTimestampISO(iso);
-    setLatestTimestamp(formatDateTime(iso, isUSFormat));
+    setLatestTimestamp(formatDateTime(iso, false));
   };
   
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header 
-        title={showGermanTitle ? "Besucherfüllstand" : "Visitor count"} 
+        title={"Besucherfüllstand"} 
         subtitle={latestTimestamp
-          ? `${latestTimestamp} ${getLocalizedTimeSuffix(isUSFormat)}`
+          ? `${latestTimestamp} ${getLocalizedTimeSuffix(false)}`
           : undefined}
       />
       
@@ -61,7 +50,7 @@ const SecurityDashboard = () => {
             autoRefresh={true}
             refreshInterval={60000} // 60 seconds
             handleUpdate={handleDataUpdate}
-            showGermanLabels={showGermanTitle}
+            showGermanLabels={true}
             currentPage='security'
             showNumbers={false}
             dashboard={true}

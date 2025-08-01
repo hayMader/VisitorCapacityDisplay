@@ -28,9 +28,10 @@ const AppRoutes = () => {
     }
   }, [user]);
 
+  // Define the routes for the application
   return (
     <Routes>
-      <Route path="/" element={<Index />} />
+      <Route path="/" element={<Index />} /> {/* Default route */}
       <Route path="/login" element={<Login />} />
       <Route path="/admin" element={
         <ProtectedRoute>
@@ -52,6 +53,7 @@ const AppRoutes = () => {
   );
 };
 
+// Main App component that wraps the application with necessary providers
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>

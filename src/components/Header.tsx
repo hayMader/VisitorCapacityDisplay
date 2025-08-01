@@ -13,10 +13,12 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ title, subtitle, isAdmin = false }) => {
-  const { user, logout } = useAuth();
+  const { user, logout } = useAuth(); // Use AuthContext to get user information and logout function
+
+  // Use useNavigate hook from react-router-dom for navigation
   const navigate = useNavigate();
 
-  const location = useLocation();
+  const location = useLocation(); // Get the current location to determine the path
 
   const handleLogout = () => {
     logout();
@@ -28,6 +30,7 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle, isAdmin = false }) => 
       <div className="flex-col w-full">
         <div className='flex flex-row items-center justify-between gap-4 sm:gap-0'>
           <div className="flex flex-row items-center gap-5">
+            {/* Logo leading to homepage*/}
             <Link to={user?.role === "security" ? "/securityDashboard" : "/"} className="flex-shrink-0">
               <img 
               src="/messe-muenchen-logo.png" 
@@ -38,7 +41,7 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle, isAdmin = false }) => 
             
             <div className="border-l h-12 border-gray-300 mx-2 hidden sm:block"></div>
             <h2 className="text-center sm:text-left text-lg sm:text-2xl">{title}</h2>
-
+            {/* Subtitle section, only visible on larger screens */}
             {subtitle && (
               <div className="items-center sm:ml-2 sm:border-l sm:border-gray-300 sm:pl-2 sm:flex hidden">
                 <Clock className="w-4 h-4 mr-1" />
@@ -50,8 +53,8 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle, isAdmin = false }) => 
           </div>
           
           <div className="flex items-center gap-2 mt-4 sm:mt-0">
-            {user?.isAuthenticated ? (
-              location.pathname === '/' ? (
+            {user?.isAuthenticated ? ( // Check if user is authenticated
+              location.pathname === '/' ? ( // If on the home page, show admin settings link
                 <Link to="/admin">
                 <Settings className="h-4 w-4 mr-2" />
                 </Link>
@@ -59,7 +62,7 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle, isAdmin = false }) => 
               <Link to="/security">
                 <Settings className="h-4 w-4 mr-2" />
               </Link>
-              ) : (
+              ) : ( //if user is authenticated, show logout button
               <Button variant="outline" size="sm" onClick={handleLogout}>
                 <LogOut className="h-5 w-5 mr-2" />
                 Abmelden
@@ -72,6 +75,7 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle, isAdmin = false }) => 
             )}
           </div>
         </div>
+        {/* Subtitle section, only visible on larger screens */}
           {subtitle && (
             <div className="flex items-center sm:ml-2 sm:border-l sm:border-gray-300 sm:pl-2 sm:hidden flex">
               <Clock className="w-4 h-4 mr-1" />

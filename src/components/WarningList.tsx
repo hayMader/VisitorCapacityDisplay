@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
@@ -8,14 +8,17 @@ import { Threshold } from '@/types';
 import { DoorOpen, Warehouse } from 'lucide-react';
 
 const WarningList = ({ areaStatus, hideControls, dashboard=true }: { areaStatus: AreaStatus[]; hideControls?: boolean; dashboard?: boolean }) => {
+
+    // State variables for managing search term and visibility of entrances/halls
     const [warningSearchTerm, setWarningSearchTerm] = useState("");
     const [showEntrances, setShowEntrances] = useState(true);
     const [showHalls, setShowHalls] = useState(true);
-    const listRef = useRef<HTMLDivElement>(null);
+    const listRef = useRef<HTMLDivElement>(null); // Reference to the list container for scrolling
 
+    // Effect to handle automatic scrolling of the list
     useEffect(() => {
-        const listElement = listRef.current;
-        if (!listElement) return;
+        const listElement = listRef.current; // Get the current list element
+        if (!listElement) return; // Exit if the list element is not available
 
         const scrollHeight = listElement.scrollHeight;
         const clientHeight = listElement.clientHeight;
@@ -41,14 +44,16 @@ const WarningList = ({ areaStatus, hideControls, dashboard=true }: { areaStatus:
         }
     }, [areaStatus]);
 
+    // Function to get the active threshold for a given visitor count
     const getActiveThreshold = (visitorCount: number, thresholds: Threshold[]): Threshold | null => {
         const sortedThresholds = thresholds
-            .filter(threshold => threshold.type === "security")
+            .filter(threshold => threshold.type === "security") // Filter for security thresholds
             .sort((a, b) =>
                 (b.upper_threshold === -1 ? Infinity : b.upper_threshold) -
                 (a.upper_threshold === -1 ? Infinity : a.upper_threshold)
             );
 
+        // If no thresholds are defined, return null, indicating no active threshold
         for (let i = 0; i < sortedThresholds.length; i++) {
             const currentThreshold = sortedThresholds[i];
             const nextLowerThreshold = sortedThresholds[i + 1];
@@ -62,6 +67,7 @@ const WarningList = ({ areaStatus, hideControls, dashboard=true }: { areaStatus:
         return null;
     };
 
+    // Function to filter areas based on search term and visibility settings
     const filteredAreas = (area: AreaStatus) => {
         const matchesSearch = area.area_name.toLowerCase().includes(warningSearchTerm.toLowerCase());
         const isEntrance = area.type == "entrance";
@@ -76,10 +82,10 @@ const WarningList = ({ areaStatus, hideControls, dashboard=true }: { areaStatus:
     return (
         <>
             <h3 className="text-lg font-semibold mb-4">Warnungen</h3>
-
             {/* Filter Controls */}
             {!hideControls && (
                 <div className="mb-4 space-y-3">
+                    {/* Text search */}
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                         <Input
@@ -91,6 +97,7 @@ const WarningList = ({ areaStatus, hideControls, dashboard=true }: { areaStatus:
                         />
                     </div>
                     <div className="flex gap-6">
+                        {/* Checkboxes for toggling visibility of entrances and halls */}
                         <div className="flex items-center gap-2">
                             <Checkbox
                                 id="show-entrances"
@@ -121,8 +128,8 @@ const WarningList = ({ areaStatus, hideControls, dashboard=true }: { areaStatus:
             <div ref={listRef} className="overflow-hidden relative" style={{height: 'inherit'}}>
                 {areaStatus
                     .sort((a, b) => a.area_name.localeCompare(b.area_name, 'de-DE', { numeric: true, sensitivity: 'base' }))
-                    .filter(area => getActiveThreshold(area.amount_visitors, area.thresholds) !== null)
-                    .filter(area => filteredAreas(area))
+                    .filter(area => getActiveThreshold(area.amount_visitors, area.thresholds) !== null) // Filter areas with active thresholds
+                    .filter(area => filteredAreas(area)) // Apply search and visibility filters
                     .concat([
                         // Adding a default "Empty Area" to ensure its scrolled down completly
                         { 
@@ -143,6 +150,7 @@ const WarningList = ({ areaStatus, hideControls, dashboard=true }: { areaStatus:
                         const isEntrance = area.area_name?.toLowerCase().includes("e");
                         return (
                             <>
+                            {/* Empty area just add a blank block to ensure scrolling shows every real alert */}
                             {area.id == -1 ? (
                                 <div>
                                     {/* Placeholder for the empty area */}
@@ -173,7 +181,7 @@ const WarningList = ({ areaStatus, hideControls, dashboard=true }: { areaStatus:
                             </>
                         );
                     })}
-                {areaStatus.filter(area => getActiveThreshold(area.amount_visitors, area.thresholds) !== null).length === 0 && (
+                {areaStatus.filter(area => getActiveThreshold(area.amount_visitors, area.thresholds) !== null).length === 0 && ( // Show message when no warnings are found
                     <p className="text-sm text-gray-500">
                         {warningSearchTerm || !showEntrances || !showHalls
                             ? "Keine Warnungen gefunden mit den aktuellen Filtereinstellungen."
